@@ -24,12 +24,16 @@ use App\Http\Controllers\MetalController;
 use App\Http\Controllers\MetalissueentryController;
 use App\Http\Controllers\MetalpurityController;
 use App\Http\Controllers\MetalreceiveentriesController;
+use App\Http\Controllers\MiscellaneousController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\QualitycheckController;
 use App\Http\Controllers\RolepermissionuserController;
+use App\Http\Controllers\SaleController;
 use App\Http\Controllers\StockoutpdilistController;
 use App\Http\Controllers\TollerenceController;
+use App\Http\Controllers\VendorController;
 use App\Http\Controllers\VouchertypeController;
-
+use Illuminate\Support\Facades\Artisan;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
@@ -138,6 +142,9 @@ Route::middleware(['auth'])->group(function () {
     // Day Wise Report END
 
 
-
-
+    Route::resource('vendors', VendorController::class);
+    Route::resource('miscellaneouses', MiscellaneousController::class);
+    Route::resource('purchases', PurchaseController::class);
+    Route::resource('sales', SaleController::class);
+    Route::get('/sales/{id}/invoice', [SaleController::class, 'invoice'])->name('sales.invoice');
 });
