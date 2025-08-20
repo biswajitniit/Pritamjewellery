@@ -19,4 +19,9 @@ class Uom extends Model
         'created_by',
         'updated_by',
     ];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'uom_id');
+    }
 }

@@ -64,6 +64,7 @@ class CustomerController extends Controller
             'cont_person'          => strip_tags($request->cont_person),
             'gstin'                => strip_tags($request->gstin),
             'statecode'            => strip_tags($request->statecode),
+            'is_validation'        => strip_tags($request->is_validation),
             'is_active'            => strip_tags($request->is_active),
             'created_by'           => Auth::user()->name
         ]);
@@ -127,6 +128,7 @@ class CustomerController extends Controller
             $customer->cont_person        = strip_tags($request->cont_person);
             $customer->gstin              = strip_tags($request->gstin);
             $customer->statecode          = strip_tags($request->statecode);
+            $customer->is_validation      = strip_tags($request->is_validation);
             $customer->is_active          = strip_tags($request->input('is_active'));
             $customer->updated_by         = Auth::user()->name;
             $customer->update();

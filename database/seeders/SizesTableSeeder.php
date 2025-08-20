@@ -209,7 +209,8 @@ class SizesTableSeeder extends Seeder
             ['pcode_id' => '37', 'schar' => 'V', 'item_name' => 'Bracelet - Ladies', 'ssize' => '21.5 CM', 'is_active' => 'Yes'],
             ['pcode_id' => '37', 'schar' => 'W', 'item_name' => 'Bracelet - Ladies', 'ssize' => '22 CM', 'is_active' => 'Yes'],
             ['pcode_id' => '41', 'schar' => 'X', 'item_name' => 'Chains - Generic', 'ssize' => '56 INCHES', 'is_active' => 'Yes'],
-            ['pcode_id' => '77', 'schar' => 'X', 'item_name' => 'Regional Chains', 'ssize' => '56 INCHES', 'is_active' => 'Yes']
+            ['pcode_id' => '77', 'schar' => 'X', 'item_name' => 'Regional Chains', 'ssize' => '56 INCHES', 'is_active' => 'Yes'],
+            ['pcode_id' => '18', 'schar' => 'XX', 'item_name' => 'temp', 'ssize' => 'temp', 'is_active' => 'Yes']
         ]);
     }
 }

@@ -17,6 +17,7 @@ use App\Models\Customerordertempitem;
 use App\Models\Itemdescriptionheader;
 use App\Models\Pcode;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -28,7 +29,7 @@ class ProductController extends Controller
         $search = $request->query('search');
         $customerOrder = $request->query('customer_order');
 
-        $products = Product::with('karigar')
+        $products = Product::with(['company', 'pattern', 'size', 'uom', 'karigar'])
             ->when($search, function ($query, $search) {
                 $query->where('item_code', 'like', "%{$search}%");
             })
@@ -59,90 +60,203 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // public function store(Request $request)
+    // {
+    //     $validatedData = $request->validate(
+    //         [
+    //             'company_id'               => 'required',
+    //             'vendorsite'               => 'required',
+    //             'item_code'                => 'required|min:14',
+    //             'design_num'               => 'required',
+    //             'description'              => 'required',
+    //             'pattern'                  => 'required',
+    //             'size'                     => 'required',
+    //             'uom'                      => 'required',
+    //             'kid'                      => 'required',
+    //             'item_pic'                 => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+    //             'kt'                       => 'required',
+    //             'lead_time_karigar'        => 'required',
+    //             'product_lead_time'        => 'required',
+
+    //         ],
+    //         [
+    //             //'company_id.required' => 'Company is Required', // custom message
+    //             'item_code.required' => 'Itemcode is Required', // custom message
+    //             'item_code.min' => 'Itemcode must be at least 14 characters',
+    //             'design_num.required' => 'Design Name is Required', // custom message
+    //             'description.required' => 'Description is Required', // custom message
+    //             'item_pic.required' => 'Item picture is Required', // custom message
+    //             'size.required'    => 'Size is Required', // custom message
+    //             'uom.required' => 'UOM is Required', // custom message
+    //             'kid.required' => 'KID Code is Required', // custom message
+    //             'pattern.required' => 'Pattern Code is Required', // custom message
+    //             'kt.required'     => 'KT is Required', // custom message
+    //             'lead_time_karigar.required'     => 'Lead Time (Karigar) is Required', // custom message
+    //             'kt.required'     => 'Product Lead Time is Required', // custom message
+    //         ]
+    //     );
+
+    //     //Digital Signature Upload
+    //     $item_pic_imageName = time() . '.' . $request->item_pic->extension();
+    //     $request->item_pic->storeAs('Product', $item_pic_imageName, 'public');
+
+    //     if (strlen($request->item_code) == 14) {
+    //         $company_id = 1; // TCL KOL
+    //     } elseif (strlen($request->item_code) == 15) {
+    //         $company_id = 6; // NOVJL
+    //     } else {
+    //         return redirect()->back()->withErrors(['item_code' => 'Itemcode must be exactly 14 or 15 characters long.']);
+    //     }
+
+    //     $product = Product::create([
+    //         'company_id'             => $company_id,
+    //         'item_code'              => strip_tags($request->item_code),
+    //         'design_num'             => strip_tags($request->design_num),
+    //         'description'            => strip_tags($request->description),
+    //         'pattern'                => strip_tags($request->pattern),
+    //         'size'                   => strip_tags($request->size),
+    //         'uom'                    => strip_tags($request->uom),
+    //         'standard_wt'            => strip_tags($request->standard_wt),
+    //         'kid'                    => strip_tags($request->kid),
+    //         'lead_time_karigar'      => strip_tags($request->lead_time_karigar),
+    //         'product_lead_time'      => strip_tags($request->product_lead_time),
+    //         'stone_charge'           => strip_tags($request->stone_charge),
+    //         'lab_charge'             => strip_tags($request->lab_charge),
+    //         'loss'                   => strip_tags($request->loss),
+    //         'purity'                 => strip_tags($request->purity),
+    //         'item_pic'               => $item_pic_imageName,
+    //         'kt'                     => strip_tags($request->kt),
+    //         'pcodechar'              => strlen($request->item_code),
+    //         'remarks'                => strip_tags($request->remarks),
+    //         'created_by'             => Auth::user()->name
+    //     ]);
+    //     $lastInsertedId = $product->id;
+    //     foreach ($request->stone_type as $key => $val) {
+    //         Productstonedetails::create([
+    //             'product_id'           => $lastInsertedId,
+    //             'stone_id'             => strip_tags($request->stone_type[$key]),
+    //             'category'             => strip_tags($request->category[$key]),
+    //             'pcs'                  => strip_tags($request->pcs[$key]),
+    //             'weight'               => strip_tags($request->weight[$key]),
+    //             'rate'                 => strip_tags($request->rate[$key]),
+    //             'amount'               => strip_tags($request->amount[$key]),
+    //             'created_by'           => Auth::user()->name
+    //         ]);
+    //     }
+
+    //     return redirect()->route('products.index')->withSuccess('Products record created successfully.');
+    // }
+
     public function store(Request $request)
     {
-        $validatedData = $request->validate(
-            [
-                //'company_id'               => 'required',
-                'item_code'                => 'required|min:14',
-                'design_num'               => 'required',
-                'description'              => 'required',
-                'pattern'                  => 'required',
-                'size'                     => 'required',
-                'uom'                      => 'required',
-                'kid'                      => 'required',
-                'item_pic'                 => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'kt'                       => 'required',
-                'lead_time_karigar'        => 'required',
-                'product_lead_time'        => 'required',
+        try {
+            DB::beginTransaction();
 
-            ],
-            [
-                //'company_id.required' => 'Company is Required', // custom message
-                'item_code.required' => 'Itemcode is Required', // custom message
-                'item_code.min' => 'Itemcode must be at least 14 characters',
-                'design_num.required' => 'Design Name is Required', // custom message
-                'description.required' => 'Description is Required', // custom message
-                'item_pic.required' => 'Item picture is Required', // custom message
-                'size.required'    => 'Size is Required', // custom message
-                'uom.required' => 'UOM is Required', // custom message
-                'kid.required' => 'KID Code is Required', // custom message
-                'pattern.required' => 'Pattern Code is Required', // custom message
-                'kt.required'     => 'KT is Required', // custom message
-                'lead_time_karigar.required'     => 'Lead Time (Karigar) is Required', // custom message
-                'kt.required'     => 'Product Lead Time is Required', // custom message
-            ]
-        );
+            // 🔹 Find customer
+            $customer = Customer::find($request->company_id);
 
-        //Digital Signature Upload
-        $item_pic_imageName = time() . '.' . $request->item_pic->extension();
-        $request->item_pic->storeAs('Product', $item_pic_imageName, 'public');
+            // 🔹 Base validation (always required)
+            $rules = [
+                'company_id'  => 'required|exists:customers,id',
+                'vendorsite'  => 'required|string|max:255',
+                'item_code'   => 'required|string|min:14|max:15',
+                'design_num'  => 'required|string|max:255',
+                'description' => 'required|string|max:1000',
+            ];
 
-        if (strlen($request->item_code) == 14) {
-            $company_id = 1; // TCL KOL
-        } elseif (strlen($request->item_code) == 15) {
-            $company_id = 6; // NOVJL
-        } else {
-            return redirect()->back()->withErrors(['item_code' => 'Itemcode must be exactly 14 or 15 characters long.']);
-        }
+            // 🔹 Apply strict rules only if customer requires validation
+            if ($customer && $customer->is_validation == 1) {
+                $rules = array_merge($rules, [
+                    'pattern_id'         => 'required|exists:patterns,id',
+                    'size_id'            => 'required|exists:sizes,id',
+                    'uom_id'             => 'required|exists:uoms,id',
+                    'kid'                => 'required|exists:karigars,id',
+                    'item_pic'           => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                    'kt'                 => 'required|string|max:10',
+                    'lead_time_karigar'  => 'required|string|max:255',
+                    'product_lead_time'  => 'required|string|max:255',
+                    'stone_charge'       => 'nullable|string|max:255',
+                    'lab_charge'         => 'nullable|string|max:255',
+                    'loss'               => 'nullable|string|max:255',
+                    'purity'             => 'nullable|numeric',
+                    'remarks'            => 'nullable|string|max:500',
+                ]);
+            }
 
-        $product = Product::create([
-            'company_id'             => $company_id,
-            'item_code'              => strip_tags($request->item_code),
-            'design_num'             => strip_tags($request->design_num),
-            'description'            => strip_tags($request->description),
-            'pattern'                => strip_tags($request->pattern),
-            'size'                   => strip_tags($request->size),
-            'uom'                    => strip_tags($request->uom),
-            'standard_wt'            => strip_tags($request->standard_wt),
-            'kid'                    => strip_tags($request->kid),
-            'lead_time_karigar'      => strip_tags($request->lead_time_karigar),
-            'product_lead_time'      => strip_tags($request->product_lead_time),
-            'stone_charge'           => strip_tags($request->stone_charge),
-            'lab_charge'             => strip_tags($request->lab_charge),
-            'loss'                   => strip_tags($request->loss),
-            'purity'                 => strip_tags($request->purity),
-            'item_pic'               => $item_pic_imageName,
-            'kt'                     => strip_tags($request->kt),
-            'pcodechar'              => strlen($request->item_code),
-            'remarks'                => strip_tags($request->remarks),
-            'created_by'             => Auth::user()->name
-        ]);
-        $lastInsertedId = $product->id;
-        foreach ($request->stone_type as $key => $val) {
-            Productstonedetails::create([
-                'product_id'           => $lastInsertedId,
-                'stone_id'             => strip_tags($request->stone_type[$key]),
-                'category'             => strip_tags($request->category[$key]),
-                'pcs'                  => strip_tags($request->pcs[$key]),
-                'weight'               => strip_tags($request->weight[$key]),
-                'rate'                 => strip_tags($request->rate[$key]),
-                'amount'               => strip_tags($request->amount[$key]),
-                'created_by'           => Auth::user()->name
+            // 🔹 Validate
+            $validatedData = $request->validate($rules);
+
+            // 🔹 Save image only if provided
+            $item_pic_imageName = null;
+            if ($request->hasFile('item_pic')) {
+                $item_pic_imageName = time() . '.' . $request->item_pic->extension();
+                $request->item_pic->storeAs('Product', $item_pic_imageName, 'public');
+            }
+
+            // 🔹 Company auto-detect from item_code length
+            if (strlen($request->item_code) == 14) {
+                $company_id = 1; // TCL KOL
+            } elseif (strlen($request->item_code) == 15) {
+                $company_id = 6; // NOVJL
+            } else {
+                return redirect()->back()
+                    ->withErrors(['item_code' => 'Itemcode must be exactly 14 or 15 characters long.']);
+            }
+
+            // 🔹 Create product
+            $product = Product::create([
+                'company_id'        => $request->company_id,
+                'vendorsite'        => $request->vendorsite,
+                'item_code'         => $request->item_code,
+                'design_num'        => $request->design_num,
+                'description'       => $request->description,
+                'pattern_id'        => $request->pattern_id ?? null,
+                'size_id'           => $request->size_id ?? null,
+                'uom_id'            => $request->uom_id ?? null,
+                'standard_wt'       => $request->standard_wt,
+                'kid'               => $request->kid ?? null,
+                'lead_time_karigar' => $request->lead_time_karigar ?? null,
+                'product_lead_time' => $request->product_lead_time ?? null,
+                'stone_charge'      => $request->stone_charge ?? null,
+                'lab_charge'        => $request->lab_charge ?? null,
+                'loss'              => $request->loss ?? null,
+                'purity'            => $request->purity ?? null,
+                'item_pic'          => $item_pic_imageName,
+                'kt'                => $request->kt ?? null,
+                'pcodechar'         => strlen($request->item_code),
+                'remarks'           => $request->remarks ?? null,
+                'created_by'        => Auth::user()->name
             ]);
-        }
 
-        return redirect()->route('products.index')->withSuccess('Products record created successfully.');
+            // 🔹 Save additional stone details if provided
+            if ($request->stone_type) {
+                foreach ($request->stone_type as $key => $val) {
+                    if (!empty($val)) {
+                        Productstonedetails::create([
+                            'product_id' => $product->id,
+                            'stone_id'   => $val,
+                            'category'   => $request->category[$key] ?? null,
+                            'pcs'        => $request->pcs[$key] ?? null,
+                            'weight'     => $request->weight[$key] ?? null,
+                            'rate'       => $request->rate[$key] ?? null,
+                            'amount'     => $request->amount[$key] ?? null,
+                            'created_by' => Auth::user()->name
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('products.index')->withSuccess('Product created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log error for debugging
+            Log::error('Product Store Error: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Something went wrong. Please try again.')
+                ->withInput();
+        }
     }
 
     /**

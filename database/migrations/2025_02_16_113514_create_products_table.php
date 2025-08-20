@@ -13,15 +13,18 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('vendorsite')->nullable();
             $table->unsignedBigInteger('company_id');
             $table->foreign('company_id')->references('id')->on('customers')->onDelete('cascade');
+            $table->string('vendorsite')->nullable();
             $table->string('item_code')->nullable();
             $table->string('design_num')->nullable();
             $table->longText('description')->nullable();
-            $table->string('pattern')->nullable();
-            $table->string('size')->nullable();
-            $table->string('uom')->nullable();
+            $table->unsignedBigInteger('pattern_id');
+            $table->foreign('pattern_id')->references('id')->on('patterns')->onDelete('cascade');
+            $table->unsignedBigInteger('size_id');
+            $table->foreign('size_id')->references('id')->on('sizes')->onDelete('cascade');
+            $table->unsignedBigInteger('uom_id');
+            $table->foreign('uom_id')->references('id')->on('uoms')->onDelete('cascade');
             $table->decimal('standard_wt', 10, 2)->default(0.00);
             $table->unsignedBigInteger('kid');
             $table->foreign('kid')->references('id')->on('karigars')->onDelete('cascade');

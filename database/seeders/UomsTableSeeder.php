@@ -29,6 +29,7 @@ class UomsTableSeeder extends Seeder
             ['uomid' => 'SET5', 'description' => 'NEC EARRING TIKA NATH BANGLE', 'is_active' => 'Yes'],
             ['uomid' => 'SET5', 'description' => 'SET5', 'is_active' => 'Yes'],
             ['uomid' => 'ST8', 'description' => 'SET8', 'is_active' => 'Yes'],
+            ['uomid' => 'xx', 'description' => 'Temp', 'is_active' => 'Yes'],
         ]);
     }
 }
