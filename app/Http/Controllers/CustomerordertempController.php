@@ -80,16 +80,18 @@ class CustomerordertempController extends Controller
         //         END as status")
         //     )
         //     ->get();
+
         $customerordertempitems = DB::table('customerordertempitems AS i')
             ->leftJoin('products AS p', 'i.item_code', '=', 'p.item_code')
             ->leftJoin('customerordertemps AS o', 'i.order_id', '=', 'o.id')
+            ->leftJoin('karigars AS k', 'p.kid', '=', 'k.id')
             ->select([
                 'o.jo_no',
                 'o.type',
                 'i.item_code',
                 'i.design',
                 'i.description',
-                'i.kid',
+                'k.kid',
                 'i.size',
                 'i.std_wt',
                 'i.total_wt',
@@ -99,7 +101,7 @@ class CustomerordertempController extends Controller
                 'i.stone_chg',
                 'i.total_value',
                 'p.design_num',
-                DB::raw("CASE WHEN p.item_code IS NULL THEN 'Item Not Found' ELSE 'Item Found' END as status"),
+                DB::raw("CASE WHEN p.item_code IS NULL THEN 'Item Not Found' ELSE 'Item Found' END as status")
             ])
             ->orderBy('o.jo_no')
             ->get();
@@ -170,6 +172,7 @@ class CustomerordertempController extends Controller
 
     public function customerorderstempimporttxt(Request $request)
     {
+
         $request->validate([
             'file' => 'required|file|mimes:txt',
         ]);
@@ -363,7 +366,7 @@ class CustomerordertempController extends Controller
                 }
 
                 // Insert into products
-                $product = Product::create([
+                /*$product = Product::create([
                     'company_id'     => $company_id,
                     'item_code'      => $item->item_code,
                     'design_num'     => $item->design,
@@ -373,6 +376,27 @@ class CustomerordertempController extends Controller
                     'standard_wt'    => $item->std_wt ?? 0,
                     'kt'             => $item->kt . 'KT',
                     'kid'            => 30,
+                    'purity'         => 0.00,
+                    'remarks'        => $item->remarks,
+                    'customer_order' => 'Yes',
+                    'stone_charge'   => $item->stone_chg,
+                    'lab_charge'     => $item->lab_chg,
+                    'loss'           => $item->loss_percent,
+                    'pcodechar'      => strlen($item->item_code),
+                    'created_by'     => Auth::user()->name,
+                ]);*/
+
+                $product = Product::create([
+                    'company_id'     => $company_id,
+                    'item_code'      => $item->item_code,
+                    'design_num'     => $item->design,
+                    'description'    => $item->description,
+                    'pattern_id'     => 24, // FOR XX
+                    'size_id'        => 197, // FOR XX
+                    'uom_id'         => 16, // FOR XX
+                    'standard_wt'    => $item->std_wt ?? 0,
+                    'kt'             => $item->kt . 'KT',
+                    'kid'            => 23, // FOR XX
                     'purity'         => 0.00,
                     'remarks'        => $item->remarks,
                     'customer_order' => 'Yes',

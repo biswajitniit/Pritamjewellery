@@ -28,7 +28,7 @@
 
                     <div class="card-body p-4">
                         <div class="tabcontent">
-                            <form class="row g-3" action="{{ route('customerorders.store') }}" method="POST" name="saveCustomerorders" enctype="multipart/form-data">
+                            <form class="row g-3" action="{{ route('customerorders.store.manual') }}" method="POST" name="saveCustomerorders" enctype="multipart/form-data">
                                 @csrf
                                     <div class="row m-3">
                                         <div class="col-md-3">

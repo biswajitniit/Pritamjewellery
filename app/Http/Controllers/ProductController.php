@@ -287,7 +287,7 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    /*public function update(Request $request, string $id)
     {
         $validatedData = $request->validate(
             [
@@ -401,6 +401,131 @@ class ProductController extends Controller
             return redirect()->back()->withErrors($e->getMessage());
         }
     }
+    */
+
+    public function update(Request $request, string $id)
+    {
+        $validatedData = $request->validate(
+            [
+                'company_id'         => 'required|integer',
+                'vendorsite'         => 'required|string',
+                'item_code'          => 'required|string|min:14',
+                'design_num'         => 'required|string',
+                'description'        => 'required|string',
+                'pattern'            => 'required|integer',
+                'size_id'            => 'required|integer',
+                'uom_id'             => 'required|integer',
+                'kid'                => 'required|string',
+                'item_pic'           => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'kt'                 => 'required|string',
+                'lead_time_karigar'  => 'required|string',
+                'product_lead_time'  => 'required|string',
+
+                // Stone details (arrays)
+                'stone_type.*'       => 'nullable|integer',
+                'category.*'         => 'nullable|string',
+                'pcs.*'              => 'nullable|numeric',
+                'weight.*'           => 'nullable|numeric',
+                'rate.*'             => 'nullable|numeric',
+                'amount.*'           => 'nullable|numeric',
+            ],
+            [
+                'item_code.required'           => 'Itemcode is Required',
+                'item_code.min'                => 'Itemcode must be at least 14 characters',
+                'design_num.required'          => 'Design Name is Required',
+                'description.required'         => 'Description is Required',
+                'item_pic.image'               => 'Item picture must be an image',
+                'size_id.required'             => 'Size is Required',
+                'uom_id.required'              => 'UOM is Required',
+                'kid.required'                 => 'KID Code is Required',
+                'pattern.required'             => 'Pattern Code is Required',
+                'kt.required'                  => 'KT is Required',
+                'lead_time_karigar.required'   => 'Lead Time (Karigar) is Required',
+                'product_lead_time.required'   => 'Product Lead Time is Required',
+            ]
+        );
+
+        try {
+            $product = Product::findOrFail($id);
+
+            // ✅ Image handling
+            if ($request->hasFile('item_pic')) {
+                $item_pic_imageName = time() . '.' . $request->item_pic->extension();
+                $request->item_pic->storeAs('Product', $item_pic_imageName, 'public');
+            } else {
+                $item_pic_imageName = $product->item_pic;
+            }
+
+            // ✅ Company ID logic
+            if (strlen($request->item_code) == 14) {
+                $company_id = 1; // TCL KOL
+            } elseif (strlen($request->item_code) == 15) {
+                $company_id = 6; // NOVJL
+            } else {
+                return redirect()->back()->withErrors([
+                    'item_code' => 'Itemcode must be exactly 14 or 15 characters long.'
+                ]);
+            }
+
+            // ✅ Update product
+            $product->update([
+                'company_id'          => $request->company_id,
+                'vendorsite'          => $request->vendorsite,
+                'item_code'           => $request->item_code,
+                'design_num'          => $request->design_num,
+                'description'         => $request->description,
+                'pattern_id'          => $request->pattern,
+                'size_id'             => $request->size_id,
+                'uom_id'              => $request->uom_id,
+                'standard_wt'         => $request->standard_wt,
+                'kid'                 => $request->kid,
+                'lead_time_karigar'   => $request->lead_time_karigar,
+                'product_lead_time'   => $request->product_lead_time,
+                'stone_charge'        => $request->stone_charge,
+                'lab_charge'          => $request->lab_charge,
+                'loss'                => $request->loss,
+                'purity'              => $request->purity,
+                'item_pic'            => $item_pic_imageName,
+                'kt'                  => $request->kt,
+                'remarks'             => $request->remarks,
+                'pcodechar'           => strlen($request->item_code),
+            ]);
+
+            // ✅ Stone details update
+            if ($request->has('stone_type') && count(array_filter($request->stone_type)) > 0) {
+                Productstonedetails::where('product_id', $id)->delete();
+
+                foreach ($request->stone_type as $key => $val) {
+                    if (!empty($val)) {
+                        Productstonedetails::create([
+                            'product_id' => $id,
+                            'stone_id'   => $val,
+                            'category'   => $request->category[$key] ?? null,
+                            'pcs'        => $request->pcs[$key] ?? null,
+                            'weight'     => $request->weight[$key] ?? null,
+                            'rate'       => $request->rate[$key] ?? null,
+                            'amount'     => $request->amount[$key] ?? null,
+                            'created_by' => Auth::user()->name
+                        ]);
+                    }
+                }
+            }
+
+            // ✅ Update customerordertempitems if kid is empty
+            if ($request->kid) {
+                DB::table('customerordertempitems')
+                    ->whereNull('kid')
+                    ->where('item_code', $request->item_code)
+                    ->update(['kid' => $request->kid]);
+            }
+
+            return redirect()->route('products.index')
+                ->withSuccess('Product record updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors($e->getMessage());
+        }
+    }
+
 
     /**
      * Remove the specified resource from storage.
