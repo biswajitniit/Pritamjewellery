@@ -46,7 +46,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $pcodes   = Pcode::where('is_active', 'Yes')->orderBy('code')->get();
+        $pcodes   = Pcode::where('is_active', 'Yes')->orderBy('description')->get();
         $sizes    = Size::where('is_active', 'Yes')->orderBy('ssize')->get();
         $uoms     = Uom::where('is_active', 'Yes')->orderBy('uomid')->get();
         $stones   = Stone::where('is_active', 'Yes')->orderBy('additional_charge_id')->get();
@@ -167,7 +167,7 @@ class ProductController extends Controller
             // 🔹 Apply strict rules only if customer requires validation
             if ($customer && $customer->is_validation == 1) {
                 $rules = array_merge($rules, [
-                    'pattern_id'         => 'required|exists:patterns,id',
+                    'pcode_id'           => 'required|exists:pcodes,id',
                     'size_id'            => 'required|exists:sizes,id',
                     'uom_id'             => 'required|exists:uoms,id',
                     'kid'                => 'required|exists:karigars,id',
@@ -210,7 +210,7 @@ class ProductController extends Controller
                 'item_code'         => $request->item_code,
                 'design_num'        => $request->design_num,
                 'description'       => $request->description,
-                'pattern_id'        => $request->pattern_id ?? null,
+                'pcode_id'          => $request->pcode_id ?? null,
                 'size_id'           => $request->size_id ?? null,
                 'uom_id'            => $request->uom_id ?? null,
                 'standard_wt'       => $request->standard_wt,
@@ -569,11 +569,11 @@ class ProductController extends Controller
 
     public function getsizepcodewise(Request $request)
     {
-        $sizes = Size::where('pcode_id', $request->pcode_id)->where('is_active', 'Yes')->get();
-        $html = '<select name="size" id="size" class="form-select rounded-0">';
+        $sizes = Size::where('pcode_id', $request->pcode_id)->where('is_active', 'Yes')->orderBy('ssize')->get();
+        $html = '<select name="size_id" id="size_id" class="form-select rounded-0">';
         $html .= '<option value="">Choose...</option>';
         foreach ($sizes as $size) {
-            $html .= '<option value="' . $size->id . '">' . $size->ssize . '</option>';
+            $html .= '<option value="' . $size->id . '">' . $size->schar . ' - ' . $size->item_name . ' - ' . $size->ssize . '</option>';
         }
         $html .= '</select>';
         echo $html;

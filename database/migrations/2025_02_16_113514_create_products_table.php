@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('item_code')->nullable();
             $table->string('design_num')->nullable();
             $table->longText('description')->nullable();
-            $table->unsignedBigInteger('pattern_id');
-            $table->foreign('pattern_id')->references('id')->on('patterns')->onDelete('cascade');
+            $table->unsignedBigInteger('pcode_id');
+            $table->foreign('pcode_id')->references('id')->on('pcodes')->onDelete('cascade');
             $table->unsignedBigInteger('size_id');
             $table->foreign('size_id')->references('id')->on('sizes')->onDelete('cascade');
             $table->unsignedBigInteger('uom_id');

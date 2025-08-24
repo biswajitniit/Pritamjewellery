@@ -48,9 +48,9 @@ class Product extends Model
         return $this->belongsTo(Customer::class, 'company_id');
     }
 
-    public function pattern()
+    public function pcode()
     {
-        return $this->belongsTo(Pattern::class, 'pattern_id');
+        return $this->belongsTo(Pcode::class, 'pcode_id');
     }
 
     public function size()

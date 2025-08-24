@@ -84,6 +84,7 @@
                                 @enderror
                             </div>
 
+                            <?php /* ?>
                             <div class="col-md-2">
                                 <label class="form-label">Patterns <span style="color: red;">*</span></label>
                                 <select name="pattern_id" class="form-select rounded-0 @error('pattern_id') is-invalid @enderror">
@@ -98,14 +99,27 @@
                                 </span>
                                 @enderror
                             </div>
+                            <?php */ ?>
+
+                            <div class="col-md-2">
+                                <label class="form-label">Pcode <span style="color: red;">*</span></label>
+                                <select name="pcode_id" class="form-select rounded-0 @error('pcode_id') is-invalid @enderror" onchange="GetSizePcodeWise(this.value)">
+                                    <option value="">Choose...</option>
+                                    @forelse($pcodes as $pcode)
+                                    <option value="{{ $pcode->id }}">{{ $pcode->description }}</option>
+                                    @empty @endforelse
+                                </select>
+                                @error('pcode_id')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                                @enderror
+                            </div>
 
                             <div class="col-md-3">
                                 <label class="form-label">Size <span style="color: red;">*</span></label>
                                 <select name="size_id" id="size_id" class="form-select rounded-0 @error('size_id') is-invalid @enderror">
                                     <option value="">Choose...</option>
-                                    @forelse($sizes as $size)
-                                    <option value="{{ $size->id }}">{{  $size->schar }} - {{  $size->item_name }} - {{ $size->ssize }}</option>
-                                    @empty @endforelse
                                 </select>
                             </div>
 

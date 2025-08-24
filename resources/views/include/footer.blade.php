@@ -784,7 +784,7 @@
                     _token: "{{ csrf_token() }}"
                 },
                 success: function (result) {
-                    $("#size").val(result);
+                    $("#size_id").html(result);
                 },
                 error: function (xhr, status, error) {
                     console.error("AJAX Error:", error);

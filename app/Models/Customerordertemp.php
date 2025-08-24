@@ -19,6 +19,7 @@ class Customerordertemp extends Model
         'jo_no',
         'customer_id',
         'jo_date',
+        'vendor_site',
         'order_type',
         'type',
         'created_by',

@@ -20,8 +20,8 @@ class Pattern extends Model
         'updated_by',
     ];
 
-    public function products()
-    {
-        return $this->hasMany(Product::class, 'pattern_id');
-    }
+    // public function products()
+    // {
+    //     return $this->hasMany(Product::class, 'pattern_id');
+    // }
 }
