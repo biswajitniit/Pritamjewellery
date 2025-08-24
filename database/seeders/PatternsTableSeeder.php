@@ -37,6 +37,7 @@ class PatternsTableSeeder extends Seeder
             ['pid' => 'C', 'pat_desc' => 'Coin', 'is_active' => 'Yes'],
             ['pid' => 'L', 'pat_desc' => 'Silver', 'is_active' => 'Yes'],
             ['pid' => 'R', 'pat_desc' => 'Raw Material', 'is_active' => 'Yes'],
+            ['pid' => 'xx', 'pat_desc' => 'temp', 'is_active' => 'Yes'],
         ]);
     }
 }

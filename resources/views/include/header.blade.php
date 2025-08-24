@@ -291,6 +291,7 @@
                                         'patterns' => 'Pattern',
                                         'stones' => 'Stone',
                                         'customers' => 'Customer',
+                                        'vendors' => 'Vendors',
                                         'karigars' => 'Karigar',
                                         'itemdescriptionheaders' => 'Item description header',
                                         'products' => 'Product',
@@ -298,6 +299,7 @@
                                         'metalpurities' => 'Metal Purity',
                                         'tollerences' => 'Tollerence',
                                         'locations' => 'Location',
+                                        'miscellaneouses' => 'Miscellaneous',
                                     ];
                                 @endphp
 
@@ -592,6 +594,27 @@
                                         </li>
                                     </ul>
                                 </li>
+
+                                @php
+                                    $permission_purchases = getUserMenuPermission(Auth::user()->id, 'purchases', 'menu_permissions');
+                                @endphp
+
+                                @if ($permission_purchases && $permission_purchases->menu_permissions == 1)
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('purchases.index') }}">Purchases</a>
+                                    </li>
+                                @endif
+
+
+                                @php
+                                    $permission_sales = getUserMenuPermission(Auth::user()->id, 'sales', 'menu_permissions');
+                                @endphp
+
+                                @if ($permission_sales && $permission_sales->menu_permissions == 1)
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('sales.index') }}">Sales</a>
+                                    </li>
+                                @endif
                             </ul>
                         </li>
 

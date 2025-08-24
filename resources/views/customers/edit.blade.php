@@ -109,6 +109,18 @@
                             </div>
 
                             <div class="col-md-3">
+                                <label class="form-label mb-2">Is Validation? <span style="color: red">*</span></label>
+                                <div class="border p-2">
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label"> <input type="radio" class="form-check-input me-2" @if($customers->is_validation == 'Yes') checked @endif name="is_validation" value="Yes" required/>Yes </label>
+                                    </div>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label"> <input type="radio" class="form-check-input me-2" @if($customers->is_validation == 'No') checked @endif name="is_validation" value="No" required/>No </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
                                 <label class="form-label mb-2">Active <span style="color: red">*</span></label>
                                 <div class="border p-2">
                                     <div class="form-check-inline">

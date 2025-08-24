@@ -47,8 +47,8 @@
 
                             <div class="col-md-3">
                                 <label class="form-label">Vendor Site <span style="color: red;">*</span></label>
-                                <input type="text" name="item_code" id="item_code_product" value="{{ old('item_code') }}" class="form-control rounded-0 @error('item_code') is-invalid @enderror" />
-                                @error('item_code')
+                                <input type="text" name="vendorsite" id="vendorsite" value="{{ old('vendorsite') }}" class="form-control rounded-0 @error('vendorsite') is-invalid @enderror" required/>
+                                @error('vendorsite')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -57,7 +57,7 @@
 
                             <div class="col-md-3">
                                 <label class="form-label">Item Code <span style="color: red;">*</span></label>
-                                <input type="text" name="item_code" id="item_code_product" value="{{ old('item_code') }}" class="form-control rounded-0 @error('item_code') is-invalid @enderror" />
+                                <input type="text" name="item_code" id="item_code" value="{{ old('item_code') }}" class="form-control rounded-0 @error('item_code') is-invalid @enderror" required/>
                                 @error('item_code')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -84,71 +84,61 @@
                                 @enderror
                             </div>
 
+                            <?php /* ?>
                             <div class="col-md-2">
-                                <label class="form-label">Pcode <span style="color: red;">*</span></label>
-                                <select name="pattern" class="form-select rounded-0 @error('pattern') is-invalid @enderror" onchange="GetSizePcodeWise(this.value)">
+                                <label class="form-label">Patterns <span style="color: red;">*</span></label>
+                                <select name="pattern_id" class="form-select rounded-0 @error('pattern_id') is-invalid @enderror">
                                     <option value="">Choose...</option>
-                                    @forelse($pcodes as $pcode)
-                                    <option value="{{ $pcode->id }}">{{ $pcode->code }}</option>
+                                    @forelse($patterns as $pattern)
+                                    <option value="{{ $pattern->id }}">{{ $pattern->pat_desc }}</option>
                                     @empty @endforelse
                                 </select>
-                                @error('pattern')
+                                @error('pattern_id')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                                @enderror
+                            </div>
+                            <?php */ ?>
+
+                            <div class="col-md-2">
+                                <label class="form-label">Pcode <span style="color: red;">*</span></label>
+                                <select name="pcode_id" class="form-select rounded-0 @error('pcode_id') is-invalid @enderror" onchange="GetSizePcodeWise(this.value)">
+                                    <option value="">Choose...</option>
+                                    @forelse($pcodes as $pcode)
+                                    <option value="{{ $pcode->id }}">{{ $pcode->description }}</option>
+                                    @empty @endforelse
+                                </select>
+                                @error('pcode_id')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
                                 @enderror
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="form-label">Size <span style="color: red;">*</span></label>
-                                <select name="size" id="size" class="form-select rounded-0">
+                                <select name="size_id" id="size_id" class="form-select rounded-0 @error('size_id') is-invalid @enderror">
                                     <option value="">Choose...</option>
                                 </select>
                             </div>
 
 
-                            {{-- <div class="col-md-2">
-                                <label class="form-label">Size <span style="color: red;">*</span></label>
-                                <input type="text" name="size" id="product_size" value="{{ old('size') }}" class="form-control rounded-0 @error('size') is-invalid @enderror" />
-                                @error('size')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                                @enderror
-                            </div> --}}
 
                             <div class="col-md-2">
                                 <label class="form-label">UOM <span style="color: red;">*</span></label>
-                                <select name="uom" class="form-select rounded-0 @error('uom') is-invalid @enderror">
+                                <select name="uom_id" class="form-select rounded-0 @error('uom_id') is-invalid @enderror">
                                     <option value="">Choose...</option>
                                     @forelse($uoms as $uom)
-                                    <option value="{{ $uom->uomid }}">{{ $uom->uomid }}</option>
+                                    <option value="{{ $uom->id }}">{{ $uom->uomid }}</option>
                                     @empty @endforelse
                                 </select>
-                                @error('uom')
+                                @error('uom_id')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
                                 @enderror
                             </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label">Pattern <span style="color: red;">*</span></label>
-                                <select name="pattern" class="form-select rounded-0 @error('pattern') is-invalid @enderror">
-                                    <option value="">Choose...</option>
-                                    @forelse($patterns as $pattern)
-                                    <option value="{{ $pattern->pat_desc }}">{{ $pattern->pat_desc }}</option>
-                                    @empty @endforelse
-                                </select>
-                                @error('pattern')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                                @enderror
-                            </div>
-
-
-
 
                             <div class="col-md-2">
                                 <label class="form-label">Standard WT</label>
@@ -169,7 +159,7 @@
                                 </span>
                                 @enderror
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="form-label">Lead Time (Karigar) <span style="color: red;">*</span></label>
                                 <input type="text" name="lead_time_karigar" value="{{ old('lead_time_karigar') }}" class="form-control rounded-0" required/>
                             </div>

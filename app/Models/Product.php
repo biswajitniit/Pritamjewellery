@@ -18,23 +18,20 @@ class Product extends Model
         'item_code',
         'design_num',
         'description',
-        'pattern',
-        'size',
-        'uom',
+        'pattern_id',
+        'size_id',
+        'uom_id',
         'standard_wt',
         'kid',
         'lead_time_karigar',
         'product_lead_time',
         'stone_charge',
         'lab_charge',
-        'additional_lab_charges',
         'loss',
         'purity',
         'item_pic',
-        'stone_wt',
-        'st_charge',
         'kt',
-        'kundan',
+        'pcodechar',
         'remarks',
         'bulk_upload',
         'customer_order',
@@ -43,8 +40,31 @@ class Product extends Model
         'updated_by',
     ];
 
+
+
+    // Relationships
+    public function company()
+    {
+        return $this->belongsTo(Customer::class, 'company_id');
+    }
+
+    public function pcode()
+    {
+        return $this->belongsTo(Pcode::class, 'pcode_id');
+    }
+
+    public function size()
+    {
+        return $this->belongsTo(Size::class, 'size_id');
+    }
+
+    public function uom()
+    {
+        return $this->belongsTo(Uom::class, 'uom_id');
+    }
+
     public function karigar()
     {
-        return $this->hasMany(Karigar::class, 'id', 'kid');
+        return $this->belongsTo(Karigar::class, 'kid');
     }
 }

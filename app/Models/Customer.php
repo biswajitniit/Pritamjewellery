@@ -26,6 +26,7 @@ class Customer extends Model
         'cont_person',
         'gstin',
         'statecode',
+        'is_validation',
         'is_active',
         'created_by',
         'updated_by',
@@ -44,5 +45,10 @@ class Customer extends Model
     public function metalreceiveentry()
     {
         return $this->belongsTo(Metalreceiveentry::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'company_id');
     }
 }

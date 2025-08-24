@@ -231,11 +231,25 @@ class CustomerorderController extends Controller
         $product = Product::where('item_code', $request->itemval)->orderBy('item_code')->first();
         $karigar = Karigar::where('id', $product->kid)->first();
         $productstonedetails_add_l_chg = Productstonedetails::where('product_id', $product->id)->sum('amount');
+        // return response()->json([
+        //     "design"        => $product->design_num,
+        //     "description"   => $product->description,
+        //     "size"          => $product->size,
+        //     "uom"           => $product->uom,
+        //     "kt"            => $product->kt,
+        //     "std_wt"        => $product->standard_wt,
+        //     "kid"           => $karigar->kid,
+        //     "add_l_chg"     => $productstonedetails_add_l_chg,
+        //     "stone_charge"  => $product->stone_charge,
+        //     "lab_charge"    => $product->lab_charge,
+        //     "loss"          => $product->loss,
+        //     "company_id"    => $product->company_id,
+        // ]);
         return response()->json([
             "design"        => $product->design_num,
             "description"   => $product->description,
-            "size"          => $product->size,
-            "uom"           => $product->uom,
+            "size"          => $product->size->ssize,
+            "uom"           => $product->uom->description,
             "kt"            => $product->kt,
             "std_wt"        => $product->standard_wt,
             "kid"           => $karigar->kid,

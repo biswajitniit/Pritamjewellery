@@ -31,7 +31,7 @@
                             <h5>Product Details</h5>
                             <hr />
 
-                            {{-- <div class="col-md-3">
+                            <div class="col-md-3">
                                 <label class="form-label">Company <span style="color: red;">*</span></label>
                                 <select name="company_id" class="form-select rounded-0 @error('company_id') is-invalid @enderror">
                                     <option value="">Choose...</option>
@@ -44,8 +44,17 @@
                                     <strong>{{ $message }}</strong>
                                 </span>
                                 @enderror
-                            </div> --}}
+                            </div>
 
+                            <div class="col-md-3">
+                                <label class="form-label">Vendor Site <span style="color: red;">*</span></label>
+                                <input type="text" name="vendorsite" id="vendorsite" value="{{ old('vendorsite',$products->vendorsite) }}" class="form-control rounded-0 @error('vendorsite') is-invalid @enderror" required/>
+                                @error('vendorsite')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                                @enderror
+                            </div>
 
                             <div class="col-md-3">
                                 <label class="form-label">Item Code <span style="color: red;">*</span></label>
@@ -76,11 +85,11 @@
                                 @enderror
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">Pattern <span style="color: red;">*</span></label>
+                                <label class="form-label">Patterns <span style="color: red;">*</span></label>
                                 <select name="pattern" class="form-select rounded-0 @error('pattern') is-invalid @enderror">
                                     <option value="">Choose...</option>
                                     @forelse($patterns as $pattern)
-                                    <option value="{{ $pattern->pat_desc }}" @if($pattern->pattern == $products->pat_desc) selected @endif>{{ $pattern->pat_desc }}</option>
+                                    <option value="{{ $pattern->id }}" @if($pattern->id == $products->pattern_id) selected @endif>{{ $pattern->pat_desc }}</option>
                                     @empty @endforelse
                                 </select>
                                 @error('pattern')
@@ -90,25 +99,25 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="form-label">Size <span style="color: red;">*</span></label>
-                                <input type="text" name="size" id="product_size" value="{{ old('size',$products->size) }}" class="form-control rounded-0 @error('size') is-invalid @enderror" />
-                                @error('size')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                                @enderror
+                                <select name="size_id" id="size_id" class="form-select rounded-0 @error('size_id') is-invalid @enderror">
+                                    <option value="">Choose...</option>
+                                    @forelse($sizes as $size)
+                                    <option value="{{ $size->id }}" @if($size->id == $products->size_id) selected @endif>{{  $size->schar }} - {{  $size->item_name }} - {{ $size->ssize }}</option>
+                                    @empty @endforelse
+                                </select>
                             </div>
 
                             <div class="col-md-2">
                                 <label class="form-label">UOM <span style="color: red;">*</span></label>
-                                <select name="uom" class="form-select rounded-0 @error('uom') is-invalid @enderror">
+                                <select name="uom_id" class="form-select rounded-0 @error('uom_id') is-invalid @enderror">
                                     <option value="">Choose...</option>
                                     @forelse($uoms as $uom)
-                                    <option value="{{ $uom->uomid }}" @if($uom->uomid == $products->uom) selected @endif>{{ $uom->uomid }}</option>
+                                    <option value="{{ $uom->id }}" @if($uom->id == $products->uom_id) selected @endif>{{ $uom->uomid }}</option>
                                     @empty @endforelse
                                 </select>
-                                @error('uom')
+                                @error('uom_id')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -134,7 +143,7 @@
                                 </span>
                                 @enderror
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="form-label">Lead Time (Karigar) <span style="color: red;">*</span></label>
                                 <input type="text" name="lead_time_karigar" value="{{ old('lead_time_karigar',$products->lead_time_karigar) }}" class="form-control rounded-0" required/>
                             </div>
@@ -168,11 +177,11 @@
                                 <input type="file" name="item_pic" class="form-control rounded-0 @error('item_pic') is-invalid @enderror" accept="image/*"/>
                             </div>
 
-                            @if (Storage::disk('public')->exists('Product/'.@$products->item_pic))
+                            {{-- @if (Storage::disk('public')->exists('Product/'.@$products->item_pic))
                             <div class="col-md-1">
                                 <img src="{{url('storage/Product/'.@$products->item_pic)}}" width="100" height="100">
                             </div>
-                            @endif
+                            @endif --}}
 
                             <div class="col-md-1">
                                 <label class="form-label">KT <span style="color: red;">*</span></label>

@@ -126,12 +126,10 @@
                                                   <td>{{$product->description}}</td>
                                                   <td><img src="{{url('storage/Product/'.$product->item_pic)}}" width="100" height="100"></td>
                                                   <td>{{$product->psize}}</td>
-                                                  <td>{{$product->uom}}</td>
+                                                  <td>{{$product->uom->uomid}}</td>
                                                   <td>{{$product->standard_wt}}</td>
                                                   <td>
-                                                    @foreach($product->karigar as $karigars)
-                                                        {{ $karigars->kid }}
-                                                    @endforeach
+                                                    {{$product->karigar->kid}}
                                                   </td>
 
                                               </tr>

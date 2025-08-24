@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             StonesTableSeeder::class,
             CustomersTableSeeder::class,
             KarigarTableSeeder::class,
-            ProductTableSeeder::class,
+            ProductsTableSeeder::class,
             MetalTableSeeder::class,
             MetalPurityTableSeeder::class,
             LocationsTableSeeder::class,

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('customer_id');
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
             $table->string('jo_date')->nullable();
+            $table->string('vendor_site')->nullable();
             $table->enum('order_type', ['AutoUpload', 'ManualUpload'])->default('ManualUpload');
             $table->enum('type', ['Customer', 'Regular'])->default('Customer');
             $table->string('created_by')->nullable();
