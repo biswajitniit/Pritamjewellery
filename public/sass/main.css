@@ -1555,9 +1555,44 @@ h5 {
     font-size: 24px;
 }
 
+h6 {
+  background: linear-gradient(to right, #e49d31, #fe0500, #e49d31, #e49d31);
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: normal;
+}
+
 .form-control{
-  border-radius: 0px;
+border-radius: 0px;
 }
 .btn-grd-primary {
-    background-image: linear-gradient(310deg, #ff0017, #e5a139) !important;
+  background-image: linear-gradient(310deg, #ff0017, #e5a139) !important;
 }
+.sales-items-title,
+.purchase-items-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 12px;
+}
+.sales-items-table td,
+.purchase-items-table td {
+  background: none;
+  display: grid;
+  grid-template-columns: 1fr min-content;
+  gap: 12px;
+}
+.sales-items-table .item-action,
+.purchase-items-table .item-action {
+  border-left: 1px solid var(--bs-table-border-color);
+  vertical-align: middle;
+}
+.sales-items-table .item-action button,
+.purchase-items-table .item-action button {
+  margin-inline-start: 8px;
+  vertical-align: middle;
+  margin-block: 50%;
+}
+.text-right { text-align: right !important; }

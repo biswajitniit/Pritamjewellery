@@ -26,17 +26,7 @@
                         <form class="row g-3" action="{{ route('sales.store') }}" method="POST" name="saveSales">
                             @csrf
 
-                            <div class="col-md-6">
-                                <label class="form-label">Sale No. <span style="color: red">*</span></label>
-                                <input type="text" name="sale_no" value="{{ old('sale_no') }}" class="form-control rounded-0 @error('sale_no') is-invalid @enderror" required/>
-                                @error('sale_no')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <label class="form-label">Customer <span style="color: red">*</span></label>
                                 <select name="customer" class="form-select rounded-0 @error('customer') is-invalid @enderror" required>
                                     <option value="">Choose...</option>
@@ -51,7 +41,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">Invoice No <span style="color: red">*</span></label>
                                 <input type="text" name="invoice_no" value="{{ old('invoice_no') }}" class="form-control rounded-0 @error('invoice_no') is-invalid @enderror" required/>
                                 @error('invoice_no')
@@ -61,7 +51,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label class="form-label">Sale Date <span style="color: red">*</span></label>
                                 <input type="date" name="sold_on" value="{{ old('sold_on') }}" class="form-control rounded-0 @error('sold_on') is-invalid @enderror" required/>
                                 @error('sold_on')
@@ -98,31 +88,40 @@
                                                             </div>
                                                             <div class="col-md-4 d-none" id="purity-block-0">
                                                                 <label class="form-label">Purity <span style="color: red">*</span></label>
-                                                                <input type="number" step="1" min="1" name="purity[]" value="" class="form-control rounded-0" id="purity-0"/>
+                                                                <select name="purity[]" class="form-select rounded-0" id="purity-0">
+                                                                    <option value="">Choose...</option>
+                                                                    @foreach ($purities as $purity)
+                                                                        <option value="{{ $purity->purity_id }}">{{ $purity->purity }}</option>
+                                                                    @endforeach
+                                                                </select>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="form-label">HSN <span style="color: red">*</span></label>
                                                                 <input type="text" name="hsn[]" value="" class="form-control rounded-0" id="hsn-0" required/>
                                                             </div>
                                                             <div class="col-md-2">
-                                                                <label class="form-label">Price <span style="color: red">*</span></label>
-                                                                <input type="number" step="0.5" min="1" name="price[]" value="" class="form-control rounded-0" id="price-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
+                                                                <label class="form-label">Quantity <span style="color: red">*</span></label>
+                                                                <input type="number" step="1" min="1" name="quantity[]" value="1" class="form-control rounded-0 text-right" id="quantity-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
                                                             </div>
                                                             <div class="col-md-2">
-                                                                <label class="form-label">Quantity <span style="color: red">*</span></label>
-                                                                <input type="number" step="1" min="1" name="quantity[]" value="1" class="form-control rounded-0" id="quantity-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
+                                                                <label class="form-label">Rate <span style="color: red">*</span></label>
+                                                                <input type="number" step="0.5" min="1" name="rate[]" value="" class="form-control rounded-0 text-right" id="rate-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <label class="form-label">Subtotal Amount <span style="color: red">*</span></label>
+                                                                <input type="number" name="subtotal_amount[]" value="" class="form-control rounded-0 text-right" id="subtotal-amount-0" readonly required/>
                                                             </div>
                                                             <div class="col-md-2">
                                                                 <label class="form-label">GSTIN (%) <span style="color: red">*</span></label>
-                                                                <input type="number" step="1" min="0" name="gstin_percent[]" value="0" class="form-control rounded-0" id="gst-percent-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
+                                                                <input type="number" step="1" min="0" name="gstin_percent[]" value="0" class="form-control rounded-0 text-right" id="gst-percent-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
                                                             </div>
                                                             <div class="col-md-3">
                                                                 <label class="form-label">GSTIN Amount <span style="color: red">*</span></label>
-                                                                <input type="number" name="gstin_amount[]" value="" class="form-control rounded-0" id="gst-amount-0" readonly required/>
+                                                                <input type="number" name="gstin_amount[]" value="" class="form-control rounded-0 text-right" id="gst-amount-0" readonly required/>
                                                             </div>
                                                             <div class="col-md-3">
-                                                                <label class="form-label">Subtotal Amount <span style="color: red">*</span></label>
-                                                                <input type="number" name="subtotal_amount[]" value="" class="form-control rounded-0" id="subtotal-amount-0" readonly required/>
+                                                                <label class="form-label">Total Amount <span style="color: red">*</span></label>
+                                                                <input type="number" name="total_amount[]" value="" class="form-control rounded-0 text-right" id="total-amount-0" readonly required/>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -151,16 +150,24 @@
 
 @section('scripts')
 <script>
-const itemTypes = JSON.parse('{!! json_encode($itemTypes) !!}') || [];
-const metals = JSON.parse('{!! $metals !!}');
-const findings = JSON.parse('{!! $findings !!}');
-const miscellaneouses = JSON.parse('{!! $miscellaneouses !!}');
+const itemTypes = {'App\\Models\\Metal':'Metals','App\\Models\\Stone':'Findings','App\\Models\\Miscellaneous':'Miscellaneous','App\\Models\\Product':'Product'};
+const metals = JSON.parse(`{!! $metals !!}`);
+const findings = JSON.parse(`{!! $findings !!}`);
+const miscellaneouses = JSON.parse(`{!! $miscellaneouses !!}`);
+const products = JSON.parse(`{!! $products !!}`);
+
 let itemsCount = 0;
 updateItemPrice(itemsCount);
 const itemTypeOptions = Object.entries(itemTypes).reduce((acc, [key, value]) => {
     acc += `<option value="${key}">${value}</option>`;
     return acc;
 }, '');
+const purityList = JSON.parse('{!! json_encode($purities) !!}');
+const purityOptions = (purityList || []).reduce((acc, v) => {
+    acc += `<option value="${v.purity_id}">${v.purity}</option>`;
+    return acc;
+}, '');
+
 
 function addMoreItem() {
     itemsCount += 1;
@@ -182,35 +189,38 @@ function addMoreItem() {
                         </div>
                         <div class="col-md-4 d-none" id="purity-block-${itemsCount}">
                             <label class="form-label">Purity <span style="color: red">*</span></label>
-                            <input type="text" name="purity[]" value="" class="form-control rounded-0" id="purity-${itemsCount}"/>
+                            <select name="purity[]" class="form-select rounded-0" id="purity-${itemsCount}">
+                                <option value="">Choose...</option>
+                                ${purityOptions}
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">HSN <span style="color: red">*</span></label>
                             <input type="text" name="hsn[]" value="" class="form-control rounded-0" id="hsn-${itemsCount}" required/>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Price <span style="color: red">*</span></label>
-                            <input type="number" step="0.5" min="1" name="price[]" value="" class="form-control rounded-0" id="price-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
-                        </div>
-                        <div class="col-md-2">
                             <label class="form-label">Quantity <span style="color: red">*</span></label>
-                            <input type="number" step="1" min="1" name="quantity[]" value="1" class="form-control rounded-0" id="quantity-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
+                            <input type="number" step="1" min="1" name="quantity[]" value="1" class="form-control rounded-0 text-right" id="quantity-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">GSTIN (%) <span style="color: red">*</span></label>
-                            <input type="number" step="1" min="0" name="gstin_percent[]" value="0" class="form-control rounded-0" id="gst-percent-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">GSTIN Amount <span style="color: red">*</span></label>
-                            <input type="number" name="gstin_amount[]" value="" class="form-control rounded-0" id="gst-amount-${itemsCount}" readonly required/>
+                            <label class="form-label">Rate <span style="color: red">*</span></label>
+                            <input type="number" step="0.5" min="1" name="rate[]" value="" class="form-control rounded-0 text-right" id="rate-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Subtotal Amount <span style="color: red">*</span></label>
-                            <input type="number" name="subtotal_amount[]" value="" class="form-control rounded-0" id="subtotal-amount-${itemsCount}" readonly required/>
+                            <input type="number" name="subtotal_amount[]" value="" class="form-control rounded-0 text-right" id="subtotal-amount-${itemsCount}" readonly required/>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">GSTIN (%) <span style="color: red">*</span></label>
+                            <input type="number" step="1" min="0" name="gstin_percent[]" value="0" class="form-control rounded-0 text-right" id="gst-percent-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">GSTIN Amount <span style="color: red">*</span></label>
+                            <input type="number" name="gstin_amount[]" value="" class="form-control rounded-0 text-right" id="gst-amount-${itemsCount}" readonly required/>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Total Amount <span style="color: red">*</span></label>
-                            <input type="number" name="total_amount[]" value="" class="form-control rounded-0" id="total-amount-${itemsCount}" readonly required/>
+                            <input type="number" name="total_amount[]" value="" class="form-control rounded-0 text-right" id="total-amount-${itemsCount}" readonly required/>
                         </div>
                     </div>
                 </div>
@@ -230,14 +240,17 @@ function deleteItem(el) {
 function updateItemType(count) {
     let items = [];
     switch ($(`#item-type-${count}`).val()) {
-        case 'metal':
+        case 'App\\Models\\Metal':
             items = metals;
             break;
-        case 'findings':
+        case 'App\\Models\\Stone':
             items = findings;
             break;
-        case 'miscellaneous':
+        case 'App\\Models\\Miscellaneous':
             items = miscellaneouses;
+            break;
+        case 'App\\Models\\Product':
+            items = products;
             break;
     }
 
@@ -254,7 +267,7 @@ function updateItemType(count) {
 
 function updateItem(count) {
     let isGold = false;
-    if ($(`#item-type-${count}`).val() === 'metal' && $(`#item-${count}`).val()) {
+    if ($(`#item-type-${count}`).val() === 'App\\Models\\Metal' && $(`#item-${count}`).val()) {
         isGold = metals.find(m => m.name === 'GOLD' && m.id == $(`#item-${count}`).val());
     }
 
@@ -267,12 +280,13 @@ function updateItem(count) {
         $(`#purity-block-${count}`).addClass('d-none');
         $(`#purity-${count}`).removeAttr('required');
     }
+    $(`#purity-${count}`).val(null);
 }
 
 function updateItemPrice(count) {
-    const price = +($(`#price-${count}`).val() || 0);
+    const rate = +($(`#rate-${count}`).val() || 0);
     const quantity = +($(`#quantity-${count}`).val() || 0);
-    const subtotalAmount = price * quantity;
+    const subtotalAmount = rate * quantity;
     const gstPercent = +($(`#gst-percent-${count}`).val() || 0);
     const gstAmount = (subtotalAmount * gstPercent) / 100;
     $(`#gst-amount-${count}`).val(gstAmount);

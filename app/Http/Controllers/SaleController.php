@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use App\Enums\ItemCategoryEnum;
 use App\Models\Customer;
 use App\Models\Metal;
+use App\Models\Metalpurity;
 use App\Models\Miscellaneous;
-use App\Models\PurchaseItem;
+use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\Stone;
@@ -21,6 +22,7 @@ class SaleController extends Controller
         ItemCategoryEnum::Metal->value => 'Metals',
         ItemCategoryEnum::Findings->value => 'Findings',
         ItemCategoryEnum::Miscellaneous->value => 'Miscellaneous',
+        ItemCategoryEnum::Product->value => 'Product',
     ];
 
     /**
@@ -59,10 +61,23 @@ class SaleController extends Controller
                 'name' => $miscellaneous->product_name,
             ];
         });
+        $products = Product::select('id', 'item_code', 'description')->orderBy('item_code')->get()->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->item_code.' - '.str_replace('"', "'", $product->description),
+            ];
+        });
+        $gold = Metal::select('metal_id')->where('metal_name', 'GOLD')->first();
+        $purities = Metalpurity::select('purity_id', 'purity')
+            ->where('is_active', 'Yes')
+            ->where('metal_id', @$gold->metal_id ?? null)
+            ->get();
 
         return view('sales.add', [
             'customers' => $customers,
             'itemTypes' => $this->itemTypes,
+            'purities' => $purities,
+            'products' => json_encode($products),
             'metals' => json_encode($metals),
             'findings' => json_encode($findings),
             'miscellaneouses' => json_encode($miscellaneouses),
@@ -77,36 +92,33 @@ class SaleController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'sale_no'              => 'required',
-                    'customer'             => 'required|integer',
+                    'customer'           => 'required|integer',
                     'invoice_no'         => 'required',
-                    'sold_on'        => 'required',
+                    'sold_on'            => 'required',
                     'item_type'          => 'required|array',
                     'item_type.*'        => 'required|string',
                     'item'               => 'required|array',
                     'item.*'             => 'required|integer',
                     'purity'             => 'nullable|array',
-                    'purity.*'           => 'nullable|string',
+                    'purity.*'           => 'nullable|integer',
                     'hsn'                => 'required|array',
                     'hsn.*'              => 'required|string',
-                    'price'              => 'required|array',
-                    'price.*'            => 'required|numeric',
+                    'rate'               => 'required|array',
+                    'rate.*'             => 'required|numeric',
                     'quantity'           => 'required|array',
                     'quantity.*'         => 'required|integer|min:1',
                     'gstin_percent'      => 'required|array',
                     'gstin_percent.*'    => 'required|numeric',
                 ],
                 [
-                    'sale_no.required'             => 'Sale No. is required', // custom message
-                    'customer.required'            => 'Customer is required', // custom message
-                    'invoice_no.required'        => 'Invoice No. is required', // custom message
-                    'sold_on.required'       => 'Purchase Date is required', // custom message
+                    'customer.required'   => 'Customer is required', // custom message
+                    'invoice_no.required' => 'Invoice No. is required', // custom message
+                    'sold_on.required'    => 'Sale Date is required', // custom message
                 ]
             );
 
             $items = [];
             $sale = Sale::create([
-                'sale_no' => strip_tags($request->sale_no),
                 'customer_id' => strip_tags($request->customer),
                 'invoice_no' => strip_tags($request->invoice_no),
                 'sold_on' => strip_tags($request->sold_on),
@@ -129,21 +141,25 @@ class SaleController extends Controller
                         $itemable_type = Miscellaneous::class;
                         $itemable_id = Miscellaneous::find($request->item[$key])->id;
                         break;
+                    case ItemCategoryEnum::Product->value:
+                        $itemable_type = Product::class;
+                        $itemable_id = Product::find($request->item[$key])->id;
+                        break;
                 }
 
                 if ($itemable_type && $itemable_id) {
-                    $price = (float) $request->price[$key] ?? 0;
+                    $rate = (float) $request->rate[$key] ?? 0;
                     $quantity = (int) $request->quantity[$key] ?? 0;
-                    $subtotalAmount = ($price * $quantity);
+                    $subtotalAmount = ($rate * $quantity);
                     $gstPercent = (float) $request->gstin_percent[$key] ?? 0;
                     $gstAmount = (float) ($subtotalAmount * $gstPercent) / 100;
                     $items[] = [
                         'itemable_type' => $itemable_type,
                         'itemable_id' => $itemable_id,
-                        'purity' => $request->purity[$key],
+                        'purity_id' => $request->purity[$key] ?? null,
                         'hsn' => $request->hsn[$key],
                         'quantity' => $quantity,
-                        'price' => $price,
+                        'rate' => $rate,
                         'subtotal_amount' => $subtotalAmount,
                         'gstin_percent' => $gstPercent,
                         'gstin_amount' => $gstAmount,
@@ -175,7 +191,7 @@ class SaleController extends Controller
     {
         $sale = Sale::findOrFail($id);
         $customers = Customer::where('is_active', 'Yes')
-            ->orWhere('id', $sale->vendor_id)
+            ->orWhere('id', $sale->customer_id)
             ->get();
         $metals = Metal::select('metal_id', 'metal_name')->where('is_active', 'Yes')->get()->map(function ($metal) {
             return [
@@ -195,11 +211,24 @@ class SaleController extends Controller
                 'name' => $miscellaneous->product_name,
             ];
         });
+        $products = Product::select('id', 'item_code', 'description')->orderBy('item_code')->get()->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->item_code.' - '.str_replace('"', "'", $product->description),
+            ];
+        });
+        $gold = Metal::select('metal_id')->where('metal_name', 'GOLD')->first();
+        $purities = Metalpurity::select('purity_id', 'purity')
+            ->where('is_active', 'Yes')
+            ->where('metal_id', @$gold->metal_id ?? null)
+            ->get();
 
         return view('sales.edit', [
             'sale' => $sale,
             'customers' => $customers,
             'itemTypes' => $this->itemTypes,
+            'purities' => $purities,
+            'products' => $products,
             'metals' => $metals,
             'findings' => $findings,
             'miscellaneouses' => $miscellaneouses,
@@ -214,30 +243,28 @@ class SaleController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'sale_no'              => 'required',
-                    'customer'             => 'required|integer',
+                    'customer'           => 'required|integer',
                     'invoice_no'         => 'required',
-                    'sold_on'        => 'required',
+                    'sold_on'            => 'required',
                     'item_type'          => 'required|array',
                     'item_type.*'        => 'required|string',
                     'item'               => 'required|array',
                     'item.*'             => 'required|integer',
                     'purity'             => 'nullable|array',
-                    'purity.*'           => 'nullable|string',
+                    'purity.*'           => 'nullable|integer',
                     'hsn'                => 'required|array',
                     'hsn.*'              => 'required|string',
-                    'price'              => 'required|array',
-                    'price.*'            => 'required|numeric',
+                    'rate'               => 'required|array',
+                    'rate.*'             => 'required|numeric',
                     'quantity'           => 'required|array',
                     'quantity.*'         => 'required|integer|min:1',
                     'gstin_percent'      => 'required|array',
                     'gstin_percent.*'    => 'required|numeric',
                 ],
                 [
-                    'sale_no.required'             => 'Sale No. is required', // custom message
                     'customer.required'            => 'Customer is required', // custom message
                     'invoice_no.required'        => 'Invoice No. is required', // custom message
-                    'sold_on.required'       => 'Purchase Date is required', // custom message
+                    'sold_on.required'       => 'Sale Date is required', // custom message
                 ]
             );
 
@@ -247,7 +274,6 @@ class SaleController extends Controller
                 throw new Exception('Invalid sale ID');
             }
             Sale::whereRaw('id = ?', [$id])->update([
-                'sale_no' => strip_tags($request->sale_no),
                 'customer_id' => strip_tags($request->customer),
                 'invoice_no' => strip_tags($request->invoice_no),
                 'sold_on' => strip_tags($request->sold_on),
@@ -270,21 +296,25 @@ class SaleController extends Controller
                         $itemable_type = Miscellaneous::class;
                         $itemable_id = Miscellaneous::find($request->item[$key])->id;
                         break;
+                    case ItemCategoryEnum::Product->value:
+                        $itemable_type = Product::class;
+                        $itemable_id = Product::find($request->item[$key])->id;
+                        break;
                 }
 
                 if ($itemable_type && $itemable_id) {
-                    $price = (float) $request->price[$key] ?? 0;
+                    $rate = (float) $request->rate[$key] ?? 0;
                     $quantity = (int) $request->quantity[$key] ?? 0;
-                    $subtotalAmount = ($price * $quantity);
+                    $subtotalAmount = ($rate * $quantity);
                     $gstPercent = (float) $request->gstin_percent[$key] ?? 0;
                     $gstAmount = (float) ($subtotalAmount * $gstPercent) / 100;
                     $itemData = [
                         'itemable_type' => $itemable_type,
                         'itemable_id' => $itemable_id,
-                        'purity' => $request->purity[$key],
+                        'purity_id' => $request->purity[$key] ?? null,
                         'hsn' => $request->hsn[$key],
                         'quantity' => $quantity,
-                        'price' => $price,
+                        'rate' => $rate,
                         'subtotal_amount' => $subtotalAmount,
                         'gstin_percent' => $gstPercent,
                         'gstin_amount' => $gstAmount,
@@ -317,7 +347,12 @@ class SaleController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $sale = Sale::whereRaw('id = ?', [$id])->firstOrFail();
+        if ($sale) {
+            $sale->delete();
+            return redirect('/sales')->with('success', 'Sale record deleted successfully.');
+        }
+        return redirect('/sales')->with('success', 'Invalid Sale ID.');
     }
 
     public function invoice(string $id)
@@ -344,6 +379,12 @@ class SaleController extends Controller
                         $itemable = Miscellaneous::find($item->itemable_id);
                         if ($itemable) {
                             $name = $itemable->product_name;
+                        }
+                        break;
+                    case ItemCategoryEnum::Product->value:
+                        $itemable = Product::find($item->itemable_id);
+                        if ($itemable) {
+                            $name = $itemable->item_code.' - '.$itemable->description;
                         }
                         break;
                 }
