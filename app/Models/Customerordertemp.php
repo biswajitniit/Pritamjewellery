@@ -29,7 +29,7 @@ class Customerordertemp extends Model
 
     public function customerordertempitems()
     {
-        return $this->hasMany(Customerordertempitem::class, 'order_id', 'id');
+        return $this->hasMany(Customerordertempitem::class);
     }
 
     public function customer()

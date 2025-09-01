@@ -36,7 +36,11 @@ class QualitycheckController extends Controller
      */
     public function create()
     {
-        $karigars = Karigar::where('is_active', 'Yes')->orderBy('kname')->get();
+        //$karigars = Karigar::where('is_active', 'Yes')->orderBy('kname')->get();
+
+        $karigars = IssueToKarigarItem::join('karigars', 'issuetokarigaritems.kid', '=', 'karigars.kid')
+            ->select('karigars.id', 'karigars.kid', 'karigars.kname')
+            ->get();
 
         // $lastVoucher = Qualitycheck::orderBy('id', 'desc')->first();
 
@@ -48,6 +52,7 @@ class QualitycheckController extends Controller
         // }
 
         $locations = Location::get();
+        //$issuetokarigaritems = Issuetokarigaritem::where('finish_product_received', 'no')->get();
 
         return view('qualitycheck.add', compact('karigars', 'locations'));
     }
@@ -55,7 +60,7 @@ class QualitycheckController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    /* public function store(Request $request)
     {
         // Get voucher type FIRST (before validation to auto-generate vou_no)
         $voucherType = Vouchertype::where('voucher_type', 'quality_check')
@@ -173,7 +178,162 @@ class QualitycheckController extends Controller
         $voucherType->save();
 
         return redirect()->route('qualitychecks.index')->withSuccess('Qualitychecks record created successfully.');
+    }*/
+    public function store(Request $request)
+    {
+        try {
+            // Get voucher type FIRST (before validation to auto-generate vou_no)
+            $voucherType = Vouchertype::where('voucher_type', 'quality_check')
+                ->where('location_id', $request->location_id)
+                ->first();
+
+            if (!$voucherType) {
+                return back()->withErrors(['Voucher type not found for this location.']);
+            }
+
+            // Generate next voucher number
+            $nextNo = (int)$voucherType->lastno + 1;
+            $voucherNo = str_pad($nextNo, 3, '0', STR_PAD_LEFT);
+
+            // Final formatted voucher number
+            $voucherNoPadded = $voucherType->prefix . '/' . $voucherNo . '/' . $voucherType->applicable_year;
+
+            // 🔹 Validation
+            $validatedData = $request->validate(
+                [
+                    'karigar_id'        => 'required|string',
+                    'karigar_name'      => 'required|string',
+                    'type'              => 'required|string',
+                    'qc_voucher'        => 'nullable|string', // auto-generated, so nullable
+                    'qualitycheck_date' => 'required|date',
+                    'item_code'         => 'required|string',
+                    'job_no'            => 'required|string',
+                    'design'            => 'required|string',
+                    'description'       => 'required|string',
+                    'purity'            => 'required|string',
+                    'size'              => 'required|string',
+                    'uom'               => 'required|string',
+                    'order_qty'         => 'required|numeric',
+                    'receive_qty'       => 'required|numeric',
+                    'bal_qty'           => 'required|numeric',
+
+                    // Arrays
+                    'design_items'      => 'required|array',
+                    'design_items.*'    => 'nullable|string',
+                    'solder_items'      => 'nullable|array',
+                    'solder_items.*'    => 'nullable|string',
+                    'polish_items'      => 'nullable|array',
+                    'polish_items.*'    => 'nullable|string',
+                    'finish_items'      => 'nullable|array',
+                    'finish_items.*'    => 'nullable|string',
+                    'mina_items'        => 'nullable|array',
+                    'mina_items.*'      => 'nullable|string',
+                    'other_items'       => 'nullable|array',
+                    'other_items.*'     => 'nullable|string',
+                    'remark_items'      => 'nullable|array',
+                    'remark_items.*'    => 'nullable|string',
+                ],
+                [
+                    'karigar_id.required'        => 'Selection of KID is Required',
+                    'karigar_name.required'      => 'Karigar name is Required',
+                    'type.required'              => 'Type is Required',
+                    'qualitycheck_date.required' => 'Date is Required',
+                    'item_code.required'         => 'Item Code is Required',
+                    'job_no.required'            => 'Job Number is Required',
+                    'design.required'            => 'Design No is Required',
+                    'description.required'       => 'Description is Required',
+                    'purity.required'            => 'Purity is Required',
+                    'size.required'              => 'Size is Required',
+                    'uom.required'               => 'UOM is Required',
+                    'order_qty.required'         => 'Order Qty is Required',
+                    'receive_qty.required'       => 'Receive Qty is Required',
+                    'bal_qty.required'           => 'Bal Qty is Required',
+                    'design_items.required'      => 'At least one design item is Required',
+                ]
+            );
+
+            // 🔹 Create parent record
+            $qualitycheck = Qualitycheck::create([
+                'karigar_id'        => strip_tags($validatedData['karigar_id']),
+                'karigar_name'      => strip_tags($validatedData['karigar_name']),
+                'type'              => strip_tags($validatedData['type']),
+                'location_id'       => $request->location_id,
+                'qc_voucher'        => $voucherNoPadded,
+                'qualitycheck_date' => $validatedData['qualitycheck_date'],
+                'item_code'         => strip_tags($validatedData['item_code']),
+                'job_no'            => strip_tags($validatedData['job_no']),
+                'design'            => strip_tags($validatedData['design']),
+                'description'       => strip_tags($validatedData['description']),
+                'purity'            => strip_tags($validatedData['purity']),
+                'size'              => strip_tags($validatedData['size']),
+                'uom'               => strip_tags($validatedData['uom']),
+                'order_qty'         => strip_tags($validatedData['order_qty']),
+                'receive_qty'       => strip_tags($validatedData['receive_qty']),
+                'bal_qty'           => strip_tags($validatedData['bal_qty']),
+                'created_by'        => Auth::user()->name
+            ]);
+
+            $lastInsertedId = $qualitycheck->id;
+
+            // 🔹 Loop through item arrays
+            foreach ($validatedData['design_items'] as $key => $val) {
+                $products = Product::where('item_code', $validatedData['item_code'])->first();
+
+                if (!$products) {
+                    throw new \Exception("Product with code {$validatedData['item_code']} not found.");
+                }
+
+                $productstonedetails = Productstonedetails::where('product_id', $products->id)->first();
+                $totalStoneAmount = Productstonedetails::where('product_id', $products->id)->sum('amount');
+
+                Qualitycheckitem::create([
+                    'qualitychecks_id' => $lastInsertedId,
+                    'karigar_id'       => strip_tags($validatedData['karigar_id']),
+                    'karigar_name'     => strip_tags($validatedData['karigar_name']),
+                    'job_no'           => strip_tags($validatedData['job_no']),
+                    'item_code'        => strip_tags($validatedData['item_code']),
+                    'design'           => strip_tags($validatedData['design']),
+                    'description'      => strip_tags($validatedData['description']),
+                    'purity'           => strip_tags($validatedData['purity']),
+                    'size'             => strip_tags($validatedData['size']),
+                    'uom'              => strip_tags($validatedData['uom']),
+                    'order_qty'        => strip_tags($validatedData['order_qty']),
+                    'receive_qty'      => strip_tags($validatedData['receive_qty']),
+                    'bal_qty'          => strip_tags($validatedData['bal_qty']),
+                    'net_wt'           => @$products->standard_wt,
+                    'rate'             => @$productstonedetails->rate,
+                    'a_lab'            => $totalStoneAmount,
+                    'loss'             => @$products->loss,
+                    'design_items'     => strip_tags($validatedData['design_items'][$key] ?? ''),
+                    'solder_items'     => strip_tags($validatedData['solder_items'][$key] ?? ''),
+                    'polish_items'     => strip_tags($validatedData['polish_items'][$key] ?? ''),
+                    'finish_items'     => strip_tags($validatedData['finish_items'][$key] ?? ''),
+                    'mina_items'       => strip_tags($validatedData['mina_items'][$key] ?? ''),
+                    'other_items'      => strip_tags($validatedData['other_items'][$key] ?? ''),
+                    'remark_items'     => strip_tags($validatedData['remark_items'][$key] ?? ''),
+                    'pdi_list'         => 'No'
+                ]);
+            }
+
+            // 🔹 Update the voucher type's lastno
+            $voucherType->lastno = $nextNo;
+            $voucherType->save();
+
+            return redirect()->route('qualitychecks.index')
+                ->withSuccess('Qualitychecks record created successfully.');
+        } catch (\Exception $e) {
+            // Log error for debugging
+            \Log::error('Qualitycheck Store Error: ' . $e->getMessage());
+
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Something went wrong: ' . $e->getMessage()]);
+        }
     }
+
+
+
+
 
     /**
      * Display the specified resource.

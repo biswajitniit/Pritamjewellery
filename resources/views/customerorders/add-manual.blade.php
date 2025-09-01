@@ -26,6 +26,16 @@
                     @endif
 
 
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <div class="card-body p-4">
                         <div class="tabcontent">
                             <form class="row g-3" action="{{ route('customerorders.store.manual') }}" method="POST" name="saveCustomerorders" enctype="multipart/form-data">
@@ -126,8 +136,8 @@
                                         </div>
 
                                         <div class="col-md-1">
-                                            <label class="form-label">StoneChg </label>
-                                            <input type="text" id="stone_chg_1" name="stone_chg[]"  class="form-control rounded-0"/>
+                                            <label class="form-label">StoneChg <span style="color: red">*</span></label>
+                                            <input type="text" id="stone_chg_1" name="stone_chg[]"  class="form-control rounded-0" required onkeyup="GetTotalValueCalulationPart(1,this.value)"/>
                                         </div>
 
                                         <div class="col-md-1">

@@ -84,6 +84,8 @@
                                 </span>
                                 @enderror
                             </div>
+
+                            <?php /* ?>
                             <div class="col-md-2">
                                 <label class="form-label">Patterns <span style="color: red;">*</span></label>
                                 <select name="pattern" class="form-select rounded-0 @error('pattern') is-invalid @enderror">
@@ -98,6 +100,22 @@
                                 </span>
                                 @enderror
                             </div>
+                            <?php */ ?>
+                            <div class="col-md-2">
+                                <label class="form-label">Pcode <span style="color: red;">*</span></label>
+                                <select name="pcode_id" class="form-select rounded-0 @error('pcode_id') is-invalid @enderror" onchange="GetSizePcodeWise(this.value)">
+                                    <option value="">Choose...</option>
+                                    @forelse($pcodes as $pcode)
+                                    <option value="{{ $pcode->id }}" @if($pcode->id == $products->pcode_id) selected @endif>{{ $pcode->description }}</option>
+                                    @empty @endforelse
+                                </select>
+                                @error('pcode_id')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                                @enderror
+                            </div>
+
 
                             <div class="col-md-3">
                                 <label class="form-label">Size <span style="color: red;">*</span></label>
@@ -134,7 +152,7 @@
                                 <select name="kid" class="form-select rounded-0 @error('stone_chg') is-invalid @enderror">
                                     <option value="">Choose...</option>
                                     @forelse($karigars as $karigar)
-                                    <option value="{{ $karigar->id }}" @if($karigar->id == $products->kid) selected @endif>{{ $karigar->kid }}</option>
+                                    <option value="{{ $karigar->id }}" @if($karigar->id == $products->kid) selected @endif>{{ $karigar->kid }} ({{ $karigar->kname }})</option>
                                     @empty @endforelse
                                 </select>
                                 @error('kid')
@@ -163,11 +181,16 @@
                                 <input type="text" name="lab_charge" value="{{ old('lab_charge',$products->lab_charge) }}" class="form-control rounded-0" />
                             </div>
 
+                            <div class="col-md-3">
+                                <label class="form-label">Additional Lab Charges</label>
+                                <input type="text" name="additional_lab_charges" value="{{ old('additional_lab_charges',$products->additional_lab_charges) }}" class="form-control rounded-0" />
+                            </div>
+
                             <div class="col-md-2">
                                 <label class="form-label">Loss %</label>
                                 <input type="text" name="loss" value="{{ old('loss',$products->loss) }}" class="form-control rounded-0" />
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <label class="form-label">Purity</label>
                                 <input type="text" name="purity" value="{{ old('purity',$products->purity) }}" class="form-control rounded-0" />
                             </div>

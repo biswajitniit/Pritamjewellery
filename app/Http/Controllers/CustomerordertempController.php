@@ -8,8 +8,10 @@ use App\Models\Customer;
 use App\Models\Customerordertemp;
 use App\Models\Customerordertempitem;
 use App\Models\Karigar;
+use App\Models\Pcode;
 use App\Models\Product;
 use App\Models\Productstonedetails;
+use App\Models\Size;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
@@ -345,7 +347,7 @@ class CustomerordertempController extends Controller
             : back()->with('error', 'No valid JO orders were processed.');
     }*/
 
-    public function customerorderstempimporttxt(Request $request)
+    /*public function customerorderstempimporttxt(Request $request)
     {
 
         $request->validate([
@@ -526,73 +528,227 @@ class CustomerordertempController extends Controller
         return !empty($insertedIds)
             ? redirect()->route('customerordertemps.show', end($insertedIds))->withSuccess('Customer orders uploaded successfully.')
             : back()->with('error', 'No valid JO orders were processed.');
+    }*/
+
+    public function customerorderstempimporttxt(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:txt',
+        ]);
+
+        $filePath = $request->file('file')->getRealPath();
+        $content = file_get_contents($filePath);
+
+        // Split the file by JO sections
+        $blocks = preg_split('/(?=\n.*?JO No\s*:\s*)/', $content);
+        $insertedIds = [];
+
+        // Extract company name from first non-empty line
+        $lines = explode("\n", $content);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (!empty($line)) {
+                $CompanyName = preg_replace('/[^A-Za-z0-9 ]/', '', $line);
+                break;
+            }
+        }
+
+        $GetCompanyId = Customer::where('cust_name', 'like', '%' . strtoupper(trim($CompanyName)) . '%')->first();
+        if (!$GetCompanyId) {
+            return back()->with('error', 'Company not found in system: ' . $CompanyName);
+        }
+
+        foreach ($blocks as $block) {
+            if (trim($block) === '') continue;
+
+            // ✅ Flexible regex for headers
+            preg_match('/JO\s*No\s*:\s*([0-9]+)/i', $block, $joNoMatch);
+            preg_match('/JO\s*Date\s*:\s*([0-9]{2}\/[0-9]{2}\/[0-9]{4}\s+[0-9]{1,2}:[0-9]{2}:[0-9]{2}\s?(AM|PM))/i', $block, $joDateMatch);
+            preg_match('/Vendor\s*Site\s*:\s*([A-Za-z0-9\-]+)/i', $block, $vendorSiteMatch);
+            preg_match('/Delivery\s*Required\s*Before\s*:\s*([0-9]{2}\/[0-9]{2}\/[0-9]{4})/i', $block, $deliveryDateMatch);
+
+            Log::info('Parsed Header', [
+                'jo_no' => $joNoMatch[1] ?? null,
+                'jo_date' => $joDateMatch[1] ?? null,
+                'delivery_date' => $deliveryDateMatch[1] ?? null,
+                'vendor_site' => $vendorSiteMatch[1] ?? null,
+            ]);
+
+            if (!isset($joNoMatch[1], $joDateMatch[1], $deliveryDateMatch[1])) {
+                Log::warning("Missing JO header fields in block", ['block' => $block]);
+                continue;
+            }
+
+            $joNo = trim($joNoMatch[1]);
+            $joDate = trim($joDateMatch[1]);
+
+            // ✅ Fixed JO Date parsing
+            try {
+                $carbonDate = Carbon::createFromFormat('d/m/Y h:i:s A', $joDate);
+                $formattedDate = $carbonDate->format('Y-m-d H:i:s');
+            } catch (\Exception $e) {
+                Log::error("Failed to parse JO Date with format d/m/Y h:i:s A: " . $joDate);
+                continue;
+            }
+
+            $deliveryDate = Carbon::createFromFormat('d/m/Y', $deliveryDateMatch[1])->format('Y-m-d');
+            $vendorSite = isset($vendorSiteMatch[1]) ? trim($vendorSiteMatch[1]) : null;
+
+            // Skip duplicates
+            if (Customerordertemp::where('jo_no', $joNo)->exists()) continue;
+
+            // Create JO header
+            $customerorder = Customerordertemp::create([
+                'customer_id' => $GetCompanyId->id,
+                'jo_no' => $joNo,
+                'jo_date' => $formattedDate,
+                'order_type' => 'AutoUpload',
+                'type' => $request->type,
+                'is_active' => strip_tags($request->is_active),
+                'vendor_site' => $vendorSite,
+                'created_by' => Auth::user()->name
+            ]);
+            $insertedIds[] = $customerorder->id;
+
+            // Process JO lines
+            $blockLines = explode("\n", $block);
+            $dataStart = false;
+
+            foreach ($blockLines as $line) {
+                $line = trim($line);
+
+                // Detect start of item rows
+                if (!$dataStart && str_contains($line, 'SLNo') && str_contains($line, 'Item Code')) {
+                    $dataStart = true;
+                    continue; // ✅ Skip header line
+                }
+
+                if (!$dataStart || empty($line)) continue;
+
+                $columns = preg_split('/\s{2,}/', $line);
+
+                // Normalize (pad to 18 columns)
+                while (count($columns) < 18) {
+                    $columns[] = null;
+                }
+
+                // Skip lines that don’t start with numeric SLNo
+                $sl_no_and_item_code = explode(' ', trim($columns[0]));
+                if (empty($sl_no_and_item_code[0]) || !is_numeric($sl_no_and_item_code[0])) {
+                    continue;
+                }
+
+                $itemData = [
+                    'order_id'      => $customerorder->id,
+                    'sl_no'         => $sl_no_and_item_code[0],
+                    'item_code'     => $sl_no_and_item_code[1] ?? null,
+                    'design'        => isset($sl_no_and_item_code[1]) ? substr($sl_no_and_item_code[1], 2, 9) : null,
+                    'delivery_date' => $deliveryDate
+                ];
+
+                // Find Karigar ID (kid)
+                $getkid = Product::with('karigar')->where('item_code', $itemData['item_code'])->first();
+                $itemData['kid'] = $getkid && $getkid->karigar ? optional($getkid->karigar->first())->kid : null;
+
+                // Map safely
+                $itemData += [
+                    'description'   => $columns[1] ?? null,
+                    'size'          => $columns[2] ?? null,
+                    'finding'       => $columns[3] ?? null,
+                    'uom'           => $columns[4] ?? null,
+                    'kt'            => $columns[5] ?? null,
+                    'std_wt'        => is_numeric($columns[6]) ? $columns[6] : 0,
+                    'conv_wt'       => $columns[7] ?? null,
+                    'ord_qty'       => is_numeric($columns[8]) ? $columns[8] : 0,
+                    'total_wt'      => is_numeric($columns[9]) ? $columns[9] : 0,
+                    'lab_chg'       => is_numeric($columns[10]) ? $columns[10] : 0,
+                    'stone_chg'     => is_numeric($columns[11]) ? $columns[11] : 0,
+                    'add_l_chg'     => is_numeric($columns[12]) ? $columns[12] : 0,
+                    'total_value'   => is_numeric($columns[13]) ? $columns[13] : 0,
+                    'loss_percent'  => is_numeric($columns[14]) ? $columns[14] : 0,
+                    'min_wt'        => is_numeric($columns[15]) ? $columns[15] : 0,
+                    'max_wt'        => is_numeric($columns[16]) ? $columns[16] : 0,
+                    'ord'           => $columns[17] ?? null,
+                ];
+
+                Log::info('Parsed Item', $itemData);
+
+                Customerordertempitem::create($itemData);
+            }
+        }
+
+        return !empty($insertedIds)
+            ? redirect()->route('customerordertemps.show', end($insertedIds))->withSuccess('Customer orders uploaded successfully.')
+            : back()->with('error', 'No valid JO orders were processed.');
     }
+
+
+
 
 
 
     public function savetempproducts(Request $request)
     {
-        // Begin transaction
         DB::beginTransaction();
 
         try {
-            // Get items where kid is null
             $items = Customerordertempitem::whereNull('kid')->get();
 
-
             foreach ($items as $item) {
-
-                if (strlen($item->item_code) == 14) {
+                $vendorsite = Customerordertemp::where('id', $item->order_id)->first();
+                // Validate item_code length
+                $len = strlen($item->item_code);
+                if ($len === 14) {
                     $company_id = 1; // TCL KOL
-                } elseif (strlen($item->item_code) == 15) {
+                } elseif ($len === 15) {
                     $company_id = 6; // NOVJL
                 } else {
-                    return redirect()->back()->withErrors(['item_code' => 'Itemcode must be exactly 14 or 15 characters long.']);
+                    throw new \Exception("Invalid item_code length for {$item->item_code}");
                 }
 
-                // Insert into products
-                /*$product = Product::create([
-                    'company_id'     => $company_id,
-                    'item_code'      => $item->item_code,
-                    'design_num'     => $item->design,
-                    'description'    => $item->description,
-                    'size'           => $item->size,
-                    'uom'            => $item->uom,
-                    'standard_wt'    => $item->std_wt ?? 0,
-                    'kt'             => $item->kt . 'KT',
-                    'kid'            => 30,
-                    'purity'         => 0.00,
-                    'remarks'        => $item->remarks,
-                    'customer_order' => 'Yes',
-                    'stone_charge'   => $item->stone_chg,
-                    'lab_charge'     => $item->lab_chg,
-                    'loss'           => $item->loss_percent,
-                    'pcodechar'      => strlen($item->item_code),
-                    'created_by'     => Auth::user()->name,
-                ]);*/
+                // Extract codes
+                $pCode = substr($item->item_code, 6, 1); // 7th char
+                $size  = substr($item->item_code, 9, 1); // 10th char
 
+                $getpcodeid = Pcode::where('code', $pCode)->first();
+                $getsizeid  = Size::where('schar', $size)->where('pcode_id', $getpcodeid->id)->first();
+
+                // Debug log for missing master data
+                if (!$getpcodeid || !$getsizeid) {
+                    \Log::warning("Missing master data for item_code={$item->item_code}, pCode={$pCode}, size={$size}");
+                }
+
+                // Purity mapping
+                $purities = [
+                    50 => 75,
+                    51 => 91.6,
+                ];
+                $purity = $purities[$item->kt] ?? 0.00;
+
+                // Create product
                 $product = Product::create([
                     'company_id'     => $company_id,
+                    'vendorsite'     => $vendorsite->vendor_site,
                     'item_code'      => $item->item_code,
                     'design_num'     => $item->design,
                     'description'    => $item->description,
-                    'pattern_id'     => 24, // FOR XX
-                    'size_id'        => 197, // FOR XX
-                    'uom_id'         => 16, // FOR XX
+                    'pcode_id'       => $getpcodeid?->id, // safe access
+                    'size_id'        => $getsizeid?->id,  // safe access
+                    'uom_id'         => 16, // TODO: replace with config/constant
                     'standard_wt'    => $item->std_wt ?? 0,
                     'kt'             => $item->kt . 'KT',
-                    'kid'            => 23, // FOR XX
-                    'purity'         => 0.00,
+                    'kid'            => 23, // TODO: replace with config/constant
+                    'purity'         => $purity,
                     'remarks'        => $item->remarks,
                     'customer_order' => 'Yes',
                     'stone_charge'   => $item->stone_chg,
                     'lab_charge'     => $item->lab_chg,
                     'loss'           => $item->loss_percent,
-                    'pcodechar'      => strlen($item->item_code),
+                    'pcodechar'      => $len,
                     'created_by'     => Auth::user()->name,
                 ]);
 
-
+                // Add default stone details
                 Productstonedetails::create([
                     'product_id' => $product->id,
                     'stone_id'   => 1,
@@ -606,14 +762,17 @@ class CustomerordertempController extends Controller
             }
 
             DB::commit();
-            //return response()->json(['status' => 'success', 'message' => 'Products saved successfully.']);
 
-            //  Redirect to products listing with query params
-            return redirect()->route('products.index', ['customer_order' => 'Yes', 'search' => ''])
-                ->with('success', 'Products saved successfully.');
+            return redirect()->route('products.index', [
+                'customer_order' => 'Yes',
+                'search' => ''
+            ])->with('success', 'Products saved successfully.');
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 }

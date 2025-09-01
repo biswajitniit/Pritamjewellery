@@ -12,10 +12,17 @@
                             {{ session()->get('success') }}
                         </div>
                     @endif
+                    @if(session('error'))
+                        <div class="alert alert-danger">{{ session('error') }}</div>
+                    @endif
 
-                    @if(Session::has('error'))
+                    @if($errors->any())
                         <div class="alert alert-danger">
-                        {{ Session::get('error')}}
+                            <ul>
+                                @foreach($errors->all() as $err)
+                                    <li>{{ $err }}</li>
+                                @endforeach
+                            </ul>
                         </div>
                     @endif
                     <div class="card-body p-4">

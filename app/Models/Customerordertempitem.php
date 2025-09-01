@@ -47,6 +47,6 @@ class Customerordertempitem extends Model
 
     public function customerordertemp()
     {
-        return $this->belongsTo(Customerordertemp::class, 'order_id');
+        return $this->belongsTo(Customerordertemp::class, 'order_id', 'id');
     }
 }

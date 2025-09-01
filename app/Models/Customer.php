@@ -47,6 +47,7 @@ class Customer extends Model
         return $this->belongsTo(Metalreceiveentry::class);
     }
 
+
     public function products()
     {
         return $this->hasMany(Product::class, 'company_id');
