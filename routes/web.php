@@ -85,6 +85,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('customerordersimporttxt', [CustomerorderController::class, 'customerordersimporttxt'])->name('customerordersimporttxt');
     Route::post('getproductinfo', [CustomerorderController::class, 'getproductinfo'])->name('getproductinfo');
     // Route::post('getproductinfo', [CustomerorderController::class, 'getproductinfo'])->name('customerorders.store.manual');
+    Route::post('/customerorders/store-manual', [CustomerOrderController::class, 'storeManual'])->name('customerorders.store.manual');
+
+
 
     Route::resource('customerordertemps', CustomerordertempController::class);
     Route::post('customerorderstempimporttxt', [CustomerordertempController::class, 'customerorderstempimporttxt'])->name('customerorderstempimporttxt');

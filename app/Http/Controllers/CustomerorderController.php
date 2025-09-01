@@ -193,6 +193,104 @@ class CustomerorderController extends Controller
     }
 
     /**
+     * Store a newly Manual created resource in storage.
+     */
+    public function storeManual(Request $request)
+    {
+        // ✅ Validation for parent + child arrays
+        $validatedData = $request->validate(
+            [
+                'customer_id'         => 'required|integer|exists:customers,id',
+                'job_no'              => 'required|string|max:50',
+                'job_date'            => 'required|date',
+
+                // Validate child arrays
+                'item_code.*'         => 'required|string|max:50',
+                'kid.*'               => 'nullable|string|max:50',
+                'design.*'            => 'nullable|string|max:255',
+                'description.*'       => 'nullable|string|max:255',
+                'size.*'              => 'nullable|string|max:50',
+                'finding.*'           => 'nullable|string|max:50',
+                'uom.*'               => 'nullable|string|max:20',
+                'kt.*'                => 'nullable|string|max:20',
+                'std_wt.*'            => 'nullable|numeric',
+                'conv_wt.*'           => 'nullable|numeric',
+                'ord_qty.*'           => 'required|numeric|min:1',
+                'total_wt.*'          => 'nullable|numeric',
+                'lab_chg.*'           => 'nullable|numeric',
+                'stone_chg.*'         => 'nullable|numeric',
+                'add_l_chg.*'         => 'nullable|numeric',
+                'total_value.*'       => 'nullable|numeric',
+                'loss_percent.*'      => 'nullable|numeric',
+                'min_wt.*'            => 'nullable|numeric',
+                'max_wt.*'            => 'nullable|numeric',
+                'ord.*'               => 'nullable|string|max:50',
+                'delivery_date.*'     => 'nullable|date',
+            ],
+            [
+                'customer_id.required' => 'Selection of Customer is Required',
+                'job_no.required'      => 'Job no is Required',
+                'job_date.required'    => 'Job Date is Required',
+                'item_code.*.required' => 'Item code is required for all rows',
+                'ord_qty.*.required'   => 'Order quantity is required for all rows',
+            ]
+        );
+
+        DB::transaction(function () use ($request, &$customerorder) {
+            // ✅ Create parent order
+            $customerorder = Customerorder::create([
+                'customer_id'  => strip_tags($request->customer_id),
+                'jo_no'       => strip_tags($request->job_no),
+                'jo_date'     => strip_tags($request->job_date),
+                'order_type'   => 'ManualUpload',
+                'is_active'    => $request->has('is_active') ? strip_tags($request->is_active) : 1,
+                'created_by'   => Auth::user()->name,
+            ]);
+
+            $lastInsertedId = $customerorder->id;
+
+            // ✅ Bulk prepare items
+            $items = [];
+            $count = 1;
+            foreach ($request->item_code as $key => $val) {
+                $items[] = [
+                    'order_id'      => $lastInsertedId,
+                    'sl_no'         => $count++,
+                    'item_code'     => strip_tags($request->item_code[$key]),
+                    'kid'           => strip_tags($request->kid[$key] ?? ''),
+                    'design'        => strip_tags($request->design[$key] ?? ''),
+                    'description'   => strip_tags($request->description[$key] ?? ''),
+                    'size'          => strip_tags($request->size[$key] ?? ''),
+                    'finding'       => strip_tags($request->finding[$key] ?? ''),
+                    'uom'           => strip_tags($request->uom[$key] ?? ''),
+                    'kt'            => strip_tags($request->kt[$key] ?? ''),
+                    'std_wt'        => $request->std_wt[$key] ?? 0,
+                    'conv_wt'       => $request->conv_wt[$key] ?? 0,
+                    'ord_qty'       => $request->ord_qty[$key] ?? 0,
+                    'total_wt'      => $request->total_wt[$key] ?? 0,
+                    'lab_chg'       => $request->lab_chg[$key] ?? 0,
+                    'stone_chg'     => $request->stone_chg[$key] ?? 0,
+                    'add_l_chg'     => $request->add_l_chg[$key] ?? 0,
+                    'total_value'   => $request->total_value[$key] ?? 0,
+                    'loss_percent'  => $request->loss_percent[$key] ?? 0,
+                    'min_wt'        => $request->min_wt[$key] ?? 0,
+                    'max_wt'        => $request->max_wt[$key] ?? 0,
+                    'ord'           => strip_tags($request->ord[$key] ?? ''),
+                    'remarks'       => strip_tags($request->remarks[$key] ?? ''),
+                    'delivery_date' => $request->delivery_date[$key] ?? null,
+                    'created_at'    => now(),
+                    'updated_at'    => now(),
+                ];
+            }
+
+            // ✅ Bulk insert
+            Customerorderitem::insert($items);
+        });
+
+        return redirect()->route('customerorders.index')->with('success', 'Customer order created successfully.');
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show(string $id)

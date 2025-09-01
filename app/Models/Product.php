@@ -14,12 +14,13 @@ class Product extends Model
      */
     protected $fillable = [
         'company_id',
+        'vendorsite',
         'item_code',
         'design_num',
         'description',
-        'pattern',
-        'size',
-        'uom',
+        'pcode_id',
+        'size_id',
+        'uom_id',
         'standard_wt',
         'kid',
         'lead_time_karigar',
@@ -37,15 +38,35 @@ class Product extends Model
         'remarks',
         'bulk_upload',
         'customer_order',
+        'karigar_loss',
         'created_by',
         'updated_by',
     ];
 
     public function karigar()
     {
-        return $this->hasMany(Karigar::class, 'id', 'kid');
+        return $this->belongsTo(Karigar::class, 'kid'); // foreign key is kid
     }
 
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'company_id'); // foreign key is company_id
+    }
+
+    public function pcode()
+    {
+        return $this->belongsTo(Pcode::class, 'pcode_id'); // foreign key is pcode_id
+    }
+
+    public function size()
+    {
+        return $this->belongsTo(Size::class, 'size_id'); // foreign key is size_id
+    }
+
+    public function uom()
+    {
+        return $this->belongsTo(Uom::class, 'uom_id'); // foreign key is uom_id
+    }
 
     public function saleItems()
     {

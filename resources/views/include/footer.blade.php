@@ -326,14 +326,187 @@
         }
     }
 
-    $counter = 2;
+    let $counter = 2;
+
     $(".add_more_order_items").click(function () {
         @php
-        $products = Get_item_codes();
+            $products = Get_item_codes();
         @endphp
-        newRowAdd = '<div id="row" class="row g-3 mb-3"><div class="col-md-2"><select name="item_code[]" id="item_code_'+$counter+'" onchange="Get_product_info(this.value,'+$counter+')" class="form-select rounded-0 @error('item_code') is-invalid @enderror" required><option value="">Select Item Code</option>@forelse($products as $product)<option value="{{ $product->item_code }}">{{ $product->item_code }}</option>@empty @endforelse</select>@error('customer_id')<span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>@enderror</div><div class="col-md-1"></label><input type="text" id="design_'+$counter+'" name="design[]" class="form-control rounded-0" required readonly="readonly" placeholder="Design *"></div><div class="col-md-2"><input type="text" id="description_'+$counter+'" name="description[]" class="form-control rounded-0" readonly="readonly" required placeholder="Description *"></div><div class="col-md-1"><input type="text" id="size_'+$counter+'" name="size[]" class="form-control rounded-0 text-end" required readonly="readonly" placeholder="Size *"></div><div class="col-md-1"><input type="text" id="finding_'+$counter+'" name="finding[]" class="form-control rounded-0 text-end" placeholder="Finding"></div><div class="col-md-1"><input type="text" id="uom_'+$counter+'" name="uom[]" class="form-control rounded-0 text-end" required readonly="readonly" placeholder="UOM *"></div><div class="col-md-1"><input type="text" id="kt_'+$counter+'" name="kt[]" class="form-control rounded-0 text-end" required placeholder="KT *"></div><div class="col-md-1"><input type="text" id="std_wt_'+$counter+'" name="std_wt[]" class="form-control rounded-0 text-end" required readonly="readonly" placeholder="StdWT *"></div><div class="col-md-1"><input type="text" id="conv_wt_'+$counter+'" name="conv_wt[]" class="form-control rounded-0 text-end" placeholder="ConvWT"></div><div class="col-md-1"><input type="text" id="ord_qty_'+$counter+'" name="ord_qty[]" class="form-control rounded-0 text-end" required placeholder="Ord.Qty *" onkeyup="GetOrdQtyCalulationPart('+$counter+',this.value)"></div><div class="col-md-1"><input type="text" id="total_wt_'+$counter+'" name="total_wt[]" class="form-control rounded-0 text-end" required placeholder="Total.Wt *"></div><div class="col-md-1"><input type="text" id="lab_chg_'+$counter+'" name="lab_chg[]" class="form-control rounded-0" required placeholder="Lab.Chg *"><input type="hidden" id="lab_chg_hdn_'+$counter+'" value=""/></div><div class="col-md-1"><input type="text" id="stone_chg_'+$counter+'" name="stone_chg[]" class="form-control rounded-0" placeholder="StoneChg"></div><div class="col-md-1"><input type="text" id="add_l_chg_'+$counter+'" name="add_l_chg[]" class="form-control rounded-0" required placeholder="Add.L.Chg *" readonly><input type="hidden" id="add_l_chg_hdn_'+$counter+'" value=""/></div><div class="col-md-1"><input type="text" id="total_value_'+$counter+'" name="total_value[]" class="form-control rounded-0" placeholder="Total Value"></div><div class="col-md-1"><input type="text" id="loss_percent_'+$counter+'" name="loss_percent[]" class="form-control rounded-0" required placeholder="Loss% *" onchange="CalculateLossPercentage('+$counter+',this.value)"></div><div class="col-md-1"><input type="text" id="min_wt_'+$counter+'" name="min_wt[]" class="form-control rounded-0" required placeholder="MinWt *"></div><div class="col-md-1"><input type="text" id="max_wt_'+$counter+'" name="max_wt[]" class="form-control rounded-0" required placeholder="MaxWt *"></div><div class="col-md-1"><input type="text" id="ord_'+$counter+'" name="ord[]" class="form-control rounded-0" placeholder="Ord"></div><div class="col-md-1"><input type="text" id="kid_'+$counter+'" name="kid[]" class="form-control rounded-0" required readonly="readonly" placeholder="Kid *"></div><div class="col-md-2"><input type="date" id="delivery_date_'+$counter+'" name="delivery_date[]" class="form-control rounded-0 text-end" required placeholder="Delivery Date *"></div><div class="col-md-1"><input type="text" id="remarks_'+$counter+'" name="remarks[]" class="form-control rounded-0" placeholder="Remarks"></div><div class="col-md-1"><button class="btn btn-danger" id="DeleteRow" type="button"><i class="bi bi-trash"></i>Delete</button></div></div>';
+
+        let newRowAdd = `
+        <div id="row" class="row g-3 mb-3">
+
+            <!-- Item Code -->
+            <div class="col-md-2">
+                <select name="item_code[]" id="item_code_${$counter}" onchange="Get_product_info(this.value,${$counter})"
+                    class="form-select rounded-0 @error('item_code') is-invalid @enderror" required>
+                    <option value="">Select Item Code</option>
+                    @forelse($products as $product)
+                        <option value="{{ $product->item_code }}">{{ $product->item_code }}</option>
+                    @empty
+                    @endforelse
+                </select>
+                @error('customer_id')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+
+            <!-- Design -->
+            <div class="col-md-1">
+                <input type="text" id="design_${$counter}" name="design[]"
+                    class="form-control rounded-0" required readonly
+                    placeholder="Design *">
+            </div>
+
+            <!-- Description -->
+            <div class="col-md-2">
+                <input type="text" id="description_${$counter}" name="description[]"
+                    class="form-control rounded-0" readonly required
+                    placeholder="Description *">
+            </div>
+
+            <!-- Size -->
+            <div class="col-md-1">
+                <input type="text" id="size_${$counter}" name="size[]"
+                    class="form-control rounded-0 text-end" required readonly
+                    placeholder="Size *">
+            </div>
+
+            <!-- Finding -->
+            <div class="col-md-1">
+                <input type="text" id="finding_${$counter}" name="finding[]"
+                    class="form-control rounded-0 text-end" placeholder="Finding">
+            </div>
+
+            <!-- UOM -->
+            <div class="col-md-1">
+                <input type="text" id="uom_${$counter}" name="uom[]"
+                    class="form-control rounded-0 text-end" required readonly
+                    placeholder="UOM *">
+            </div>
+
+            <!-- KT -->
+            <div class="col-md-1">
+                <input type="text" id="kt_${$counter}" name="kt[]"
+                    class="form-control rounded-0 text-end" required
+                    placeholder="KT *">
+            </div>
+
+            <!-- StdWT -->
+            <div class="col-md-1">
+                <input type="text" id="std_wt_${$counter}" name="std_wt[]"
+                    class="form-control rounded-0 text-end" required readonly
+                    placeholder="StdWT *">
+            </div>
+
+            <!-- ConvWT -->
+            <div class="col-md-1">
+                <input type="text" id="conv_wt_${$counter}" name="conv_wt[]"
+                    class="form-control rounded-0 text-end" placeholder="ConvWT">
+            </div>
+
+            <!-- Order Qty -->
+            <div class="col-md-1">
+                <input type="text" id="ord_qty_${$counter}" name="ord_qty[]"
+                    class="form-control rounded-0 text-end" required
+                    placeholder="Ord.Qty *"
+                    onkeyup="GetOrdQtyCalulationPart(${$counter},this.value)">
+            </div>
+
+            <!-- Total Wt -->
+            <div class="col-md-1">
+                <input type="text" id="total_wt_${$counter}" name="total_wt[]"
+                    class="form-control rounded-0 text-end" required
+                    placeholder="Total.Wt *">
+            </div>
+
+            <!-- Lab Charge -->
+            <div class="col-md-1">
+                <input type="text" id="lab_chg_${$counter}" name="lab_chg[]"
+                    class="form-control rounded-0" required
+                    placeholder="Lab.Chg *">
+                <input type="hidden" id="lab_chg_hdn_${$counter}" value=""/>
+            </div>
+
+            <!-- Stone Charge -->
+            <div class="col-md-1">
+                <input type="text" id="stone_chg_${$counter}" name="stone_chg[]"
+                    class="form-control rounded-0" placeholder="StoneChg *"
+                    onkeyup="GetTotalValueCalulationPart(${$counter},this.value)">
+            </div>
+
+            <!-- Add.L.Chg -->
+            <div class="col-md-1">
+                <input type="text" id="add_l_chg_${$counter}" name="add_l_chg[]"
+                    class="form-control rounded-0" required readonly
+                    placeholder="Add.L.Chg *">
+                <input type="hidden" id="add_l_chg_hdn_${$counter}" value=""/>
+            </div>
+
+            <!-- Total Value -->
+            <div class="col-md-1">
+                <input type="text" id="total_value_${$counter}" name="total_value[]"
+                    class="form-control rounded-0" placeholder="Total Value">
+            </div>
+
+            <!-- Loss % -->
+            <div class="col-md-1">
+                <input type="text" id="loss_percent_${$counter}" name="loss_percent[]"
+                    class="form-control rounded-0" required
+                    placeholder="Loss% *"
+                    onchange="CalculateLossPercentage(${$counter},this.value)">
+            </div>
+
+            <!-- Min Wt -->
+            <div class="col-md-1">
+                <input type="text" id="min_wt_${$counter}" name="min_wt[]"
+                    class="form-control rounded-0" required placeholder="MinWt *">
+            </div>
+
+            <!-- Max Wt -->
+            <div class="col-md-1">
+                <input type="text" id="max_wt_${$counter}" name="max_wt[]"
+                    class="form-control rounded-0" required placeholder="MaxWt *">
+            </div>
+
+            <!-- Ord -->
+            <div class="col-md-1">
+                <input type="text" id="ord_${$counter}" name="ord[]"
+                    class="form-control rounded-0" placeholder="Ord">
+            </div>
+
+            <!-- Kid -->
+            <div class="col-md-1">
+                <input type="text" id="kid_${$counter}" name="kid[]"
+                    class="form-control rounded-0" required readonly
+                    placeholder="Kid *">
+            </div>
+
+            <!-- Delivery Date -->
+            <div class="col-md-2">
+                <input type="date" id="delivery_date_${$counter}" name="delivery_date[]"
+                    class="form-control rounded-0 text-end" required
+                    placeholder="Delivery Date *">
+            </div>
+
+            <!-- Remarks -->
+            <div class="col-md-6">
+                <input type="text" id="remarks_${$counter}" name="remarks[]"
+                    class="form-control rounded-0" placeholder="Remarks">
+            </div>
+
+            <!-- Delete Button -->
+            <div class="col-md-1">
+                <button class="btn btn-danger" id="DeleteRow" type="button">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+        </div>`;
+
         $('.newitems').append(newRowAdd);
-        $('#item_code_'+$counter).select2();
+        $('#item_code_' + $counter).select2();
         $counter++;
     });
 
@@ -395,6 +568,18 @@
             // $("#lab_chg_"+rowid).attr('value',$lab_chg_hdn);
             $("#total_wt_"+rowid).val('');
         }
+    }
+
+    function GetTotalValueCalulationPart(rowid, qtyval) {
+        let totalW   = parseFloat($("#total_wt_" + rowid).val()) || 0;
+        let labChg   = parseFloat($("#lab_chg_" + rowid).val()) || 0;
+        let stoneChg = parseFloat(qtyval) || 0;
+        let ordQty   = parseFloat($("#ord_qty_" + rowid).val()) || 0;
+
+        let totalValue = (totalW * labChg) + (stoneChg * ordQty);
+
+        // Round to 2 decimals if required
+        $("#total_value_" + rowid).val(totalValue.toFixed(2));
     }
 
     function CalculateLossPercentage(rowid,lossval){

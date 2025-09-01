@@ -32,6 +32,7 @@ return new class extends Migration
             $table->string('product_lead_time')->nullable();
             $table->string('stone_charge')->nullable();
             $table->string('lab_charge')->nullable();
+            $table->string('additional_lab_charges')->nullable();
             $table->string('loss')->nullable();
             $table->decimal('purity', 10, 2)->default(0.00);
             $table->string('item_pic')->nullable();

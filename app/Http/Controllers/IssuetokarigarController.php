@@ -25,6 +25,7 @@ class IssuetokarigarController extends Controller
         //dd($issuetokarigars);
         return view('issuetokarigars.list', compact('issuetokarigars'));*/
 
+
         $issuetokarigars = DB::table('customerorders as co')
             ->join('issuetokarigaritems as ik', 'co.jo_no', '=', 'ik.job_no')
             ->join('karigars', 'ik.kid', '=', 'karigars.kid')
@@ -35,9 +36,11 @@ class IssuetokarigarController extends Controller
                 DB::raw('MIN(co.jo_no) as jo_no'),
                 DB::raw('MIN(co.jo_date) as jo_date')
             )
-            ->where('co.jo_date', '<', Carbon::now())
+            ->where('co.jo_date', '<=', Carbon::now())
             ->groupBy('ik.kid', 'karigars.kname')
             ->get();
+
+
         return view('issuetokarigars.list', compact('issuetokarigars'));
     }
 

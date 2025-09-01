@@ -31,10 +31,10 @@ class Issuetokarigaritem extends Model
         'finish_product_received',
     ];
 
-    // public function karigar()
-    // {
-    //     return $this->belongsTo(Karigar::class);
-    // }
+    public function karigar()
+    {
+        return $this->belongsTo(Karigar::class, 'kid', 'kid');
+    }
 
     public function issuetokarigar()
     {

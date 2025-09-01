@@ -179,11 +179,16 @@
                                 <input type="text" name="lab_charge" value="{{ old('lab_charge') }}" class="form-control rounded-0" />
                             </div>
 
+                            <div class="col-md-3">
+                                <label class="form-label">Additional Lab Charges</label>
+                                <input type="text" name="additional_lab_charges" value="{{ old('additional_lab_charges') }}" class="form-control rounded-0" />
+                            </div>
+
                             <div class="col-md-2">
                                 <label class="form-label">Loss %</label>
                                 <input type="text" name="loss" value="{{ old('loss') }}" class="form-control rounded-0" />
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <label class="form-label">Purity</label>
                                 <input type="text" name="purity" value="{{ old('purity') }}" class="form-control rounded-0" />
                             </div>
