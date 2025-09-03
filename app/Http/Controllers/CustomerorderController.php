@@ -305,16 +305,82 @@ class CustomerorderController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $customers          = Customer::where('is_active', 'Yes')->orderBy('cust_name')->get();
+        $products           = Product::orderBy('item_code')->get();
+        $customerorders     = Customerorder::findOrFail($id);
+        $customerorderitems = Customerorderitem::where('order_id', $id)->get();
+        return view('customerorders.edit', compact('customers', 'products', 'customerorders', 'customerorderitems'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        DB::beginTransaction();
+
+        try {
+            // ✅ Update main order
+            $order = Customerorder::findOrFail($id);
+            $order->update([
+                'jo_no'       => $request->job_no,
+                'customer_id' => $request->customer_id,
+                'jo_date'     => $request->job_date,
+            ]);
+
+            // ✅ Start counter for sl_no
+            $count = 1;
+
+            foreach ($request->item_code as $index => $code) {
+                $itemId = $request->item_id[$index] ?? null;
+
+                $data = [
+                    'sl_no'         => $count++,
+                    'item_code'     => $code,
+                    'design'        => $request->design[$index] ?? null,
+                    'description'   => $request->description[$index] ?? null,
+                    'size'          => $request->size[$index] ?? null,
+                    'finding'       => $request->finding[$index] ?? null,
+                    'uom'           => $request->uom[$index] ?? null,
+                    'kt'            => $request->kt[$index] ?? null,
+                    'std_wt'        => $request->std_wt[$index] ?? null,
+                    'conv_wt'       => $request->conv_wt[$index] ?? null,
+                    'ord_qty'       => $request->ord_qty[$index] ?? null,
+                    'total_wt'      => $request->total_wt[$index] ?? null,
+                    'lab_chg'       => $request->lab_chg[$index] ?? null,
+                    'stone_chg'     => $request->stone_chg[$index] ?? null,
+                    'add_l_chg'     => $request->add_l_chg[$index] ?? null,
+                    'total_value'   => $request->total_value[$index] ?? null,
+                    'loss_percent'  => $request->loss_percent[$index] ?? null,
+                    'min_wt'        => $request->min_wt[$index] ?? null,
+                    'max_wt'        => $request->max_wt[$index] ?? null,
+                    'ord'           => $request->ord[$index] ?? null,
+                    'kid'           => $request->kid[$index] ?? null,
+                    'delivery_date' => $request->delivery_date[$index] ?? null,
+                    'remarks'       => $request->remarks[$index] ?? null,
+                ];
+
+                if ($itemId) {
+                    // ✅ Update existing item
+                    Customerorderitem::where('id', $itemId)->update($data);
+                } else {
+                    // ✅ Insert new item
+                    $data['order_id'] = $order->id;
+                    Customerorderitem::create($data);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('customerorders.index')->with('success', 'Order updated successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Update failed: ' . $e->getMessage() . ' (line ' . $e->getLine() . ')');
+        }
     }
+
+
+
+
 
     /**
      * Remove the specified resource from storage.

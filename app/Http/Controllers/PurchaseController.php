@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ItemCategoryEnum;
 use App\Models\Metal;
+use App\Models\Metalpurity;
 use App\Models\Miscellaneous;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
@@ -57,10 +58,16 @@ class PurchaseController extends Controller
                 'name' => $miscellaneous->product_name,
             ];
         });
+        $gold = Metal::select('metal_id')->where('metal_name', 'GOLD')->first();
+        $purities = Metalpurity::select('purity_id', 'purity')
+            ->where('is_active', 'Yes')
+            ->where('metal_id', @$gold->metal_id ?? null)
+            ->get();
 
         return view('purchases.add', [
             'vendors' => $vendors,
             'itemTypes' => $this->itemTypes,
+            'purities' => $purities,
             'metals' => json_encode($metals),
             'findings' => json_encode($findings),
             'miscellaneouses' => json_encode($miscellaneouses),
