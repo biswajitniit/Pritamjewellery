@@ -65,6 +65,14 @@
                                                             <i class="fa fa-ellipsis-v"></i>
                                                         </button>
                                                         <ul class="dropdown-menu">
+
+                                                            @php $permission_edit = getUserMenuPermission(Auth::user()->id, 'customerorders', 'permissions_edit'); @endphp
+                                                            @if ($permission_edit && $permission_edit->permissions_edit == 1 && $customerorder->order_type == "ManualUpload")
+                                                            <li>
+                                                                <a class="dropdown-item" href="{{ route('customerorders.edit',[$customerorder->id]) }}"><i class="fa fa-pencil"></i> Edit</a>
+                                                            </li>
+                                                            @endif
+
                                                             {{-- @php $permission_edit = getUserMenuPermission(Auth::user()->id, 'customerorders', 'permissions_edit'); @endphp @if ($permission_edit && $permission_edit->permissions_edit == 1)
                                                             <li>
                                                                 <a class="dropdown-item" href="{{ route('customerorders.edit',[$customerorder->id]) }}"><i class="fa fa-pencil"></i> Edit</a>
@@ -85,8 +93,6 @@
                                                             <li><hr class="dropdown-divider"></hr></li>
                                                             <li><a class="dropdown-item" href="{{ route('customerorders.show',[$customerorder->id]) }}"><i class="fa fa-eye"></i> View</a></li>
                                                             <li><hr class="dropdown-divider"></hr></li>
-
-
                                                         </ul>
                                                     </div>
                                                 </td>

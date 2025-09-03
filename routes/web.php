@@ -13,6 +13,7 @@ use App\Http\Controllers\UomController;
 use App\Http\Controllers\SizeController;
 use App\Http\Controllers\StoneController;
 use App\Http\Controllers\CustomerorderController;
+use App\Http\Controllers\CustomerOrderItemController;
 use App\Http\Controllers\CustomerordertempController;
 use App\Http\Controllers\DaywisereportController;
 use App\Http\Controllers\FinishedproductpdiController;
@@ -87,7 +88,7 @@ Route::middleware(['auth'])->group(function () {
     // Route::post('getproductinfo', [CustomerorderController::class, 'getproductinfo'])->name('customerorders.store.manual');
     Route::post('/customerorders/store-manual', [CustomerOrderController::class, 'storeManual'])->name('customerorders.store.manual');
 
-
+    Route::delete('/customerorderitems/{id}', [CustomerOrderItemController::class, 'destroy']);
 
     Route::resource('customerordertemps', CustomerordertempController::class);
     Route::post('customerorderstempimporttxt', [CustomerordertempController::class, 'customerorderstempimporttxt'])->name('customerorderstempimporttxt');

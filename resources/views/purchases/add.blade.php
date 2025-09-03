@@ -165,6 +165,12 @@ const itemTypeOptions = Object.entries(itemTypes).reduce((acc, [key, value]) => 
     acc += `<option value="${key}">${value}</option>`;
     return acc;
 }, '');
+const purityList = JSON.parse('{!! json_encode($purities) !!}');
+const purityOptions = (purityList || []).reduce((acc, v) => {
+    acc += `<option value="${v.purity_id}">${v.purity}</option>`;
+    return acc;
+}, '');
+
 
 function addMoreItem() {
     itemsCount += 1;
@@ -186,35 +192,38 @@ function addMoreItem() {
                         </div>
                         <div class="col-md-4 d-none" id="purity-block-${itemsCount}">
                             <label class="form-label">Purity <span style="color: red">*</span></label>
-                            <input type="text" name="purity[]" value="" class="form-control rounded-0" id="purity-${itemsCount}"/>
+                            <select name="purity[]" class="form-select rounded-0" id="purity-${itemsCount}">
+                                <option value="">Choose...</option>
+                                ${purityOptions}
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">HSN <span style="color: red">*</span></label>
                             <input type="text" name="hsn[]" value="" class="form-control rounded-0" id="hsn-${itemsCount}" required/>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Price <span style="color: red">*</span></label>
-                            <input type="number" step="0.5" min="1" name="price[]" value="" class="form-control rounded-0" id="price-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
+                            <label class="form-label">Quantity <span style="color: red">*</span></label>
+                            <input type="number" step="1" min="1" name="quantity[]" value="1" class="form-control rounded-0 text-right" id="quantity-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Quantity <span style="color: red">*</span></label>
-                            <input type="number" step="1" min="1" name="quantity[]" value="1" class="form-control rounded-0" id="quantity-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
+                            <label class="form-label">Rate <span style="color: red">*</span></label>
+                            <input type="number" step="0.5" min="1" name="rate[]" value="" class="form-control rounded-0 text-right" id="rate-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Subtotal Amount <span style="color: red">*</span></label>
-                            <input type="number" name="subtotal_amount[]" value="" class="form-control rounded-0" id="subtotal-amount-${itemsCount}" readonly required/>
+                            <input type="number" name="subtotal_amount[]" value="" class="form-control rounded-0 text-right" id="subtotal-amount-${itemsCount}" readonly required/>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">GSTIN (%) <span style="color: red">*</span></label>
-                            <input type="number" step="1" min="0" name="gstin_percent[]" value="0" class="form-control rounded-0" id="gst-percent-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
+                            <input type="number" step="1" min="0" name="gstin_percent[]" value="0" class="form-control rounded-0 text-right" id="gst-percent-${itemsCount}" onkeyup="updateItemPrice(${itemsCount})" onchange="updateItemPrice(${itemsCount})" required/>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">GSTIN Amount <span style="color: red">*</span></label>
-                            <input type="number" name="gstin_amount[]" value="" class="form-control rounded-0" id="gst-amount-${itemsCount}" readonly required/>
+                            <input type="number" name="gstin_amount[]" value="" class="form-control rounded-0 text-right" id="gst-amount-${itemsCount}" readonly required/>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Total Amount <span style="color: red">*</span></label>
-                            <input type="number" name="total_amount[]" value="" class="form-control rounded-0" id="total-amount-${itemsCount}" readonly required/>
+                            <input type="number" name="total_amount[]" value="" class="form-control rounded-0 text-right" id="total-amount-${itemsCount}" readonly required/>
                         </div>
                     </div>
                 </div>
@@ -271,12 +280,13 @@ function updateItem(count) {
         $(`#purity-block-${count}`).addClass('d-none');
         $(`#purity-${count}`).removeAttr('required');
     }
+    $(`#purity-${count}`).val(null);
 }
 
 function updateItemPrice(count) {
-    const price = +($(`#price-${count}`).val() || 0);
+    const rate = +($(`#rate-${count}`).val() || 0);
     const quantity = +($(`#quantity-${count}`).val() || 0);
-    const subtotalAmount = price * quantity;
+    const subtotalAmount = rate * quantity;
     const gstPercent = +($(`#gst-percent-${count}`).val() || 0);
     const gstAmount = (subtotalAmount * gstPercent) / 100;
     $(`#gst-amount-${count}`).val(gstAmount);

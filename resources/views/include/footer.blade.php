@@ -335,7 +335,7 @@
 
         let newRowAdd = `
         <div id="row" class="row g-3 mb-3">
-
+            <input type="hidden" name="item_id[]" value="">
             <!-- Item Code -->
             <div class="col-md-2">
                 <select name="item_code[]" id="item_code_${$counter}" onchange="Get_product_info(this.value,${$counter})"
@@ -498,16 +498,201 @@
             </div>
 
             <!-- Delete Button -->
-            <div class="col-md-1">
-                <button class="btn btn-danger" id="DeleteRow" type="button">
-                    <i class="bi bi-trash"></i> Delete
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" id="DeleteRow" class="btn btn-danger btn-sm remove-row">
+                    <i class="fa fa-trash"></i>
                 </button>
             </div>
+
         </div>`;
 
         $('.newitems').append(newRowAdd);
         $('#item_code_' + $counter).select2();
         $counter++;
+    });
+
+    let $counteredit = $("#counterEdit").val();
+    $(".add_more_order_items_edit").click(function () {
+        @php
+            $products = Get_item_codes();
+        @endphp
+
+        let newRowAdd = `
+        <div id="row" class="row g-3 mb-3">
+            <input type="hidden" name="item_id[]" value="">
+            <!-- Item Code -->
+            <div class="col-md-2">
+                <select name="item_code[]" id="item_code_${$counteredit}" onchange="Get_product_info(this.value,${$counteredit})"
+                    class="form-select rounded-0 @error('item_code') is-invalid @enderror" required>
+                    <option value="">Select Item Code</option>
+                    @forelse($products as $product)
+                        <option value="{{ $product->item_code }}">{{ $product->item_code }}</option>
+                    @empty
+                    @endforelse
+                </select>
+                @error('customer_id')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+
+            <!-- Design -->
+            <div class="col-md-1">
+                <input type="text" id="design_${$counteredit}" name="design[]"
+                    class="form-control rounded-0" required readonly
+                    placeholder="Design *">
+            </div>
+
+            <!-- Description -->
+            <div class="col-md-2">
+                <input type="text" id="description_${$counteredit}" name="description[]"
+                    class="form-control rounded-0" readonly required
+                    placeholder="Description *">
+            </div>
+
+            <!-- Size -->
+            <div class="col-md-1">
+                <input type="text" id="size_${$counteredit}" name="size[]"
+                    class="form-control rounded-0 text-end" required readonly
+                    placeholder="Size *">
+            </div>
+
+            <!-- Finding -->
+            <div class="col-md-1">
+                <input type="text" id="finding_${$counteredit}" name="finding[]"
+                    class="form-control rounded-0 text-end" placeholder="Finding">
+            </div>
+
+            <!-- UOM -->
+            <div class="col-md-1">
+                <input type="text" id="uom_${$counteredit}" name="uom[]"
+                    class="form-control rounded-0 text-end" required readonly
+                    placeholder="UOM *">
+            </div>
+
+            <!-- KT -->
+            <div class="col-md-1">
+                <input type="text" id="kt_${$counteredit}" name="kt[]"
+                    class="form-control rounded-0 text-end" required
+                    placeholder="KT *">
+            </div>
+
+            <!-- StdWT -->
+            <div class="col-md-1">
+                <input type="text" id="std_wt_${$counteredit}" name="std_wt[]"
+                    class="form-control rounded-0 text-end" required readonly
+                    placeholder="StdWT *">
+            </div>
+
+            <!-- ConvWT -->
+            <div class="col-md-1">
+                <input type="text" id="conv_wt_${$counteredit}" name="conv_wt[]"
+                    class="form-control rounded-0 text-end" placeholder="ConvWT">
+            </div>
+
+            <!-- Order Qty -->
+            <div class="col-md-1">
+                <input type="text" id="ord_qty_${$counteredit}" name="ord_qty[]"
+                    class="form-control rounded-0 text-end" required
+                    placeholder="Ord.Qty *"
+                    onkeyup="GetOrdQtyCalulationPart(${$counteredit},this.value)">
+            </div>
+
+            <!-- Total Wt -->
+            <div class="col-md-1">
+                <input type="text" id="total_wt_${$counter}" name="total_wt[]"
+                    class="form-control rounded-0 text-end" required
+                    placeholder="Total.Wt *">
+            </div>
+
+            <!-- Lab Charge -->
+            <div class="col-md-1">
+                <input type="text" id="lab_chg_${$counteredit}" name="lab_chg[]"
+                    class="form-control rounded-0" required
+                    placeholder="Lab.Chg *">
+                <input type="hidden" id="lab_chg_hdn_${$counteredit}" value=""/>
+            </div>
+
+            <!-- Stone Charge -->
+            <div class="col-md-1">
+                <input type="text" id="stone_chg_${$counter}" name="stone_chg[]"
+                    class="form-control rounded-0" placeholder="StoneChg *"
+                    onkeyup="GetTotalValueCalulationPart(${$counter},this.value)">
+            </div>
+
+            <!-- Add.L.Chg -->
+            <div class="col-md-1">
+                <input type="text" id="add_l_chg_${$counteredit}" name="add_l_chg[]"
+                    class="form-control rounded-0" required readonly
+                    placeholder="Add.L.Chg *">
+                <input type="hidden" id="add_l_chg_hdn_${$counteredit}" value=""/>
+            </div>
+
+            <!-- Total Value -->
+            <div class="col-md-1">
+                <input type="text" id="total_value_${$counteredit}" name="total_value[]"
+                    class="form-control rounded-0" placeholder="Total Value">
+            </div>
+
+            <!-- Loss % -->
+            <div class="col-md-1">
+                <input type="text" id="loss_percent_${$counteredit}" name="loss_percent[]"
+                    class="form-control rounded-0" required
+                    placeholder="Loss% *"
+                    onchange="CalculateLossPercentage(${$counteredit},this.value)">
+            </div>
+
+            <!-- Min Wt -->
+            <div class="col-md-1">
+                <input type="text" id="min_wt_${$counteredit}" name="min_wt[]"
+                    class="form-control rounded-0" required placeholder="MinWt *">
+            </div>
+
+            <!-- Max Wt -->
+            <div class="col-md-1">
+                <input type="text" id="max_wt_${$counteredit}" name="max_wt[]"
+                    class="form-control rounded-0" required placeholder="MaxWt *">
+            </div>
+
+            <!-- Ord -->
+            <div class="col-md-1">
+                <input type="text" id="ord_${$counteredit}" name="ord[]"
+                    class="form-control rounded-0" placeholder="Ord">
+            </div>
+
+            <!-- Kid -->
+            <div class="col-md-1">
+                <input type="text" id="kid_${$counteredit}" name="kid[]"
+                    class="form-control rounded-0" required readonly
+                    placeholder="Kid *">
+            </div>
+
+            <!-- Delivery Date -->
+            <div class="col-md-2">
+                <input type="date" id="delivery_date_${$counteredit}" name="delivery_date[]"
+                    class="form-control rounded-0 text-end" required
+                    placeholder="Delivery Date *">
+            </div>
+
+            <!-- Remarks -->
+            <div class="col-md-6">
+                <input type="text" id="remarks_${$counteredit}" name="remarks[]"
+                    class="form-control rounded-0" placeholder="Remarks">
+            </div>
+
+            <!-- Delete Button -->
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" id="DeleteRow" class="btn btn-danger btn-sm remove-row">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>
+
+        </div>`;
+
+        $('.newitems').append(newRowAdd);
+        $('#item_code_' + $counteredit).select2();
+        $counteredit++;
     });
 
     $(".add_more_product_stone_items").click(function () {
@@ -895,7 +1080,7 @@
                     $html = '';
                 for (var i = 0; i < $receive_qty; i++) {
                     $html += '<div class="row mb-1">'; // optional wrapper per item
-                    $html += '<div class="col-md-2"><select name="design_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Match" selected="selected">Match</option><option value="Mis Match">Mis Match</option><option value="Mis">Mis</option></select></div><div class="col-md-1"><select name="solder_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Good" selected="selected">Good</option><option value="Satisfy">Satisfy</option><option value="Poor">Poor</option></select></div><div class="col-md-1"><select name="polish_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Good" selected="selected">Good</option><option value="Satisfy">Satisfy</option><option value="Poor">Poor</option></select></div><div class="col-md-1"><select name="finish_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Good" selected="selected">Good</option><option value="Satisfy">Satisfy</option><option value="Poor">Poor</option></select></div><div class="col-md-1"><select name="mina_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Good" selected="selected">Good</option><option value="Satisfy">Satisfy</option><option value="Poor">Poor</option></select></div><div class="col-md-1"><select name="other_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Good" selected="selected">Good</option><option value="Satisfy">Satisfy</option><option value="Poor">Poor</option></select></div><div class="col-md-1"><select name="remark_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Accept" selected="selected">Accept</option><option value="Reject">Reject</option></select></div>';
+                    $html += '<div class="col-md-2"><select name="design_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Match" selected="selected">Match</option><option value="Mismatch">Mismatch</option></select></div><div class="col-md-1"><select name="solder_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Solder cut" selected="selected">Solder cut</option><option value="Link cut">Link cut</option><option value="Weak Solder">Weak Solder</option></select></div><div class="col-md-1"><select name="polish_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Polishing not ok" selected="selected">Polishing not ok</option><option value="Satisfy">Satisfy</option></select></div><div class="col-md-1"><select name="finish_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Finishing not ok" selected="selected">Finishing not ok</option><option value="Satisfy">Satisfy</option></select></div><div class="col-md-1"><select name="mina_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Enamel crack" selected="selected">Enamel crack</option><option value="Chief off">Chief off</option><option value="Satisfy">Satisfy</option></select></div><div class="col-md-1"><select name="other_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Satisfy" selected="selected">Satisfy</option><option value="Finishing not ok">Finishing not ok</option></select></div><div class="col-md-1"><select name="remark_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Accept" selected="selected">Accept</option><option value="Reject">Reject</option></select></div>';
                     $html += '</div>'; // close wrapper div
                 }
                 $("#qualitycheckitems").html($html);
@@ -978,8 +1163,52 @@
         }
     }
 
-</script>
+    $(document).ready(function () {
 
+        // Remove unsaved row
+        $(document).on("click", ".remove-item", function () {
+            $(this).closest(".order-item").remove();
+        });
+
+        // SweetAlert delete confirmation for saved rows
+        $(document).on("click", ".delete-item", function () {
+            let id = $(this).data("id");
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "This item will be permanently deleted!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/customerorderitems/${id}`,
+                        type: "DELETE",
+                        data: { _token: "{{ csrf_token() }}" },
+                        success: function () {
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: "Item has been deleted.",
+                                icon: "success",
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload(); // ✅ auto refresh page
+                            });
+                        },
+                        error: function () {
+                            Swal.fire("Error!", "Failed to delete item.", "error");
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+@yield('scripts')
 </body>
 
 </html>
