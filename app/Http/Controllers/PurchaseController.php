@@ -82,7 +82,6 @@ class PurchaseController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'po_no'              => 'required',
                     'vendor'             => 'required|integer',
                     'invoice_no'         => 'required',
                     'purchase_on'        => 'required',
@@ -91,18 +90,17 @@ class PurchaseController extends Controller
                     'item'               => 'required|array',
                     'item.*'             => 'required|integer',
                     'purity'             => 'nullable|array',
-                    'purity.*'           => 'nullable|string',
+                    'purity.*'           => 'nullable|integer',
                     'hsn'                => 'required|array',
                     'hsn.*'              => 'required|string',
-                    'price'              => 'required|array',
-                    'price.*'            => 'required|numeric',
+                    'rate'               => 'required|array',
+                    'rate.*'             => 'required|numeric',
                     'quantity'           => 'required|array',
                     'quantity.*'         => 'required|integer|min:1',
                     'gstin_percent'      => 'required|array',
                     'gstin_percent.*'    => 'required|numeric',
                 ],
                 [
-                    'po_no.required'             => 'PO No. is required', // custom message
                     'vendor.required'            => 'Vendor is required', // custom message
                     'invoice_no.required'        => 'Invoice No. is required', // custom message
                     'purchase_on.required'       => 'Purchase Date is required', // custom message
@@ -111,7 +109,6 @@ class PurchaseController extends Controller
 
             $items = [];
             $purchase = Purchase::create([
-                'po_no' => strip_tags($request->po_no),
                 'vendor_id' => strip_tags($request->vendor),
                 'invoice_no' => strip_tags($request->invoice_no),
                 'purchase_on' => strip_tags($request->purchase_on),
@@ -137,18 +134,18 @@ class PurchaseController extends Controller
                 }
 
                 if ($itemable_type && $itemable_id) {
-                    $price = (float) $request->price[$key] ?? 0;
+                    $rate = (float) $request->rate[$key] ?? 0;
                     $quantity = (int) $request->quantity[$key] ?? 0;
-                    $subtotalAmount = ($price * $quantity);
+                    $subtotalAmount = ($rate * $quantity);
                     $gstPercent = (float) $request->gstin_percent[$key] ?? 0;
                     $gstAmount = (float) ($subtotalAmount * $gstPercent) / 100;
                     $items[] = [
                         'itemable_type' => $itemable_type,
                         'itemable_id' => $itemable_id,
-                        'purity' => $request->purity[$key],
+                        'purity_id' => $request->purity[$key] ?? null,
                         'hsn' => $request->hsn[$key],
                         'quantity' => $quantity,
-                        'price' => $price,
+                        'rate' => $rate,
                         'subtotal_amount' => $subtotalAmount,
                         'gstin_percent' => $gstPercent,
                         'gstin_amount' => $gstAmount,
@@ -200,11 +197,17 @@ class PurchaseController extends Controller
                 'name' => $miscellaneous->product_name,
             ];
         });
+        $gold = Metal::select('metal_id')->where('metal_name', 'GOLD')->first();
+        $purities = Metalpurity::select('purity_id', 'purity')
+            ->where('is_active', 'Yes')
+            ->where('metal_id', @$gold->metal_id ?? null)
+            ->get();
 
         return view('purchases.edit', [
             'purchase' => $purchase,
             'vendors' => $vendors,
             'itemTypes' => $this->itemTypes,
+            'purities' => $purities,
             'metals' => $metals,
             'findings' => $findings,
             'miscellaneouses' => $miscellaneouses,
@@ -219,7 +222,6 @@ class PurchaseController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'po_no'              => 'required',
                     'vendor'             => 'required|integer',
                     'invoice_no'         => 'required',
                     'purchase_on'        => 'required',
@@ -228,18 +230,17 @@ class PurchaseController extends Controller
                     'item'               => 'required|array',
                     'item.*'             => 'required|integer',
                     'purity'             => 'nullable|array',
-                    'purity.*'           => 'nullable|string',
+                    'purity.*'           => 'nullable|integer',
                     'hsn'                => 'required|array',
                     'hsn.*'              => 'required|string',
-                    'price'              => 'required|array',
-                    'price.*'            => 'required|numeric',
+                    'rate'              => 'required|array',
+                    'rate.*'            => 'required|numeric',
                     'quantity'           => 'required|array',
                     'quantity.*'         => 'required|integer|min:1',
                     'gstin_percent'      => 'required|array',
                     'gstin_percent.*'    => 'required|numeric',
                 ],
                 [
-                    'po_no.required'             => 'PO No. is required', // custom message
                     'vendor.required'            => 'Vendor is required', // custom message
                     'invoice_no.required'        => 'Invoice No. is required', // custom message
                     'purchase_on.required'       => 'Purchase Date is required', // custom message
@@ -252,7 +253,6 @@ class PurchaseController extends Controller
                 throw new Exception('Invalid purchase ID');
             }
             Purchase::whereRaw('id = ?', [$id])->update([
-                'po_no' => strip_tags($request->po_no),
                 'vendor_id' => strip_tags($request->vendor),
                 'invoice_no' => strip_tags($request->invoice_no),
                 'purchase_on' => strip_tags($request->purchase_on),
@@ -278,18 +278,18 @@ class PurchaseController extends Controller
                 }
 
                 if ($itemable_type && $itemable_id) {
-                    $price = (float) $request->price[$key] ?? 0;
+                    $rate = (float) $request->rate[$key] ?? 0;
                     $quantity = (int) $request->quantity[$key] ?? 0;
-                    $subtotalAmount = ($price * $quantity);
+                    $subtotalAmount = ($rate * $quantity);
                     $gstPercent = (float) $request->gstin_percent[$key] ?? 0;
                     $gstAmount = (float) ($subtotalAmount * $gstPercent) / 100;
                     $itemData = [
                         'itemable_type' => $itemable_type,
                         'itemable_id' => $itemable_id,
-                        'purity' => $request->purity[$key],
+                        'purity_id' => $request->purity[$key] ?? null,
                         'hsn' => $request->hsn[$key],
                         'quantity' => $quantity,
-                        'price' => $price,
+                        'rate' => $rate,
                         'subtotal_amount' => $subtotalAmount,
                         'gstin_percent' => $gstPercent,
                         'gstin_amount' => $gstAmount,
@@ -322,6 +322,11 @@ class PurchaseController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $purchase = Purchase::whereRaw('id = ?', [$id])->firstOrFail();
+        if ($purchase) {
+            $purchase->delete();
+            return redirect('/purchases')->with('success', 'Purchase record deleted successfully.');
+        }
+        return redirect('/purchases')->with('success', 'Invalid Purchase ID.');
     }
 }

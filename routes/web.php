@@ -32,12 +32,11 @@ use App\Http\Controllers\RolepermissionuserController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\StockoutpdilistController;
 use App\Http\Controllers\TollerenceController;
+use App\Http\Controllers\TransactionReportController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\VouchertypeController;
 use Illuminate\Support\Facades\Artisan;
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+
 
 Route::get('/config-cache', function () {
     Artisan::call('config:cache');
@@ -152,4 +151,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('purchases', PurchaseController::class);
     Route::resource('sales', SaleController::class);
     Route::get('/sales/{id}/invoice', [SaleController::class, 'invoice'])->name('sales.invoice');
+
+    Route::get('/purchase-ledger', [TransactionReportController::class, 'purchase_ledger'])->name('purchase-ledger');
+    Route::get('/purchase-ledger/{id}/items', [TransactionReportController::class, 'purchase_ledger_items'])->name('purchase-ledger.items');
+    Route::get('/sales-register', [TransactionReportController::class, 'sales_register'])->name('sales-register');
+    Route::get('/sales-register/{id}/items', [TransactionReportController::class, 'sales_register_items'])->name('sales-register.items');
+
 });

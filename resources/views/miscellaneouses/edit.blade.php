@@ -86,7 +86,7 @@
                             </div>
                             <div class="col-md-12">
                                 <div class="d-md-flex d-grid align-items-center gap-3">
-                                    <input type="submit" name="submit" value="Edit" class="btn btn-grd-info px-4 rounded-0">
+                                    <input type="submit" name="submit" value="Save" class="btn btn-grd-info px-4 rounded-0">
                                 </div>
                             </div>
                         </form>

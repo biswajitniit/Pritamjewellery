@@ -28,6 +28,9 @@
         .text-left {
             text-align: left;
         }
+        .text-right {
+            text-align: right !important;
+        }
         .no-border {
             border: none;
         }
@@ -94,16 +97,16 @@
                 <tr>
                     <td>{{ $i + 1 }}</td>
                     <td>{{ $item->name ?? '' }}<br>{{ $item->hsn ?? '' }}</td>
-                    <td>{{ $item->purity ?? '' }}</td>
+                    <td>{{ isset($item->purity->purity) ? $item->purity->purity : '' }}</td>
                     <td>{{ $item->quantity ?? '' }}</td>
-                    <td>{{ number_format($item->price, 2) ?? '' }}</td>
-                    <td>{{ number_format($item->subtotal_amount, 2) ?? '' }}</td>
+                    <td class="text-right">{{ number_format($item->rate, 2) ?? '' }}</td>
+                    <td class="text-right">{{ number_format($item->subtotal_amount, 2) ?? '' }}</td>
                     <td>{{ $item->gstin_percent ?? '' }}</td>
-                    <td>{{ number_format($item->gstin_amount, 2) ?? '' }}</td>
-                    <td>{{ number_format($item->total_amount, 2) ?? '' }}</td>
+                    <td class="text-right">{{ number_format($item->gstin_amount, 2) ?? '' }}</td>
+                    <td class="text-right">{{ number_format($item->total_amount, 2) ?? '' }}</td>
                 </tr>
                 @php
-                    $subtotalAmount = $subtotalAmount + (float) $item->price;
+                    $subtotalAmount = $subtotalAmount + (float) $item->subtotal_amount;
                     $gstAmount = $gstAmount + (float) $item->gstin_amount;
                     $totalAmount = $totalAmount + (float) $item->total_amount;
                 @endphp
@@ -112,10 +115,10 @@
             <tr>
                 <td colspan="2"><strong>TOTAL</strong></td>
                 <td colspan="3"></td>
-                <td><strong>{{ number_format($subtotalAmount, 2) ?? '' }}</strong></td>
+                <td class="text-right"><strong>{{ number_format($subtotalAmount, 2) ?? '' }}</strong></td>
                 <td></td>
-                <td><strong>{{ number_format($gstAmount, 2) ?? '' }}</strong></td>
-                <td><strong>{{ number_format($totalAmount, 2) ?? 0 }}</strong></td>
+                <td class="text-right"><strong>{{ number_format($gstAmount, 2) ?? '' }}</strong></td>
+                <td class="text-right"><strong>{{ number_format($totalAmount, 2) ?? 0 }}</strong></td>
             </tr>
         </tbody>
     </table>

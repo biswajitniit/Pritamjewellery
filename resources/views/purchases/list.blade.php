@@ -36,9 +36,8 @@
                                             <tr>
                                                 <th><i class="fa fa-cog style_cog"></i></th>
                                                 <th scope="col">#</th>
-                                                <th scope="col">PO No.</th>
-                                                <th scope="col">Vendor</th>
                                                 <th scope="col">Invoice No.</th>
+                                                <th scope="col">Vendor</th>
                                                 <th scope="col">Date</th>
                                                 <th scope="col">Items</th>
                                             </tr>
@@ -82,16 +81,15 @@
                                                     </div>
                                                 </td>
                                                 <th scope="row">{{ $count }}</th>
-                                                <td>{{ $purchase->po_no }}</td>
-                                                <td>{{ $purchase->vendor->name }} - {{ $purchase->vendor->vendor_code }}</td>
                                                 <td>{{ $purchase->invoice_no }}</td>
-                                                <td>{{ $purchase->purchase_on }}</td>
+                                                <td>{{ $purchase->vendor->name }} - {{ $purchase->vendor->vendor_code }}</td>
+                                                <td>{{ date('d-m-Y', strtotime($purchase->purchase_on)) }}</td>
                                                 <td>{{ $purchase->items_count }}</td>
                                             </tr>
                                             @php $count++; @endphp
                                             @empty
                                                 <tr class="no-records">
-                                                    <td colspan="7">No record found.</td>
+                                                    <td colspan="6">No record found.</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>

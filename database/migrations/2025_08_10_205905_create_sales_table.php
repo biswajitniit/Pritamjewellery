@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->string('sale_no');
             $table->foreignId('customer_id')->constrained('customers', 'id')->restrictOnDelete();
             $table->string('invoice_no');
             $table->date('sold_on');
@@ -26,10 +25,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('sale_id')->constrained('sales', 'id')->restrictOnDelete();
             $table->morphs('itemable');
-            $table->string('purity')->nullable()->default(null);
+            $table->foreignId('purity_id')->nullable()->constrained('metalpurities', 'purity_id')->restrictOnDelete();
             $table->string('hsn')->nullable()->default(null);
             $table->unsignedInteger('quantity');
-            $table->string('price');
+            $table->string('rate');
             $table->string('subtotal_amount');
             $table->string('gstin_percent');
             $table->string('gstin_amount');

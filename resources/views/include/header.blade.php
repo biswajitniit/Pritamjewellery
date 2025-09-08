@@ -675,6 +675,18 @@
                                     </a>
                                 </li>
 
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('purchase-ledger') }}">
+                                        Purchase Ledger
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('sales-register') }}">
+                                        Sales Register
+                                    </a>
+                                </li>
+
                                 {{-- <li>
                                     <a class="dropdown-item" href="#">
                                         Status Enquiry
