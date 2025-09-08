@@ -36,9 +36,8 @@
                                             <tr>
                                                 <th><i class="fa fa-cog style_cog"></i></th>
                                                 <th scope="col">#</th>
-                                                <th scope="col">Sale No.</th>
-                                                <th scope="col">Customer</th>
                                                 <th scope="col">Invoice No.</th>
+                                                <th scope="col">Customer</th>
                                                 <th scope="col">Date</th>
                                                 <th scope="col">Items</th>
                                                 <th scope="col">Invoice</th>
@@ -79,17 +78,16 @@
                                                     </div>
                                                 </td>
                                                 <th scope="row">{{ $count }}</th>
-                                                <td>{{ $sale->sale_no }}</td>
-                                                <td>{{ $sale->customer->cust_name }} - {{ $sale->customer->cust_code }}</td>
                                                 <td>{{ $sale->invoice_no }}</td>
-                                                <td>{{ $sale->sold_on }}</td>
+                                                <td>{{ $sale->customer->cust_name }} - {{ $sale->customer->cust_code }}</td>
+                                                <td>{{ date('d-m-Y', strtotime($sale->sold_on)) }}</td>
                                                 <td>{{ $sale->items_count }}</td>
                                                 <td><a href="{{ route('sales.invoice', ['id' => $sale->id]) }}" target="_blank">Invoice</a></td>
                                             </tr>
                                             @php $count++; @endphp
                                             @empty
                                                 <tr class="no-records">
-                                                    <td colspan="8">No record found.</td>
+                                                    <td colspan="7">No record found.</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>

@@ -150,6 +150,9 @@
 
 @section('scripts')
 <script>
+$(document).ready(function () {
+    $('.select2').select2();
+});
 const itemTypes = {'App\\Models\\Metal':'Metals','App\\Models\\Stone':'Findings','App\\Models\\Miscellaneous':'Miscellaneous','App\\Models\\Product':'Product'};
 const metals = JSON.parse(`{!! $metals !!}`);
 const findings = JSON.parse(`{!! $findings !!}`);
@@ -231,6 +234,7 @@ function addMoreItem() {
         </tr>
     `);
     updateItemPrice(itemsCount);
+    $('.select2').select2();
 }
 
 function deleteItem(el) {

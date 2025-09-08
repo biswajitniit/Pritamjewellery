@@ -12,10 +12,10 @@ class SaleItem extends Model
         'sale_id',
         'itemable_type',
         'itemable_id',
-        'purity',
+        'purity_id',
         'hsn',
         'quantity',
-        'price',
+        'rate',
         'subtotal_amount',
         'gstin_percent',
         'gstin_amount',
@@ -25,5 +25,10 @@ class SaleItem extends Model
     public function itemable()
     {
         return $this->morphTo();
+    }
+
+    public function purity()
+    {
+        return $this->belongsTo(Metalpurity::class, 'purity_id');
     }
 }

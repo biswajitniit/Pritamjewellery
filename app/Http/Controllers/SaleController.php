@@ -171,7 +171,7 @@ class SaleController extends Controller
 
             return redirect()->route('sales.index')->withSuccess('Sale record created successfully.');
         } catch (Exception $e) {
-            // dd($e->getMessage());
+            dd($e->getMessage());
             return redirect()->back()->withErrors($e->getMessage());
         }
     }
@@ -396,7 +396,7 @@ class SaleController extends Controller
 
             return $pdf->stream(time().'.pdf');
         } catch (Exception $e) {
-            // dd($e->getMessage());
+            dd($e->getMessage());
             return redirect()->back()->withErrors($e->getMessage());
         }
     }

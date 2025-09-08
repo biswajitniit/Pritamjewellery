@@ -29,4 +29,16 @@ class Stone extends Model
     {
         return $this->hasMany(Productstonedetails::class);
     }
+
+
+    public function purchaseItems()
+    {
+        return $this->morphMany(PurchaseItem::class, 'itemable');
+    }
+
+
+    public function saleItems()
+    {
+        return $this->morphMany(SaleItem::class, 'itemable');
+    }
 }

@@ -26,17 +26,7 @@
                         <form class="row g-3" action="{{ route('purchases.store') }}" method="POST" name="savePurchase">
                             @csrf
 
-                            <div class="col-md-6">
-                                <label class="form-label">PO No. <span style="color: red">*</span></label>
-                                <input type="text" name="po_no" value="{{ old('po_no') }}" class="form-control rounded-0 @error('po_no') is-invalid @enderror" required/>
-                                @error('po_no')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <label class="form-label">Vendor <span style="color: red">*</span></label>
                                 <select name="vendor" class="form-select rounded-0 @error('vendor') is-invalid @enderror" required>
                                     <option value="">Choose...</option>
@@ -51,7 +41,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">Invoice No <span style="color: red">*</span></label>
                                 <input type="text" name="invoice_no" value="{{ old('invoice_no') }}" class="form-control rounded-0 @error('invoice_no') is-invalid @enderror" required/>
                                 @error('invoice_no')
@@ -61,7 +51,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label class="form-label">Purchase Date <span style="color: red">*</span></label>
                                 <input type="date" name="purchase_on" value="{{ old('purchase_on') }}" class="form-control rounded-0 @error('purchase_on') is-invalid @enderror" required/>
                                 @error('purchase_on')
@@ -98,35 +88,40 @@
                                                             </div>
                                                             <div class="col-md-4 d-none" id="purity-block-0">
                                                                 <label class="form-label">Purity <span style="color: red">*</span></label>
-                                                                <input type="number" step="1" min="1" name="purity[]" value="" class="form-control rounded-0" id="purity-0"/>
+                                                                <select name="purity[]" class="form-select rounded-0" id="purity-0">
+                                                                    <option value="">Choose...</option>
+                                                                    @foreach ($purities as $purity)
+                                                                        <option value="{{ $purity->purity_id }}">{{ $purity->purity }}</option>
+                                                                    @endforeach
+                                                                </select>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="form-label">HSN <span style="color: red">*</span></label>
                                                                 <input type="text" name="hsn[]" value="" class="form-control rounded-0" id="hsn-0" required/>
                                                             </div>
                                                             <div class="col-md-2">
-                                                                <label class="form-label">Price <span style="color: red">*</span></label>
-                                                                <input type="number" step="0.5" min="1" name="price[]" value="" class="form-control rounded-0" id="price-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
+                                                                <label class="form-label">Quantity <span style="color: red">*</span></label>
+                                                                <input type="number" step="1" min="1" name="quantity[]" value="1" class="form-control rounded-0 text-right" id="quantity-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
                                                             </div>
                                                             <div class="col-md-2">
-                                                                <label class="form-label">Quantity <span style="color: red">*</span></label>
-                                                                <input type="number" step="1" min="1" name="quantity[]" value="1" class="form-control rounded-0" id="quantity-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
+                                                                <label class="form-label">Rate <span style="color: red">*</span></label>
+                                                                <input type="number" step="0.5" min="1" name="rate[]" value="" class="form-control rounded-0 text-right" id="rate-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
                                                             </div>
                                                             <div class="col-md-2">
                                                                 <label class="form-label">Subtotal Amount <span style="color: red">*</span></label>
-                                                                <input type="number" name="subtotal_amount[]" value="" class="form-control rounded-0" id="subtotal-amount-0" readonly required/>
+                                                                <input type="number" name="subtotal_amount[]" value="" class="form-control rounded-0 text-right" id="subtotal-amount-0" readonly required/>
                                                             </div>
                                                             <div class="col-md-2">
                                                                 <label class="form-label">GSTIN (%) <span style="color: red">*</span></label>
-                                                                <input type="number" step="1" min="0" name="gstin_percent[]" value="0" class="form-control rounded-0" id="gst-percent-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
+                                                                <input type="number" step="1" min="0" name="gstin_percent[]" value="0" class="form-control rounded-0 text-right" id="gst-percent-0" onkeyup="updateItemPrice(0)" onchange="updateItemPrice(0)" required/>
                                                             </div>
                                                             <div class="col-md-3">
                                                                 <label class="form-label">GSTIN Amount <span style="color: red">*</span></label>
-                                                                <input type="number" name="gstin_amount[]" value="" class="form-control rounded-0" id="gst-amount-0" readonly required/>
+                                                                <input type="number" name="gstin_amount[]" value="" class="form-control rounded-0 text-right" id="gst-amount-0" readonly required/>
                                                             </div>
                                                             <div class="col-md-3">
                                                                 <label class="form-label">Total Amount <span style="color: red">*</span></label>
-                                                                <input type="number" name="total_amount[]" value="" class="form-control rounded-0" id="total-amount-0" readonly required/>
+                                                                <input type="number" name="total_amount[]" value="" class="form-control rounded-0 text-right" id="total-amount-0" readonly required/>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -155,6 +150,9 @@
 
 @section('scripts')
 <script>
+$(document).ready(function () {
+    $('.select2').select2();
+});
 const itemTypes = {'App\\Models\\Metal':'Metals','App\\Models\\Stone':'Findings','App\\Models\\Miscellaneous':'Miscellaneous'};
 const metals = JSON.parse('{!! $metals !!}');
 const findings = JSON.parse('{!! $findings !!}');
@@ -234,6 +232,7 @@ function addMoreItem() {
         </tr>
     `);
     updateItemPrice(itemsCount);
+    $('.select2').select2();
 }
 
 function deleteItem(el) {

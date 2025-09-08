@@ -44,6 +44,7 @@
                                         'patterns' => 'Pattern Master',
                                         'stones' => 'Stone Master',
                                         'customers' => 'Customer Master',
+                                        'vendors' => 'Vendor Master',
                                         'karigars' => 'Karigar Master',
                                         'itemdescriptionheaders' => 'Item Description Header Master',
                                         'products' => 'Product Master',
@@ -51,11 +52,14 @@
                                         'metalpurities' => 'Metal Purity Master',
                                         'tollerences' => 'Tollerence Master',
                                         'locations' => 'Location',
+                                        'miscellaneouses' => 'Miscellaneous Master',
 
                                         // FOR TRANSACTION
                                         'customerordertemps' => 'Customer Order Temp',
                                         'customerorders' => 'Customer Order',
                                         'issuetokarigars'=> 'Issue To Karigar',
+                                        'purchases' => 'Purchases',
+                                        'sales' => 'Sales',
                                     ];
 
                                     $permissions = [
