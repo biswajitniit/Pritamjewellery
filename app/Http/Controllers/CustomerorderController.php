@@ -63,61 +63,6 @@ class CustomerorderController extends Controller
      */
     public function store(Request $request)
     {
-        /*
-        $validatedData = $request->validate(
-            [
-                'customer_id'                => 'required',
-                'job_no'                     => 'required',
-                'job_date'                   => 'required|date'
-            ],
-            [
-                'customer_id.required' => 'Selection of Customer is Required', // custom message
-                'job_no.required'      => 'Job no is Required', // custom message
-                'job_date.required'    => 'Job Date is Required', // custom message
-            ]
-        );
-        $customerorder = Customerorder::create([
-            'order_no'             => rand(1000000000, 100000),
-            'customer_id'          => strip_tags($request->customer_id),
-            'jo_no'                => strip_tags($request->job_no),
-            'jo_date'              => strip_tags($request->job_date),
-            'order_type'           => 'ManualUpload',
-            'is_active'            => strip_tags($request->is_active),
-            'created_by'           => Auth::user()->name
-        ]);
-        $lastInsertedId = $customerorder->id;
-        $count = 1;
-        foreach ($request->item_code as $key => $val) {
-            Customerorderitem::create([
-                'order_id'             => $lastInsertedId,
-                'sl_no'                => $count,
-                'item_code'            => strip_tags($request->item_code[$key]),
-                'kid'                  => strip_tags($request->kid[$key]),
-                'design'               => strip_tags($request->design[$key]),
-                'description'          => strip_tags($request->description[$key]),
-                'size'                 => strip_tags($request->size[$key]),
-                'finding'              => strip_tags($request->finding[$key]),
-                'uom'                  => strip_tags($request->uom[$key]),
-                'kt'                   => strip_tags($request->kt[$key]),
-                'std_wt'               => strip_tags($request->std_wt[$key]),
-                'conv_wt'              => $request->conv_wt[$key] ? $request->conv_wt[$key] : 0,
-                'ord_qty'              => strip_tags($request->ord_qty[$key]),
-                'total_wt'             => strip_tags($request->total_wt[$key]),
-                'lab_chg'              => strip_tags($request->lab_chg[$key]),
-                'stone_chg'            => $request->stone_chg[$key] ? $request->stone_chg[$key] : 0,
-                'add_l_chg'            => strip_tags($request->add_l_chg[$key]),
-                'total_value'          => strip_tags($request->total_value[$key]),
-                'loss_percent'         => strip_tags($request->loss_percent[$key]),
-                'min_wt'               => strip_tags($request->min_wt[$key]),
-                'max_wt'               => strip_tags($request->max_wt[$key]),
-                'ord'                  => strip_tags($request->ord[$key]),
-                'delivery_date'        => strip_tags($request->delivery_date[$key])
-            ]);
-
-            $count++;
-        }
-        */
-
 
         DB::beginTransaction();
 
@@ -149,11 +94,18 @@ class CustomerorderController extends Controller
 
                 // Clone related items
                 foreach ($tempOrder->customerordertempitems as $tempItem) {
+
+                    $getkid = Product::with('karigar')
+                        ->where('item_code', $tempItem->item_code)
+                        ->first();
+                    $kid = $getkid?->karigar?->kid ?? '';
+
+
                     Customerorderitem::create([
                         'order_id'      => $newOrder->id,
                         'sl_no'         => $tempItem->sl_no,
                         'item_code'     => $tempItem->item_code,
-                        'kid'           => $tempItem->kid,
+                        'kid'           => $kid,
                         'design'        => $tempItem->design,
                         'description'   => $tempItem->description,
                         'size'          => $tempItem->size,

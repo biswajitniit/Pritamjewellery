@@ -49,4 +49,9 @@ class Karigar extends Model
     {
         return $this->hasMany(IssueToKarigarItem::class, 'kid', 'kid');
     }
+
+    public function finishproductreceivedentries()
+    {
+        return $this->hasMany(Finishproductreceivedentry::class, 'karigar_id');
+    }
 }

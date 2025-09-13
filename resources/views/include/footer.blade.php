@@ -1080,7 +1080,7 @@
                     $html = '';
                 for (var i = 0; i < $receive_qty; i++) {
                     $html += '<div class="row mb-1">'; // optional wrapper per item
-                    $html += '<div class="col-md-2"><select name="design_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Match" selected="selected">Match</option><option value="Mismatch">Mismatch</option></select></div><div class="col-md-1"><select name="solder_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Solder cut" selected="selected">Solder cut</option><option value="Link cut">Link cut</option><option value="Weak Solder">Weak Solder</option></select></div><div class="col-md-1"><select name="polish_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Polishing not ok" selected="selected">Polishing not ok</option><option value="Satisfy">Satisfy</option></select></div><div class="col-md-1"><select name="finish_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Finishing not ok" selected="selected">Finishing not ok</option><option value="Satisfy">Satisfy</option></select></div><div class="col-md-1"><select name="mina_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Enamel crack" selected="selected">Enamel crack</option><option value="Chief off">Chief off</option><option value="Satisfy">Satisfy</option></select></div><div class="col-md-1"><select name="other_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Satisfy" selected="selected">Satisfy</option><option value="Finishing not ok">Finishing not ok</option></select></div><div class="col-md-1"><select name="remark_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Accept" selected="selected">Accept</option><option value="Reject">Reject</option></select></div>';
+                    $html += '<div class="col-md-1"><select name="design_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Match" selected="selected">Match</option><option value="Mismatch">Mismatch</option></select></div><div class="col-md-2"><select name="solder_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Satisfy" selected="selected">Satisfy</option><option value="Solder cut" >Solder cut</option><option value="Link cut">Link cut</option><option value="Weak Solder">Weak Solder</option></select></div><div class="col-md-2"><select name="polish_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Satisfy" selected="selected">Satisfy</option><option value="Polishing not ok" >Polishing not ok</option></select></div><div class="col-md-2"><select name="finish_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Satisfy" selected="selected">Satisfy</option><option value="Finishing not ok">Finishing not ok</option></select></div><div class="col-md-2"><select name="mina_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Satisfy" selected="selected">Satisfy</option><option value="Enamel crack" >Enamel crack</option><option value="Chief off">Chief off</option></select></div><div class="col-md-2"><select name="other_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Satisfy" selected="selected">Satisfy</option><option value="Finishing not ok">Finishing not ok</option></select></div><div class="col-md-1"><select name="remark_items[]" class="form-select rounded-0"><option value="">Choose...</option><option value="Accept" selected="selected">Accept</option><option value="Reject">Reject</option></select></div>';
                     $html += '</div>'; // close wrapper div
                 }
                 $("#qualitycheckitems").html($html);
@@ -1207,6 +1207,29 @@
             });
         });
     });
+
+    function Getjoborderno(select){
+        let id = select.value;
+        let jobNo = select.options[select.selectedIndex].getAttribute('data-job-no');
+
+        if (jobNo !== '') {
+            $.ajax({
+                url: "{{ route('getordertype') }}",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    jobNo: jobNo, // use the parameter passed into the function
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (result) {
+                    $("#type").val(result.type);
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", error);
+                }
+            });
+        }
+    }
 </script>
 @yield('scripts')
 </body>

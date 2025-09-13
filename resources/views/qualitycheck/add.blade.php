@@ -47,10 +47,10 @@
 
                             <div class="col-md-2">
                                 <label class="form-label">KID <span style="color: red;">*</span></label>
-                                <select name="karigar_id" onchange="return GetKarigarDetails(this.value), GetIssueToKarigarItemDetails(this.value)" class="form-select rounded-0 @error('karigar_id') is-invalid @enderror">
+                                <select name="karigar_id" onchange="return GetKarigarDetails(this.value), GetIssueToKarigarItemDetails(this.value), Getjoborderno(this)" class="form-select rounded-0 @error('karigar_id') is-invalid @enderror">
                                     <option value="">Choose...</option>
                                     @forelse($karigars as $karigar)
-                                    <option value="{{ $karigar->id }}">{{ $karigar->kid }}</option>
+                                    <option value="{{ $karigar->id }}" data-job-no="{{ $karigar->job_no }}">{{ $karigar->kid }} - ({{ $karigar->kname }}) - {{ $karigar->job_no }}</option>
                                     @empty @endforelse
                                 </select>
                                 @error('karigar_id')
@@ -72,7 +72,7 @@
 
                             <div class="col-md-1">
                                 <label class="form-label">Type <span style="color: red;">*</span></label>
-                                <input type="text" name="type" class="form-control rounded-0 @error('type') is-invalid @enderror" />
+                                <input type="text" name="type" id="type" class="form-control rounded-0 @error('type') is-invalid @enderror" />
                                 @error('type')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
