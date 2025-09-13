@@ -160,7 +160,7 @@ class VouchertypeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function getlocationwisevoucherno(Request $request)
+    /*public function getlocationwisevoucherno(Request $request)
     {
         $vouchertypes = Vouchertype::where('voucher_type', $request->voucher_type)
             ->where('location_id', $request->location_id)
@@ -172,7 +172,33 @@ class VouchertypeController extends Controller
         }
 
         return response()->json([
-            'voucher_no' => $vouchertypes->prefix . '/' . $vouchertypes->lastno . '/' . $vouchertypes->applicable_year
+            'voucher_no' => $vouchertypes->prefix . '/' . $vouchertypes->lastno . '/' . $vouchertypes->suffix . '/' . $vouchertypes->applicable_year
+        ]);
+    }*/
+
+    public function getlocationwisevoucherno(Request $request)
+    {
+        $vouchertypes = Vouchertype::where('voucher_type', $request->voucher_type)
+            ->where('location_id', $request->location_id)
+            ->where('status', 'Active')
+            ->first();
+
+        if (!$vouchertypes) {
+            return response()->json(['voucher_no' => null]);
+        }
+
+        // Determine the next number
+        $nextNo = (int) $vouchertypes->lastno + 1;
+
+        // Pad the number according to startno length (001, 0001, etc.)
+        $length = strlen($vouchertypes->startno);
+        $nextNoFormatted = str_pad($nextNo, $length, '0', STR_PAD_LEFT);
+
+        // Build final voucher no: PREFIX/NUMBER/SUFFIX/YEAR
+        $voucherNo = $vouchertypes->prefix . '/' . $nextNoFormatted . '/' . $vouchertypes->suffix . '/' . $vouchertypes->applicable_year;
+
+        return response()->json([
+            'voucher_no' => $voucherNo
         ]);
     }
 }

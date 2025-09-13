@@ -130,6 +130,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('qualitychecks', QualitycheckController::class);
     Route::post('getissuetokarigaritemdetails', [QualitycheckController::class, 'getissuetokarigaritemdetails'])->name('getissuetokarigaritemdetails');
     Route::post('getissuetokarigaritemcodedetails', [QualitycheckController::class, 'getissuetokarigaritemcodedetails'])->name('getissuetokarigaritemcodedetails');
+    Route::post('getordertype', [QualitycheckController::class, 'getordertype'])->name('getordertype');
     // For Qualitycheck END
 
     // For Finished product pdi Start
@@ -156,5 +157,4 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/purchase-ledger/{id}/items', [TransactionReportController::class, 'purchase_ledger_items'])->name('purchase-ledger.items');
     Route::get('/sales-register', [TransactionReportController::class, 'sales_register'])->name('sales-register');
     Route::get('/sales-register/{id}/items', [TransactionReportController::class, 'sales_register_items'])->name('sales-register.items');
-
 });

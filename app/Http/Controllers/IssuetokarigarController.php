@@ -314,7 +314,7 @@ class IssuetokarigarController extends Controller
             $karigarhtml = '<select name="kid[]" class="form-select rounded-0"><option value="">Select</option>';
             foreach ($karigars as $karigar) {
                 $selected = $customerorderitem->kid == $karigar->kid ? 'selected' : '';
-                $karigarhtml .= '<option value="' . $karigar->kid . '" ' . $selected . '>' . $karigar->kid . '</option>';
+                $karigarhtml .= '<option value="' . $karigar->kid . '" ' . $selected . '>' . $karigar->kid . '-(' . $karigar->kname . ')' . '</option>';
             }
             $karigarhtml .= '</select>';
 

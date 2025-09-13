@@ -67,9 +67,7 @@
                                                 </td>
                                                   <th scope="row">{{ $count }}</th>
                                                   <td>
-                                                    @foreach($finishproductreceivedentry->karigar as $karigars)
-                                                       {{$karigars->kid}}
-                                                    @endforeach
+                                                   {{ $finishproductreceivedentry->karigar->kid }}
                                                   </td>
                                                   <td>
                                                     {{ $finishproductreceivedentry->karigar_name }}
