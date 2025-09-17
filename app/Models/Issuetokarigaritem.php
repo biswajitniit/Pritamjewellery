@@ -29,6 +29,7 @@ class Issuetokarigaritem extends Model
         'kid',
         'delivery_date',
         'finish_product_received',
+        'quality_check',
     ];
 
     public function karigar()

@@ -11,13 +11,23 @@
 
                     @if(session()->has('success'))
                         <div class="alert alert-success">
-                            {{ session()->get('success') }}
+                            {{ session('success') }}
                         </div>
                     @endif
 
-                    @if(Session::has('error'))
+                    @if(session()->has('error'))
                         <div class="alert alert-danger">
-                        {{ Session::get('error')}}
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
                         </div>
                     @endif
 
@@ -76,14 +86,18 @@
                                 </span>
                                 @enderror
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="form-label">PAN Number</label>
                                 <input type="text" name="pan" value="{{ @$karigars->pan }}" class="form-control rounded-0" />
 
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="form-label">Introducer</label>
                                 <input type="text" name="introducer" value="{{ @$karigars->introducer }}" class="form-control rounded-0" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Karigar Loss</label>
+                                <input type="text" name="karigar_loss" value="{{ @$karigars->karigar_loss }}" class="form-control rounded-0" />
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Remark</label>

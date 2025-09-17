@@ -3,7 +3,7 @@
   <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pritam Jewellery</title>
+  <title>Pritam Jewellers</title>
   <!--favicon-->
 	<link rel="icon" href="{{ asset('assets/images/favicon-32x32.png') }}" type="image/png">
   <!-- loader-->
@@ -45,7 +45,7 @@
             <img src="{{asset('assets/images/logo1.png') }}" class="logo-img" width="45" alt>
           </div>
           <div class="logo-name">
-            <h5 class="mb-0">Pritam Jewellery</h5>
+            <h5 class="mb-0">Pritam Jewellers</h5>
           </div>
         </div>
         <div class="btn-toggle d-xl-none" data-bs-toggle="offcanvas"

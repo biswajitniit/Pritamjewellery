@@ -18,4 +18,10 @@ class Location extends Model
         'created_by',
         'updated_by',
     ];
+
+    // 🔹 One Location can have many Metal Issue Entries
+    public function metalissueentries()
+    {
+        return $this->hasMany(Metalissueentry::class, 'location_id', 'id');
+    }
 }

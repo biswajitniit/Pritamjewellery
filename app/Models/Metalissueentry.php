@@ -8,16 +8,13 @@ class Metalissueentry extends Model
 {
     protected $table = 'metalissueentries';
     protected $primaryKey = 'metal_issue_entries_id';
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+
     protected $fillable = [
         'metal_issue_entries_id',
         'metalissueentries_id',
         'metal_category',
         'location_id',
+        'customer_id',
         'voucher_no',
         'metal_issue_entries_date',
         'karigar_id',
@@ -32,23 +29,33 @@ class Metalissueentry extends Model
         'updated_by',
     ];
 
+    // 🔹 Belongs to a Metal
     public function metal()
     {
-        return $this->hasMany(Metal::class, 'metal_id', 'metal_id');
+        return $this->belongsTo(Metal::class, 'metal_id', 'metal_id');
     }
 
+    // 🔹 Belongs to a Karigar
     public function karigar()
     {
-        return $this->hasMany(Karigar::class, 'id', 'karigar_id');
+        return $this->belongsTo(Karigar::class, 'karigar_id', 'id');
     }
 
+    // 🔹 Belongs to a Metal Purity
     public function metalpurity()
     {
-        return $this->hasMany(Metalpurity::class, 'purity_id', 'purity_id');
+        return $this->belongsTo(Metalpurity::class, 'purity_id', 'purity_id');
     }
 
+    // 🔹 Belongs to a Location
     public function location()
     {
         return $this->belongsTo(Location::class, 'location_id', 'id');
+    }
+
+    // 🔹 Belongs to a Customer
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
 }

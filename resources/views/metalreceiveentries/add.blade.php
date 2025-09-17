@@ -54,7 +54,12 @@
 
                             <div class="col-md-3">
                                 <label class="form-label">Date <span style="color: red">*</span></label>
-                                <input type="date" name="metal_receive_entries_date" value="{{ old('metal_receive_entries_date') }}" max="{{ date('Y-m-d') }}" class="form-control rounded-0 @error('metal_receive_entries_date') is-invalid @enderror" />
+                                <input type="date"
+                                    name="metal_receive_entries_date"
+                                    value="{{ old('metal_receive_entries_date', date('Y-m-d')) }}"
+                                    max="{{ date('Y-m-d') }}"
+                                    class="form-control rounded-0 @error('metal_receive_entries_date') is-invalid @enderror" />
+
                                 @error('metal_receive_entries_date')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -64,7 +69,7 @@
                             <div class="col-md-3"></div>
 
                             <div class="col-md-3">
-                                <label class="form-label">Company ID <span style="color: red">*</span></label>
+                                <label class="form-label">Customer ID <span style="color: red">*</span></label>
                                 <select name="customer_id" class="form-select rounded-0 @error('customer_id') is-invalid @enderror" onchange="GetCustomerDetails(this.value)">
                                     <option value="">Choose...</option>
                                     @forelse($customers as $customer)
@@ -80,7 +85,7 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label">Company Name <span style="color: red">*</span></label>
+                                <label class="form-label">Customer Name <span style="color: red">*</span></label>
                                 <input type="text" name="cust_name" id="cust_name" value="{{ old('cust_name') }}" class="form-control rounded-0 @error('cust_name') is-invalid @enderror" readonly/>
                                 @error('cust_name')
                                     <span class="invalid-feedback" role="alert">

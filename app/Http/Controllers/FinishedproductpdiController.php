@@ -15,22 +15,34 @@ class FinishedproductpdiController extends Controller
     public function index(Request $request)
     {
         $purity = $request->query('purity');
-        $jobNo = $request->query('job_no');
         $kid = $request->query('kid');
+
         $qualitycheckitems = Qualitycheckitem::with('karigar')
             ->when($purity, function ($query, $purity) {
                 return $query->where('purity', $purity);
-            })
-            ->when($jobNo, function ($query, $jobNo) {
-                return $query->where('job_no', 'like', "%{$jobNo}%");
             })
             ->when($kid && $kid !== 'all', function ($query) use ($kid) {
                 return $query->where('karigar_id', $kid);
             })
             ->where('pdi_list', 'No')
-            ->paginate(100); // Optional: paginate results
-        $karigars = Karigar::where('is_active', 'Yes')->orderBy('kname')->get();
-        return view('finishedproductpdis.list', compact('karigars', 'qualitycheckitems'));
+            ->paginate(100);
+
+        // Active karigars with pending (pdi_list = No)
+        $karigars = Karigar::where('is_active', 'Yes')
+            ->whereHas('qualitycheckitems', function ($query) {
+                $query->where('pdi_list', 'No');
+            })
+            ->orderBy('kname')
+            ->get();
+
+        // Distinct purity values where pdi_list = No
+        $purities = Qualitycheckitem::where('pdi_list', 'No')
+            ->select('purity')
+            ->groupBy('purity')
+            ->orderBy('purity')
+            ->pluck('purity');
+
+        return view('finishedproductpdis.list', compact('karigars', 'qualitycheckitems', 'purities', 'purity', 'kid'));
     }
 
     /**
@@ -73,7 +85,7 @@ class FinishedproductpdiController extends Controller
 
 
             Finishedproductpdi::create([
-                'jo_number'            => strip_tags($qualitycheckitems->job_no),
+                'job_no'            => strip_tags($qualitycheckitems->job_no),
                 'item_code'            => strip_tags($qualitycheckitems->item_code),
                 'qty'                  => strip_tags($qualitycheckitems->order_qty),
                 'size'                 => strip_tags($qualitycheckitems->size),

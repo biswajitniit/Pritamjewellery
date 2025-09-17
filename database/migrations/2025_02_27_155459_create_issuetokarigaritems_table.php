@@ -30,6 +30,7 @@ return new class extends Migration
             $table->string('kid')->nullable();
             $table->date('delivery_date')->nullable();
             $table->enum('finish_product_received', ['Yes', 'No'])->default('No');
+            $table->enum('quality_check', ['Yes', 'No'])->default('No');
             $table->timestamps();
         });
     }

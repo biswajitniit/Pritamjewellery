@@ -35,8 +35,9 @@ class Metalpurity extends Model
         return $this->belongsTo(Metalreceiveentry::class);
     }
 
-    public function metalissueentry()
+    // 🔹 One Metal Purity can be used in many issue entries
+    public function metalissueentries()
     {
-        return $this->belongsTo(Metalissueentry::class);
+        return $this->hasMany(Metalissueentry::class, 'purity_id', 'purity_id');
     }
 }

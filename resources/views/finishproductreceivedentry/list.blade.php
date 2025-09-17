@@ -67,10 +67,10 @@
                                                 </td>
                                                   <th scope="row">{{ $count }}</th>
                                                   <td>
-                                                   {{ $finishproductreceivedentry->karigar->kid }}
+                                                   {{ $finishproductreceivedentry->karigar->kid ?? '-' }}
                                                   </td>
                                                   <td>
-                                                    {{ $finishproductreceivedentry->karigar_name }}
+                                                    {{ $finishproductreceivedentry->karigar->kname ?? '-' }}
                                                   </td>
                                                   <td>
                                                     {{ $finishproductreceivedentry->voucher_no }}

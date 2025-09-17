@@ -50,14 +50,36 @@
                                 </span>
                                 @enderror
                             </div>
-                            <div class="col-md-3"></div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Customer ID <span style="color: red;">*</span></label>
+                                <select name="customer_id" class="form-select rounded-0 @error('customer_id') is-invalid @enderror">
+                                    <option value="">Choose...</option>
+                                    @forelse($customers as $customer)
+                                    <option value="{{ $customer->id }}">{{ $customer->cust_name }} ({{ $customer->cid }})</option>
+                                    @empty
+                                    @endforelse
+                                </select>
+                                @error('customer_id')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                                @enderror
+                            </div>
+
                             <div class="col-md-2">
                                 <label class="form-label">Voucher No <span style="color: red;">*</span></label>
                                 <input type="text" name="voucher_no" id="voucher_no" class="form-control rounded-0 text-end" value="" readonly/>
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Date <span style="color: red;">*</span></label>
-                                <input type="date" name="metal_issue_entries_date" class="form-control rounded-0" value="{{ old('metal_issue_entries_date') }}" required/>
+                                <input type="date"
+                                    name="metal_issue_entries_date"
+                                    class="form-control rounded-0 @error('metal_issue_entries_date') is-invalid @enderror"
+                                    value="{{ old('metal_issue_entries_date', date('Y-m-d')) }}"
+                                    max="{{ date('Y-m-d') }}"
+                                    required />
+
                                 @error('metal_issue_entries_date')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -69,7 +91,7 @@
                                 <select name="karigar_id" class="form-select rounded-0 @error('karigar_id') is-invalid @enderror" onchange="GetKarigarDetails(this.value)" required>
                                     <option value="">Choose...</option>
                                     @forelse($karigars as $karigar)
-                                    <option value="{{ $karigar->id }}">{{ $karigar->kid }}</option>
+                                    <option value="{{ $karigar->id }}">{{ $karigar->kid }} - {{ $karigar->kname }}</option>
                                     @empty
                                     @endforelse
                                 </select>

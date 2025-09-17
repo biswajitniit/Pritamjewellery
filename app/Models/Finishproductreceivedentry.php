@@ -19,17 +19,19 @@ class Finishproductreceivedentry extends Model
         'voucher_date',
         'location_id',
         'voucher_no',
-        'purity',
-        'net_wt',
-        'loss',
-        'total_wt',
-        'stone_wt',
+        'voucher_purity',
+        'voucher_net_wt',
+        'voucher_loss',
+        'voucher_total_wt',
+        'voucher_stone_wt',
+        'voucher_mina',
+        'voucher_kundan',
         'created_by',
         'updated_by',
     ];
     public function karigar()
     {
-        return $this->belongsTo(Karigar::class, "karigar_id", "id");
+        return $this->belongsTo(Karigar::class, 'karigar_id', 'id');
     }
 
     public function location()

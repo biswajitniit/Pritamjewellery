@@ -19,15 +19,15 @@
                                 <div class="col-auto">
                                     <label class="col-form-label">Purity</label>
                                 </div>
-                                <div class="col-md-1">
-                                    <input type="text" name="purity" value="91.6" class="form-control" />
-                                </div>
-
-                                <div class="col-auto">
-                                    <label class="col-form-label">Filter By</label>
-                                </div>
                                 <div class="col-md-2">
-                                    <input type="text" name="job_no" placeholder="Job No" value="" class="form-control" />
+                                    <select name="purity" class="form-select">
+                                        <option value="">All</option>
+                                        @foreach($purities as $p)
+                                            <option value="{{ $p }}" {{ $purity == $p ? 'selected' : '' }}>
+                                                {{ $p }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <div class="col-auto">
@@ -37,8 +37,9 @@
                                     <select name="kid" class="form-select">
                                         <option value="all">All</option>
                                         @forelse($karigars as $karigar)
-                                        <option value="{{ $karigar->id }}">{{ $karigar->kid }}</option>
-                                        @empty @endforelse
+                                            <option value="{{ $karigar->id }}">{{ $karigar->kid }} - {{ $karigar->kname }}</option>
+                                        @empty
+                                        @endforelse
                                     </select>
                                 </div>
 
@@ -54,9 +55,9 @@
                                 <div class="card-body">
                                     <div class="table-responsive-xxl">
                                         @if(Session::has('success'))
-                                        <div class="alert alert-success">
-                                            {{ Session::get('success')}}
-                                        </div>
+                                            <div class="alert alert-success">
+                                                {{ Session::get('success') }}
+                                            </div>
                                         @endif
 
                                         <table class="table mb-0 table-striped">
@@ -79,80 +80,78 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @php
-                                                $count=1;
-                                                @endphp @forelse($qualitycheckitems as $qualitycheckitem)
-                                                <tr>
-                                                    <td scope="row">{{ $count }}</td>
-                                                    <td scope="row">{{ $qualitycheckitem->job_no }}</td>
-                                                    <td scope="row">{{ $qualitycheckitem->item_code }}</td>
-                                                    <td scope="row">{{ $qualitycheckitem->receive_qty }}</td>
-                                                    <td scope="row">{{ $qualitycheckitem->uom }}</td>
-                                                    <td scope="row">{{ $qualitycheckitem->size }}</td>
-                                                    <td scope="row">{{ $qualitycheckitem->net_wt }}</td>
-                                                    <td scope="row">{{ $qualitycheckitem->purity }}</td>
-                                                    <td scope="row">
-                                                        @php
-                                                        $getRate = GetItemcodeRate($qualitycheckitem->item_code);
-                                                        @endphp
-                                                        {{ @$getRate->lab_charge }}
-                                                    </td>
-                                                    <td scope="row">
-
-                                                        @php
-                                                        $getALab = GetItemcodeAlabStoneChg($qualitycheckitem->item_code);
-                                                        @endphp
-                                                        @if($getALab && $getALab->category != 'Stone')
-                                                        {{ $getALab->pcs * $getALab->amount  }}
-                                                        @else
-                                                        0.00
-                                                        @endif
-                                                    </td>
-                                                    <td scope="row">
-                                                        @php
-                                                        $getAStone = GetItemcodeAlabStoneChg($qualitycheckitem->item_code);
-                                                        @endphp
-                                                        @if($getAStone && $getAStone->category == 'Stone')
-                                                        {{ $getAStone->pcs * $getAStone->amount  }}
-                                                        @else
-                                                        0.00
-                                                        @endif
-                                                    </td>
-                                                    <td scope="row">
-                                                        {{-- {{ $qualitycheckitem->loss }} --}}
-                                                        @php
-                                                        $getLoss = GetItemcodeLoss($qualitycheckitem->item_code);
-                                                        @endphp
-                                                        {{ @$getLoss->loss }}
-                                                    </td>
-                                                    <td scope="row">
-                                                        <input
-                                                        type="checkbox"
-                                                        name="selectstockout[]"
-                                                        class="stockoutpdilist"
-                                                        value="{{ $qualitycheckitem->receive_qty }},{{ $qualitycheckitem->net_wt }}"
-                                                        >
-                                                    </td>
-                                                    <td>
-                                                        @foreach($qualitycheckitem->karigar as $karigars) {{ $karigars->kid }} @endforeach
-                                                    </td>
-                                                </tr>
-                                                @php
-                                                $count++;
-                                                @endphp
+                                                @php $count = 1; @endphp
+                                                @forelse($qualitycheckitems as $qualitycheckitem)
+                                                    <tr>
+                                                        <td scope="row">{{ $count }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->job_no }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->item_code }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->receive_qty }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->uom }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->size }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->net_wt }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->purity }}</td>
+                                                        <td scope="row">
+                                                            @php
+                                                                $getRate = GetItemcodeRate($qualitycheckitem->item_code);
+                                                            @endphp
+                                                            {{ @$getRate->lab_charge }}
+                                                        </td>
+                                                        <td scope="row">
+                                                            @php
+                                                                $getALab = GetItemcodeAlabStoneChg($qualitycheckitem->item_code);
+                                                            @endphp
+                                                            @if($getALab && $getALab->category != 'Stone')
+                                                                {{ $getALab->pcs * $getALab->amount  }}
+                                                            @else
+                                                                0.00
+                                                            @endif
+                                                        </td>
+                                                        <td scope="row">
+                                                            @php
+                                                                $getAStone = GetItemcodeAlabStoneChg($qualitycheckitem->item_code);
+                                                            @endphp
+                                                            @if($getAStone && $getAStone->category == 'Stone')
+                                                                {{ $getAStone->pcs * $getAStone->amount  }}
+                                                            @else
+                                                                0.00
+                                                            @endif
+                                                        </td>
+                                                        <td scope="row">
+                                                            @php
+                                                                $getLoss = GetItemcodeLoss($qualitycheckitem->item_code);
+                                                            @endphp
+                                                            {{ @$getLoss->loss }}
+                                                        </td>
+                                                        <td scope="row">
+                                                            <input
+                                                                type="checkbox"
+                                                                name="selectstockout[]"
+                                                                class="stockoutpdilist"
+                                                                value="{{ $qualitycheckitem->receive_qty }},{{ $qualitycheckitem->net_wt }}"
+                                                            >
+                                                        </td>
+                                                        <td>
+                                                            {{ optional($qualitycheckitem->karigar)->kid }}
+                                                        </td>
+                                                    </tr>
+                                                    @php $count++; @endphp
                                                 @empty
-                                                <tr class="no-records">
-                                                    <td colspan="14">No record found.</td>
-                                                </tr>
+                                                    <tr class="no-records">
+                                                        <td colspan="14">No record found.</td>
+                                                    </tr>
                                                 @endforelse
                                             </tbody>
                                         </table>
 
-
                                         <div class="d-flex justify-content-end">
                                             <div class="form-row">
-                                                <div class="col">Total Qty <input type="text" id="total_qty" class="form-control" value="" placeholder="Total Qty" readonly /></div>
-                                                <div class="col">Total WT <input type="text" id="total_wt" class="form-control" value="" placeholder="Total WT" readonly /></div>
+                                                <div class="col">
+                                                    Total Qty <input type="text" id="total_qty" class="form-control" value="" placeholder="Total Qty" readonly />
+                                                </div>
+                                                <div class="col">
+                                                    Total WT <input type="text" id="total_wt" class="form-control" value="" placeholder="Total WT" readonly />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -161,8 +160,6 @@
                                                 <input type="submit" name="submit" value="Submit" class="btn btn-grd-danger px-4 rounded-0" />
                                             </div>
                                         </div>
-
-
 
                                     </div>
                                 </div>
@@ -177,6 +174,7 @@
     </div>
 </main>
 <!--end main wrapper-->
+
 
 
 @include('include.footer')

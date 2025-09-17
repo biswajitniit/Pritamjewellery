@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CustomerordertempController extends Controller
 {
@@ -841,10 +842,15 @@ class CustomerordertempController extends Controller
                     \Log::warning("Missing master data for item_code={$item->item_code}, pCode={$pCode}, size={$size}");
                 }
 
+                $firstTwoDigits = Str::substr($item->item_code, 0, 2); // "51"
+
                 // Purity mapping
                 $purities = [
-                    50 => 75,
-                    51 => 91.6,
+                    22 => 91.6,
+                    18 => 75,
+                    14 => 58.3,
+                    9  => 37.5,
+                    24 => 99.9,
                 ];
                 $purity = $purities[$item->kt] ?? 0.00;
 

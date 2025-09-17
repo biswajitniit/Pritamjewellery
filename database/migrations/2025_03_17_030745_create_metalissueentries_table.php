@@ -20,6 +20,9 @@ return new class extends Migration
             $table->unsignedBigInteger('location_id');
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
 
+            $table->unsignedBigInteger('customer_id');
+            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
+
             $table->string('voucher_no')->nullable();
             $table->date('metal_issue_entries_date')->nullable();
 

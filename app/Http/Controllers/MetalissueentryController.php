@@ -36,117 +36,124 @@ class MetalissueentryController extends Controller
     {
         $karigars = Karigar::where('is_active', 'Yes')->orderBy('kid')->get();
         $metals = Metal::where('is_active', 'Yes')->orderBy('metal_name')->get();
-
-        // $lastVoucher = Metalissueentry::orderBy('metal_issue_entries_id', 'desc')->first();
-
-        // if ($lastVoucher) {
-        //     $newNumber = $lastVoucher->metal_issue_entries_id + 1;
-        //     $newVoucherNo = $newNumber . '/' . date('y') . '-' . date('y', strtotime('+1 year'));
-        // } else {
-        //     $newVoucherNo = '1/' . date('y') . '-' . date('y', strtotime('+1 year'));
-        // }
         $locations = Location::get();
-
-        return view('metalissueentries.add', compact('metals', 'karigars', 'locations'));
+        $customers = Customer::where('id', 1)->where('is_active', 'Yes')->orderBy('cust_name')->get();
+        return view('metalissueentries.add', compact('metals', 'karigars', 'locations', 'customers'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
+
     public function store(Request $request)
     {
+        try {
+            DB::beginTransaction();
 
-        // Get voucher type FIRST (before validation to auto-generate vou_no)
-        $voucherType = Vouchertype::where('voucher_type', 'gold_issue_entry')
-            ->where('location_id', $request->location_id)
-            ->first();
+            // 🔹 Validation
+            $validatedData = $request->validate(
+                [
+                    'metal_category'             => 'required|string|max:255',
+                    'metal_issue_entries_date'   => 'required|date',
+                    'karigar_id'                 => 'required|exists:karigars,id',
+                    'metal_id'                   => 'required|exists:metals,metal_id',
+                    'purity_id'                  => 'required|exists:metalpurities,purity_id',
+                    'converted_purity'           => 'required|string|max:255',
+                    'weight'                     => 'required|numeric|min:0.01',
+                    'alloy_gm'                   => 'required|numeric|min:0',
+                    'netweight_gm'               => 'required|numeric|min:0.01',
+                    'location_id'                => 'required|exists:locations,id',
+                    'customer_id'                => 'required|exists:customers,id',
+                ],
+                [
+                    'metal_category.required'           => 'Category is required.',
+                    'metal_issue_entries_date.required' => 'Date is required.',
+                    'karigar_id.required'               => 'Karigar is required.',
+                    'metal_id.required'                 => 'Metal is required.',
+                    'purity_id.required'                => 'Purity is required.',
+                    'converted_purity.required'         => 'Converted Purity is required.',
+                    'weight.required'                   => 'Weight is required.',
+                    'alloy_gm.required'                 => 'Alloy (gm) is required.',
+                    'netweight_gm.required'             => 'Net Weight (gm) is required.',
+                    'location_id.required'              => 'Location is required.',
+                    'customer_id.required'              => 'Customer is required.',
+                ]
+            );
 
-        if (!$voucherType) {
-            return back()->withErrors(['Voucher type not found for this location.']);
-        }
+            // 🔹 Get voucher type FIRST (to auto-generate voucher number)
+            $voucherType = Vouchertype::where('voucher_type', 'gold_issue_entry')
+                ->where('location_id', $request->location_id)
+                ->lockForUpdate() // prevent race conditions
+                ->first();
 
-        // Generate next voucher number
-        $nextNo = (int)$voucherType->lastno + 1;
-        $voucherNo = str_pad($nextNo, 3, '0', STR_PAD_LEFT);
-
-        // Final formatted voucher number
-        //$voucherNoPadded = $voucherType->prefix . '/' . $voucherNo . '/' . $voucherType->applicable_year;
-        $voucherNoPadded = $voucherType->prefix . '/' . $voucherType->lastno . '/' . $voucherType->applicable_year;
-
-        $validatedData = $request->validate(
-            [
-                'metal_category'                         => 'required',
-                'metal_issue_entries_date'               => 'required',
-                'karigar_id'                             => 'required',
-                'metal_id'                               => 'required',
-                'purity_id'                              => 'required',
-                'converted_purity'                       => 'required',
-                'weight'                                 => 'required',
-                'alloy_gm'                               => 'required',
-                'netweight_gm'                           => 'required',
-            ],
-            [
-                'metal_category.required'           => 'Category is Required', // custom message
-                'metal_issue_entries_date.required' => 'Date is Required', // custom message
-                'karigar_id.required'               => 'Kid is Required', // custom message
-                'metal_id.required'                 => 'Metal Name is Required', // custom message
-                'purity_id.required'                => 'Purity is Required', // custom message
-                'converted_purity.required'         => 'Converted Purity is Required', // custom message
-                'weight.required'                   => 'Weight is Required', // custom message
-                'alloy_gm.required'                 => 'Alloy (gm) is Required', // custom message
-                'netweight_gm.required'             => 'NetWeight (gm) is Required', // custom message
-            ]
-        );
-
-        Metalissueentry::create([
-            'metalissueentries_id'         => (string) Str::uuid(),
-            'metal_category'               => $request->metal_category,
-            'location_id'                  => $request->location_id,
-            'voucher_no'                   => $voucherNoPadded,
-            'metal_issue_entries_date'     => $request->metal_issue_entries_date,
-            'karigar_id'                   => strip_tags($request->karigar_id),
-            'karigar_name'                 => strip_tags($request->karigar_name),
-            'metal_id'                     => strip_tags($request->metal_id),
-            'purity_id'                    => strip_tags($request->purity_id),
-            'converted_purity'             => strip_tags($request->converted_purity),
-            'weight'                       => strip_tags($request->weight),
-            'alloy_gm'                     => strip_tags($request->alloy_gm),
-            'netweight_gm'                 => strip_tags($request->netweight_gm),
-            'created_by'                   => Auth::user()->name
-        ]);
-
-        $entries = Metalreceiveentry::where('metal_id', $request->metal_id)
-            ->where('purity_id', $request->purity_id)
-            ->where('balance_qty', '>', 0)
-            ->get();
-
-        $requestWeight = $request->weight;
-
-        foreach ($entries as $entry) {
-            if ($requestWeight <= 0) break;
-
-            $issueQty = min($entry->balance_qty, $requestWeight);
-
-            if (!is_null($entry->issue_qty)) {
-                $entry->issue_qty += $issueQty;
-            } else {
-                $entry->issue_qty = $issueQty;
+            if (!$voucherType) {
+                return back()->withErrors(['Voucher type not found for this location.'])->withInput();
             }
 
-            $entry->balance_qty -= $issueQty;
-            $entry->last_entry_issue_date = now();
-            $entry->last_entry_issue_by = Auth::user()->name;
-            $entry->update();
+            // 🔹 Generate next voucher number (padded)
+            $nextNo    = (int) $voucherType->lastno + 1;
+            $voucherNo = str_pad($nextNo, 3, '0', STR_PAD_LEFT);
 
-            $requestWeight -= $issueQty;
+            // 🔹 Save new entry
+            Metalissueentry::create([
+                'metalissueentries_id'     => (string) Str::uuid(),
+                'metal_category'           => $request->metal_category,
+                'location_id'              => $request->location_id,
+                'customer_id'              => $request->customer_id,
+                'voucher_no'               => $request->voucher_no,
+                'metal_issue_entries_date' => $request->metal_issue_entries_date,
+                'karigar_id'               => $request->karigar_id,
+                'karigar_name'             => $request->karigar_name,
+                'metal_id'                 => $request->metal_id,
+                'purity_id'                => $request->purity_id,
+                'converted_purity'         => $request->converted_purity,
+                'weight'                   => $request->weight,
+                'alloy_gm'                 => $request->alloy_gm,
+                'netweight_gm'             => $request->netweight_gm,
+                'created_by'               => Auth::user()->name,
+            ]);
+
+            // 🔹 Adjust stock from metal receive entries
+            $entries = Metalreceiveentry::where('metal_id', $request->metal_id)
+                ->where('purity_id', $request->purity_id)
+                ->where('balance_qty', '>', 0)
+                ->orderBy('id') // ensure FIFO
+                ->lockForUpdate()
+                ->get();
+
+            $requestWeight = $request->weight;
+
+            foreach ($entries as $entry) {
+                if ($requestWeight <= 0) break;
+
+                $issueQty = min($entry->balance_qty, $requestWeight);
+
+                $entry->issue_qty = ($entry->issue_qty ?? 0) + $issueQty;
+                $entry->balance_qty -= $issueQty;
+                $entry->last_entry_issue_date = now();
+                $entry->last_entry_issue_by   = Auth::user()->name;
+                $entry->save();
+
+                $requestWeight -= $issueQty;
+            }
+
+            // 🔹 Update voucher last number
+            $voucherType->lastno = $voucherNo;
+            $voucherType->save();
+
+            DB::commit();
+
+            return redirect()
+                ->route('metalissueentries.index')
+                ->withSuccess('Metal issue entry created successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return back()->withErrors($e->validator)->withInput();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Something went wrong: ' . $e->getMessage()])
+                ->withInput();
         }
-
-
-        // Update the voucher type's lastno (as INTEGER, not padded)
-        $voucherType->lastno = $voucherNo;
-        $voucherType->save();
-
-        return redirect()->route('metalissueentries.index')->withSuccess('Metal issue entries record created successfully.');
     }
 
     /**

@@ -52,4 +52,10 @@ class Customer extends Model
     {
         return $this->hasMany(Product::class, 'company_id');
     }
+
+    // 🔹 One Customer can have many Metal Issue Entries
+    public function metalissueentries()
+    {
+        return $this->hasMany(Metalissueentry::class, 'customer_id', 'id');
+    }
 }

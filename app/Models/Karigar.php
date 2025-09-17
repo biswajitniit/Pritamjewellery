@@ -23,6 +23,7 @@ class Karigar extends Model
         'pan',
         'remark',
         'introducer',
+        'karigar_loss',
         'gstin',
         'statecode',
         'is_active',
@@ -35,9 +36,10 @@ class Karigar extends Model
         return $this->hasMany(Issuetokarigaritem::class);
     }
 
-    public function metalissueentry()
+    // 🔹 One Karigar can have many Metal Issue Entries
+    public function metalissueentries()
     {
-        return $this->belongsTo(Metalissueentry::class);
+        return $this->hasMany(Metalissueentry::class, 'karigar_id', 'id');
     }
 
     public function products()
@@ -52,6 +54,11 @@ class Karigar extends Model
 
     public function finishproductreceivedentries()
     {
-        return $this->hasMany(Finishproductreceivedentry::class, 'karigar_id');
+        return $this->hasMany(Finishproductreceivedentry::class, 'karigar_id', 'id');
+    }
+
+    public function qualitycheckitems()
+    {
+        return $this->hasMany(Qualitycheckitem::class, 'karigar_id', 'id');
     }
 }

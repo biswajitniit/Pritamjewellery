@@ -56,11 +56,10 @@
                                 <div class="col-md-1">
                                     <label class="form-label">KID</label>
                                     <select name="karigar_id" class="form-select rounded-0" onchange="Get_issue_to_karigar_items(this.value)">
-                                        <option selected>Selection Karigar</option>
-                                        @forelse($issuetokarigaritems as $issuetokarigaritem)
-                                        <option value="{{ $issuetokarigaritem->kid }}"> {{ $issuetokarigaritem->kid }} </option>
-                                        @empty
-                                        @endforelse
+                                        <option value="">-- Select Karigar --</option>
+                                        @foreach ($karigars as $karigar)
+                                            <option value="{{ $karigar->kid }}">{{ $karigar->kid }} - {{ $karigar->kname }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
 
@@ -83,12 +82,11 @@
                                 </div>
                             </div>
                             <div class="row g-2 mb-1">
-                                {{-- <div class="col-md-1"><label class="form-label">Jo No</label></div> --}}
-                                <div class="col-md-1"><label class="form-label">Item Code</label></div>
+                                <div class="col-md-1-5"><label class="form-label">Item Code</label></div>
                                 <div class="col-md-1-5"><label class="form-label">Design</label></div>
-                                <div class="col-md-0-8"><label class="form-label">Size</label></div>
-                                <div class="col-md-0-8"><label class="form-label">UOM</label></div>
-                                <div class="col-md-0-8"><label class="form-label">Qty.</label></div>
+                                <div class="col-md-0-7"><label class="form-label">Size</label></div>
+                                <div class="col-md-0-7"><label class="form-label">UOM</label></div>
+                                <div class="col-md-0-7"><label class="form-label">Qty.</label></div>
                                 <div class="col-md-0-8"><label class="form-label">Purity</label></div>
                                 <div class="col-md-0-8"><label class="form-label">Gross Wt</label></div>
                                 <div class="col-md-0-8"><label class="form-label">Stone Wt</label></div>
@@ -96,9 +94,10 @@
                                 <div class="col-md-0-8"><label class="form-label">Mina</label></div>
                                 <div class="col-md-0-7"><label class="form-label">Loss%</label></div>
                                 <div class="col-md-0-7"><label class="form-label">Loss Wt</label></div>
-                                <div class="col-md-0-8"><label class="form-label">Pure</label></div>
-                                <div class="col-md-0-8"><label class="form-label">Net</label></div>
+                                <div class="col-md-0-8"><label class="form-label">Pure Wt</label></div>
+                                <div class="col-md-0-7"><label class="form-label">Net Wt</label></div>
                             </div>
+
                             <div id="issue_to_karigar_items"></div>
 
                             <div class="card-header py-3 px-4">
@@ -112,7 +111,10 @@
                             <div class="row m-2">
                                 <div class="col-md-2">
                                     <label class="form-label">Date</label>
-                                    <input type="date" name="voucher_date" class="form-control" />
+                                    <input type="date" name="voucher_date"
+                                        value="{{ old('voucher_date', now()->format('Y-m-d')) }}"
+                                        class="form-control"
+                                        max="{{ date('Y-m-d') }}" />
                                 </div>
 
                                 <div class="col-md-2">
@@ -121,38 +123,38 @@
                                 </div>
 
                                 <div class="col-md-1">
-                                    <label class="form-label">Purity</label>
-                                    <input type="text" name="voucher_purity" class="form-control" />
+                                    <label class="form-label">Pure Wt</label>
+                                    <input type="text" name="voucher_purity" id="voucher_purity" class="form-control" />
                                 </div>
 
                                 <div class="col-md-1">
                                     <label class="form-label">Net Wt</label>
-                                    <input type="text" name="voucher_net_wt" class="form-control" />
+                                    <input type="text" name="voucher_net_wt" id="voucher_net_wt" class="form-control" />
                                 </div>
 
                                 <div class="col-md-1">
                                     <label class="form-label">Loss</label>
-                                    <input type="text" name="voucher_loss" class="form-control" />
+                                    <input type="text" name="voucher_loss" id="voucher_loss" class="form-control" />
                                 </div>
 
                                 <div class="col-md-1">
                                     <label class="form-label">Total Wt</label>
-                                    <input type="text" name="voucher_total_wt" class="form-control" />
+                                    <input type="text" name="voucher_total_wt" id="voucher_total_wt" class="form-control" />
                                 </div>
 
                                 <div class="col-md-1">
                                     <label class="form-label">Stone Wt</label>
-                                    <input type="text" name="voucher_stone_wt" class="form-control" />
+                                    <input type="text" name="voucher_stone_wt" id="voucher_stone_wt" class="form-control" />
                                 </div>
 
                                 <div class="col-md-1">
                                     <label class="form-label">Mina</label>
-                                    <input type="text" name="voucher_mina" class="form-control" />
+                                    <input type="text" name="voucher_mina" id="voucher_mina" class="form-control" />
                                 </div>
 
                                 <div class="col-md-1">
                                     <label class="form-label">Kundan</label>
-                                    <input type="text" name="voucher_kundan" class="form-control" />
+                                    <input type="text" name="voucher_kundan" id="voucher_kundan" class="form-control" />
                                 </div>
                             </div>
 

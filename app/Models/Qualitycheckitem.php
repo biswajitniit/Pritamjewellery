@@ -49,6 +49,6 @@ class Qualitycheckitem extends Model
 
     public function karigar()
     {
-        return $this->hasMany(Karigar::class, 'id', 'karigar_id');
+        return $this->belongsTo(Karigar::class, 'karigar_id', 'id');
     }
 }

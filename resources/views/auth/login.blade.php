@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Pritam Jewellery</title>
+        <title>Pritam Jewellers</title>
         <!--favicon-->
         <link rel="icon" href="assets/images/favicon-32x32.png" type="image/png" />
         <!-- loader-->
@@ -37,7 +37,7 @@
                             <div class="text-center">
 
                                     <img src="assets/images/logo1.png" alt />
-                                    <h4>Pritam Jewellery</h4>
+                                    <h4>Pritam Jewellers</h4>
 
                             </div>
 

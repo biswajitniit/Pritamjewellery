@@ -35,10 +35,6 @@ class Metal extends Model
         return $this->belongsTo(Metalreceiveentry::class);
     }
 
-    public function metalissueentry()
-    {
-        return $this->belongsTo(Metalissueentry::class);
-    }
 
 
     public function purchaseItems()
@@ -50,5 +46,11 @@ class Metal extends Model
     public function saleItems()
     {
         return $this->morphMany(SaleItem::class, 'itemable');
+    }
+
+    // 🔹 One Metal can have many issue entries
+    public function metalissueentries()
+    {
+        return $this->hasMany(Metalissueentry::class, 'metal_id', 'metal_id');
     }
 }

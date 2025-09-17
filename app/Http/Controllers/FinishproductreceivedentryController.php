@@ -8,6 +8,7 @@ use App\Models\Finishproductreceivedentryitem;
 use App\Models\Issuetokarigaritem;
 use App\Models\Karigar;
 use App\Models\Location;
+use App\Models\Product;
 use App\Models\Vouchertype;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,10 +28,14 @@ class FinishproductreceivedentryController extends Controller
      */
     public function create()
     {
-        // $issuetokarigaritems = Issuetokarigaritem::with('karigar')->where('finish_product_received', 'No')->get();
-        $issuetokarigaritems = Issuetokarigaritem::select('kid')->where('finish_product_received', 'No')->distinct()->get();
+        $karigars = Karigar::whereIn('kid', function ($query) {
+            $query->select('kid')
+                ->from('issuetokarigaritems')
+                ->where('finish_product_received', 'No')
+                ->where('quality_check', 'Yes');
+        })->get();
         $locations = Location::get();
-        return view('finishproductreceivedentry.add', compact('issuetokarigaritems', 'locations'));
+        return view('finishproductreceivedentry.add', compact('karigars', 'locations'));
     }
 
     /**
@@ -47,22 +52,21 @@ class FinishproductreceivedentryController extends Controller
             ]
         );
 
-        // Get voucher type FIRST (before validation to auto-generate vou_no)
-        $voucherType = Vouchertype::where('voucher_type', 'finished_goods_entry')
+        // 🔹 Lock voucher type row to prevent duplicate voucher numbers
+        $voucherType = Vouchertype::where('voucher_type', 'quality_check')
             ->where('location_id', $request->location_id)
+            ->lockForUpdate() // prevents race conditions
             ->first();
 
         if (!$voucherType) {
             return back()->withErrors(['Voucher type not found for this location.']);
         }
 
-        // Generate next voucher number
-        $nextNo = (int)$voucherType->lastno + 1;
+        // 🔹 Generate next voucher number (padded)
+        $nextNo = (int) $voucherType->lastno + 1;
         $voucherNo = str_pad($nextNo, 3, '0', STR_PAD_LEFT);
 
-        // Final formatted voucher number
-        //$voucherNoPadded = $voucherType->prefix . '/' . $voucherNo . '/' . $voucherType->applicable_year;
-        $voucherNoPadded = $voucherType->prefix . '/' . $voucherType->lastno . '/' . $voucherType->applicable_year;
+
 
 
 
@@ -77,7 +81,7 @@ class FinishproductreceivedentryController extends Controller
             'bal'                  => strip_tags($request->bal),
             'voucher_date'         => strip_tags($request->voucher_date),
             'location_id'          => strip_tags($request->location_id),
-            'voucher_no'           => $voucherNoPadded,
+            'voucher_no'           => $request->voucher_no,
             'voucher_purity'       => strip_tags($request->voucher_purity),
             'voucher_net_wt'       => strip_tags($request->voucher_net_wt),
             'voucher_loss'         => strip_tags($request->voucher_loss),
@@ -112,9 +116,10 @@ class FinishproductreceivedentryController extends Controller
             ]);
         }
 
-        // Update the voucher type's lastno (as INTEGER, not padded)
-        $voucherType->lastno = $voucherNo;
+        // 🔹 Update the voucher type's lastno with padded value
+        $voucherType->lastno = $voucherNo; // ✅ stores 001, 002, etc.
         $voucherType->save();
+
         return redirect()->route('finishproductreceivedentries.index')->withSuccess('Finished Product Received record created successfully.');
     }
 
@@ -154,6 +159,7 @@ class FinishproductreceivedentryController extends Controller
     {
         $issuetokarigaritems = Issuetokarigaritem::where('kid', $request->kid)
             ->where('finish_product_received', 'No')
+            ->where('quality_check', 'Yes')
             ->get();
 
         $html = '';
@@ -162,6 +168,14 @@ class FinishproductreceivedentryController extends Controller
 
         foreach ($issuetokarigaritems as $item) {
             $purity = GetProductPurity($item->item_code);
+
+            $isReadOnly = substr($item->item_code, -2) === '00';
+            $readonlyAttr = $isReadOnly ? 'readonly' : '';
+            $defaultValue = $isReadOnly ? '0.00' : '';
+
+
+            $loss_percentage = Karigar::where('kid', $item->kid)->value('karigar_loss') ?? Product::where('item_code', $item->item_code)->value('loss') ?? 0;
+
 
             for ($i = 0; $i < $item->qty; $i++) {
                 $html .= '<div class="row g-2 mb-2 row_id_' . $count . '">';
@@ -172,7 +186,7 @@ class FinishproductreceivedentryController extends Controller
 
                 $html .= '<input type="hidden" name="job_no[]" value="' . $item->job_no . '">';
 
-                $html .= '<div class="col-md-1">
+                $html .= '<div class="col-md-1-5">
                             <input type="text" name="item_code[]" id="item_code_' . $count . '" class="form-control form-control-sm rounded-0" value="' . $item->item_code . '" readonly>
                         </div>';
 
@@ -181,15 +195,15 @@ class FinishproductreceivedentryController extends Controller
                             <input type="text" name="description[]" id="description_' . $count . '" class="form-control form-control-sm rounded-0" value="' . $item->description . '" readonly>
                         </div>';
 
-                $html .= '<div class="col-md-0-8">
+                $html .= '<div class="col-md-0-7">
                             <input type="text" name="size[]" id="size_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $item->size . '" readonly>
                         </div>';
 
-                $html .= '<div class="col-md-0-8">
+                $html .= '<div class="col-md-0-7">
                             <input type="text" name="uom[]" id="uom_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $item->uom . '" readonly>
                         </div>';
 
-                $html .= '<div class="col-md-0-8">
+                $html .= '<div class="col-md-0-7">
                             <input type="hidden" name="hidden_qty[]" id="hidden_qty_' . $count . '" class="gettotalqty" value="1">
                             <input type="text" name="qty[]" id="qty_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="1">
                         </div>';
@@ -202,31 +216,34 @@ class FinishproductreceivedentryController extends Controller
                             <input type="text" name="gross_wt[]" id="gross_wt_' . $count . '" class="form-control form-control-sm rounded-0 text-end" onkeyup="netwtcalculation(' . $count . ')">
                         </div>';
 
+                // Stone Wt
                 $html .= '<div class="col-md-0-8">
-                            <input type="text" name="st_weight[]" id="st_weight_' . $count . '" class="form-control form-control-sm rounded-0 text-end" onkeyup="netwtcalculation(' . $count . ')">
+                            <input type="text" name="st_weight[]" id="st_weight_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $defaultValue . '" onkeyup="netwtcalculation(' . $count . ')" ' . $readonlyAttr . '>
                         </div>';
 
+                // K.Excess
                 $html .= '<div class="col-md-0-8">
-                            <input type="text" name="k_excess[]" id="k_excess_' . $count . '" class="form-control form-control-sm rounded-0 text-end" onkeyup="netwtcalculation(' . $count . ')">
+                            <input type="text" name="k_excess[]" id="k_excess_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $defaultValue . '" onkeyup="netwtcalculation(' . $count . ')" ' . $readonlyAttr . '>
                         </div>';
 
+                // Mina
                 $html .= '<div class="col-md-0-8">
-                            <input type="text" name="mina[]" id="mina_' . $count . '" class="form-control form-control-sm rounded-0 text-end" onkeyup="netwtcalculation(' . $count . ')">
+                    <input type="text" name="mina[]" id="mina_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $defaultValue . '" onkeyup="netwtcalculation(' . $count . ')" ' . $readonlyAttr . '>
+                </div>';
+
+                $html .= '<div class="col-md-0-7">
+                            <input type="text" name="loss_percentage[]" id="loss_percentage_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $loss_percentage . '" onkeyup="losswtcalculation(' . $count . ')">
                         </div>';
 
                 $html .= '<div class="col-md-0-7">
-                            <input type="text" name="loss_percentage[]" id="loss_percentage_' . $count . '" class="form-control form-control-sm rounded-0 text-end" onkeyup="losswtcalculation(' . $count . ')">
-                        </div>';
-
-                $html .= '<div class="col-md-0-7">
-                            <input type="text" name="loss_wt[]" id="loss_wt_' . $count . '" class="form-control form-control-sm rounded-0 text-end">
+                            <input type="text" name="loss_wt[]" id="loss_wt_' . $count . '" class="form-control form-control-sm rounded-0 text-end" readonly>
                         </div>';
 
                 $html .= '<div class="col-md-0-8">
                             <input type="text" name="pure[]" id="pure_' . $count . '" class="form-control form-control-sm rounded-0 text-end">
                         </div>';
 
-                $html .= '<div class="col-md-0-8">
+                $html .= '<div class="col-md-0-7">
                             <input type="text" name="net[]" id="net_' . $count . '" class="form-control form-control-sm rounded-0 text-end">
                         </div>';
 
@@ -243,89 +260,6 @@ class FinishproductreceivedentryController extends Controller
         ]);
     }
 
-
-
-    /*
-    public function getissuetokarigaritems(Request $request)
-    {
-        $issuetokarigaritems = Issuetokarigaritem::where('kid', $request->kid)
-            ->where('finish_product_received', 'No')
-            ->get();
-
-        $html = '';
-        $count = 1;
-        $bal = 0;
-
-        foreach ($issuetokarigaritems as $item) {
-            $purity = GetProductPurity($item->item_code);
-
-            $html .= '<div class="row g-2 mb-2 row_id_' . $count . '">';
-
-            $html .= '<div class="col-md-1">
-            <input type="text" name="job_no[]" id="job_no_' . $count . '" class="form-control form-control-sm rounded-0" value="' . $item->job_no . '" readonly>
-        </div>';
-
-            $html .= '<div class="col-md-1-5">
-            <input type="text" name="item_code[]" id="item_code_' . $count . '" class="form-control form-control-sm rounded-0" value="' . $item->item_code . '" readonly>
-        </div>';
-
-            $html .= '<div class="col-md-1-5">
-            <input type="hidden" name="design[]" value="' . $item->design . '">
-            <input type="text" name="description[]" id="description_' . $count . '" class="form-control form-control-sm rounded-0" value="' . $item->description . '" readonly>
-        </div>';
-
-            $html .= '<div class="col-md-0-8">
-            <input type="text" name="size[]" id="size_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $item->size . '" readonly>
-        </div>';
-
-            $html .= '<div class="col-md-0-8">
-            <input type="text" name="uom[]" id="uom_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $item->uom . '" readonly>
-        </div>';
-
-            $html .= '<div class="col-md-0-8">
-            <input type="hidden" name="hidden_qty[]" id="hidden_qty_' . $count . '" class="gettotalqty" value="' . $item->qty . '">
-            <input type="text" name="qty[]" id="qty_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $item->qty . '">
-        </div>';
-
-            $html .= '<div class="col-md-0-8">
-            <input type="text" name="purity[]" id="purity_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $purity->purity . '">
-        </div>';
-
-            $html .= '<div class="col-md-0-8">
-            <input type="text" name="gross_wt[]" id="gross_wt_' . $count . '" class="form-control form-control-sm rounded-0 text-end">
-        </div>';
-
-            $html .= '<div class="col-md-0-8">
-            <input type="text" name="st_weight[]" id="st_weight_' . $count . '" class="form-control form-control-sm rounded-0 text-end">
-        </div>';
-
-            $html .= '<div class="col-md-0-8">
-            <input type="text" name="k_excess[]" id="k_excess_' . $count . '" class="form-control form-control-sm rounded-0 text-end">
-        </div>';
-
-            $html .= '<div class="col-md-0-8">
-            <input type="text" name="mina[]" id="mina_' . $count . '" class="form-control form-control-sm rounded-0 text-end">
-        </div>';
-
-            $html .= '<div class="col-md-0-8">
-            <input type="text" name="pure[]" id="pure_' . $count . '" class="form-control form-control-sm rounded-0 text-end">
-        </div>';
-
-            $html .= '<div class="col-md-0-8">
-            <input type="text" name="net[]" id="net_' . $count . '" class="form-control form-control-sm rounded-0 text-end">
-        </div>';
-
-            $html .= '</div>'; // End of row
-
-            $bal += $item->qty;
-            $count++;
-        }
-
-        return response()->json([
-            'ohtml' => $html,
-            'obal'  => $bal,
-        ]);
-    }*/
     public function getkarigardetailsissuetokarigaritems(Request $request)
     {
         $karigar = Karigar::where('kid', $request->kid)->first();

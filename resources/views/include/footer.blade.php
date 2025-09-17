@@ -4,7 +4,7 @@
 
 <!--start footer-->
 <footer class="page-footer">
-    <p class="mb-0">Copyright © {{date('Y')}}. All right reserved, Pritam Jewellery.</p>
+    <p class="mb-0">Copyright © {{date('Y')}}. All right reserved, Pritam Jewellers.</p>
 </footer>
 <!--top footer-->
 
@@ -1124,14 +1124,43 @@
         let k_excess = parseFloat($('#k_excess_' + count).val()) || 0;
         let mina = parseFloat($('#mina_' + count).val()) || 0;
         let purity = parseFloat($('#purity_' + count).val()) || 0;
+        let loss_percentage = parseFloat($('#loss_percentage_' + count).val()) || 0;
 
+        // 1️⃣ Net Wt
         let net = gross_wt - st_weight - k_excess - mina;
+        $('#net_' + count).val(net.toFixed(3));
 
-        //Pure calculation
-        let pure = ((net * purity) / 100);
+        // 2️⃣ Loss Wt
+        let losswt = (net * loss_percentage) / 100;
+        $('#loss_wt_' + count).val(losswt.toFixed(3));
 
-        $('#net_' + count).val(net.toFixed(3)); // round to 3 decimals if needed
-        $('#pure_' + count).val(pure.toFixed(3)); // round to 3 decimals if needed
+        // 3️⃣ Pure
+        let pure = ((net - losswt) * purity) / 100;
+        $('#pure_' + count).val(pure.toFixed(3));
+
+        // 4️⃣ Update Voucher Totals
+        calculateVoucherTotals();
+    }
+
+    function calculateVoucherTotals() {
+        let totalPure = 0, totalNet = 0, totalLoss = 0, totalGross = 0, totalStone = 0, totalMina = 0, totalKundan = 0, totalkexcess = 0;
+
+        document.querySelectorAll('input[name="pure[]"]').forEach(el => totalPure += parseFloat(el.value) || 0);
+        document.querySelectorAll('input[name="net[]"]').forEach(el => totalNet += parseFloat(el.value) || 0);
+        document.querySelectorAll('input[name="loss_wt[]"]').forEach(el => totalLoss += parseFloat(el.value) || 0);
+        document.querySelectorAll('input[name="gross_wt[]"]').forEach(el => totalGross += parseFloat(el.value) || 0);
+        document.querySelectorAll('input[name="st_weight[]"]').forEach(el => totalStone += parseFloat(el.value) || 0);
+        document.querySelectorAll('input[name="mina[]"]').forEach(el => totalMina += parseFloat(el.value) || 0);
+        document.querySelectorAll('input[name="kundan[]"]').forEach(el => totalKundan += parseFloat(el.value) || 0);
+        document.querySelectorAll('input[name="k_excess[]"]').forEach(el => totalkexcess += parseFloat(el.value) || 0);
+
+        $('#voucher_purity').val(totalPure.toFixed(3));
+        $('#voucher_net_wt').val(totalNet.toFixed(3));
+        $('#voucher_loss').val(totalLoss.toFixed(3));
+        $('#voucher_total_wt').val(totalGross.toFixed(3));
+        $('#voucher_stone_wt').val(totalStone.toFixed(3));
+        $('#voucher_mina').val(totalMina.toFixed(3));
+        $('#voucher_kundan').val(totalkexcess.toFixed(3));
     }
 
     function losswtcalculation(count){
