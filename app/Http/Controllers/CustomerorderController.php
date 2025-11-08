@@ -42,7 +42,13 @@ class CustomerorderController extends Controller
      */
     public function create(Request $request)
     {
-        $customers    = Customer::where('is_active', 'Yes')->orderBy('cust_name')->get();
+        //$customers    = Customer::where('is_active', 'Yes')->orderBy('cust_name')->get();
+        $customers = Customer::where('is_active', 'Yes')
+            ->select('id', 'cust_name', 'cid', 'is_validation')
+            ->orderBy('cust_name')
+            ->get();
+
+
         $products    = Product::orderBy('item_code')->get();
 
         $type = $request->query('type'); // 'bulk' or 'manual'
@@ -61,6 +67,7 @@ class CustomerorderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    /*
     public function store(Request $request)
     {
 
@@ -143,7 +150,116 @@ class CustomerorderController extends Controller
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }*/
+
+
+    public function store(Request $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            // 🔹 Find the selected customer
+            $customer = Customer::find($request->customer_id);
+
+            // 🔹 Define base validation rules (always required)
+            $rules = [
+                'customer_id' => 'required|exists:customers,id',
+                'jo_date'     => 'required|date',
+            ];
+
+            // 🔹 Conditional rule for JO No
+            if ($customer && $customer->is_validation === 'Yes') {
+                $rules['jo_no'] = 'required|string|max:255|unique:customerorders,jo_no';
+            } else {
+                // Optional if validation = No, but still check uniqueness if provided
+                $rules['jo_no'] = 'nullable|string|max:255|unique:customerorders,jo_no';
+            }
+
+            // 🔹 Validate request
+            $validated = $request->validate($rules);
+
+            // 🔹 Fetch temporary orders
+            $tempOrders = Customerordertemp::with('customerordertempitems')
+                ->where('jo_no', $request->jo_no)
+                ->get();
+
+            if ($tempOrders->isEmpty()) {
+                return back()->with('error', 'No temporary orders found for this JO No.');
+            }
+
+            foreach ($tempOrders as $tempOrder) {
+                // 🔹 Check for duplicate JO No if validation is ON
+                if ($customer && $customer->is_validation === 'Yes') {
+                    $existingOrder = Customerorder::where('jo_no', $tempOrder->jo_no)->first();
+                    if ($existingOrder) {
+                        DB::rollBack();
+                        return back()->with('error', 'JO No already exists. Duplicate upload is not allowed.');
+                    }
+                }
+
+                // 🔹 Create new customer order
+                $newOrder = Customerorder::create([
+                    'jo_no'       => $tempOrder->jo_no,
+                    'customer_id' => $tempOrder->customer_id,
+                    'jo_date'     => $tempOrder->jo_date,
+                    'order_type'  => $tempOrder->order_type,
+                    'type'        => $tempOrder->type,
+                    'created_by'  => $tempOrder->created_by,
+                    'updated_by'  => $tempOrder->updated_by,
+                    'created_at'  => $tempOrder->created_at,
+                    'updated_at'  => $tempOrder->updated_at,
+                ]);
+
+                // 🔹 Clone related temp items into permanent order items
+                foreach ($tempOrder->customerordertempitems as $tempItem) {
+                    $getkid = Product::with('karigar')
+                        ->where('item_code', $tempItem->item_code)
+                        ->first();
+                    $kid = $getkid?->karigar?->kid ?? '';
+
+                    Customerorderitem::create([
+                        'order_id'       => $newOrder->id,
+                        'sl_no'          => $tempItem->sl_no,
+                        'item_code'      => $tempItem->item_code,
+                        'kid'            => $kid,
+                        'design'         => $tempItem->design,
+                        'description'    => $tempItem->description,
+                        'size'           => $tempItem->size,
+                        'finding'        => $tempItem->finding,
+                        'uom'            => $tempItem->uom,
+                        'kt'             => $tempItem->kt,
+                        'std_wt'         => $tempItem->std_wt,
+                        'conv_wt'        => $tempItem->conv_wt,
+                        'ord_qty'        => $tempItem->ord_qty,
+                        'ord_qty_actual' => $tempItem->ord_qty,
+                        'total_wt'       => $tempItem->total_wt,
+                        'lab_chg'        => $tempItem->lab_chg,
+                        'stone_chg'      => $tempItem->stone_chg,
+                        'add_l_chg'      => $tempItem->add_l_chg,
+                        'total_value'    => $tempItem->total_value,
+                        'loss_percent'   => $tempItem->loss_percent,
+                        'min_wt'         => $tempItem->min_wt,
+                        'max_wt'         => $tempItem->max_wt,
+                        'ord'            => $tempItem->ord,
+                        'delivery_date'  => $tempItem->delivery_date,
+                    ]);
+                }
+
+                // 🔹 Delete temp data after successful transfer
+                $tempOrder->customerordertempitems()->delete();
+                $tempOrder->delete();
+            }
+
+            DB::commit();
+
+            return redirect()->route('customerorders.index')->withSuccess('Customer orders record created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Customer Order Store Error: ' . $e->getMessage());
+            return back()->with('error', 'Something went wrong: ' . $e->getMessage());
+        }
     }
+
 
     /**
      * Store a newly Manual created resource in storage.

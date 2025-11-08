@@ -43,22 +43,27 @@
                             <form class="row g-3" action="<?php echo e(route('customerorders.store.manual')); ?>" method="POST" name="saveCustomerorders" enctype="multipart/form-data">
                                 <?php echo csrf_field(); ?>
                                     <div class="row m-3">
+                                        
                                         <div class="col-md-3">
                                             <label class="form-label">Selection of Customer <span style="color: red">*</span></label>
-                                            <select name="customer_id" id="customer_id" class="form-select rounded-0 <?php $__errorArgs = ['stone_chg'];
+                                            
+                                        <select name="customer_id" id="customer_id" 
+                                                class="form-select rounded-0 <?php $__errorArgs = ['stone_chg'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" required readonly>
-                                                <option value="">Customer Selection</option>
-                                                <?php $__empty_1 = true; $__currentLoopData = $customers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $customer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                                                <option value="<?php echo e($customer->id); ?>"><?php echo e($customer->cust_name); ?>(<?php echo e($customer->cid); ?>)</option>
-                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                                <?php endif; ?>
-                                            </select>
+unset($__errorArgs, $__bag); ?>" required>
+                                            <option value="">Customer Selection</option>
+                                            <?php $__empty_1 = true; $__currentLoopData = $customers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $customer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                                <option value="<?php echo e($customer->id); ?>" data-validation="<?php echo e($customer->is_validation); ?>">
+                                                    <?php echo e($customer->cust_name); ?>(<?php echo e($customer->cid); ?>)
+                                                </option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                            <?php endif; ?>
+                                        </select>
                                             <?php $__errorArgs = ['customer_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -72,6 +77,7 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                                         </div>
+
 
                                         <div class="col-md-2">
                                             <label class="form-label">JO No <span style="color: red">*</span></label>

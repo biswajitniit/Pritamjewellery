@@ -1729,6 +1729,36 @@
             toggleValidation(validation);
         }
     });
+
+    /* This is a customer order menual page */
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const customerSelect = document.getElementById('customer_id');
+        const joNoInput = document.querySelector('input[name="job_no"]');
+        const joNoLabel = joNoInput.closest('div').querySelector('label span[style*="color: red"], label .text-danger');
+
+        function toggleJOValidation(validationStatus) {
+            if (validationStatus === 'No') {
+                joNoInput.removeAttribute('required');
+                if (joNoLabel) joNoLabel.style.display = 'none';
+            } else {
+                joNoInput.setAttribute('required', true);
+                if (joNoLabel) joNoLabel.style.display = 'inline';
+            }
+        }
+
+        customerSelect.addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const validation = selectedOption.getAttribute('data-validation');
+            toggleJOValidation(validation);
+        });
+
+        const preselected = customerSelect.options[customerSelect.selectedIndex];
+        if (preselected) {
+            const validation = preselected.getAttribute('data-validation');
+            toggleJOValidation(validation);
+        }
+    });
 </script>
 @yield('scripts')
 </body>

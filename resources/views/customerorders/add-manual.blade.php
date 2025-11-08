@@ -41,7 +41,7 @@
                             <form class="row g-3" action="{{ route('customerorders.store.manual') }}" method="POST" name="saveCustomerorders" enctype="multipart/form-data">
                                 @csrf
                                     <div class="row m-3">
-                                        <div class="col-md-3">
+                                        {{-- <div class="col-md-3">
                                             <label class="form-label">Selection of Customer <span style="color: red">*</span></label>
                                             <select name="customer_id" id="customer_id" class="form-select rounded-0 @error('stone_chg') is-invalid @enderror" required readonly>
                                                 <option value="">Customer Selection</option>
@@ -55,7 +55,27 @@
                                                 <strong>{{ $message }}</strong>
                                             </span>
                                             @enderror
+                                        </div> --}}
+                                        <div class="col-md-3">
+                                            <label class="form-label">Selection of Customer <span style="color: red">*</span></label>
+                                            
+                                        <select name="customer_id" id="customer_id" 
+                                                class="form-select rounded-0 @error('stone_chg') is-invalid @enderror" required>
+                                            <option value="">Customer Selection</option>
+                                            @forelse($customers as $customer)
+                                                <option value="{{ $customer->id }}" data-validation="{{ $customer->is_validation }}">
+                                                    {{ $customer->cust_name }}({{ $customer->cid }})
+                                                </option>
+                                            @empty
+                                            @endforelse
+                                        </select>
+                                            @error('customer_id')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                            @enderror
                                         </div>
+
 
                                         <div class="col-md-2">
                                             <label class="form-label">JO No <span style="color: red">*</span></label>
