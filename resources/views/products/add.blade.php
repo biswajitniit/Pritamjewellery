@@ -30,7 +30,7 @@
                             <h5>Product Details</h5>
                             <hr />
 
-                            <div class="col-md-3">
+                            {{-- <div class="col-md-3">
                                 <label class="form-label">Company <span style="color: red;">*</span></label>
                                 <select name="company_id" class="form-select rounded-0 @error('company_id') is-invalid @enderror">
                                     <option value="">Choose...</option>
@@ -43,7 +43,20 @@
                                     <strong>{{ $message }}</strong>
                                 </span>
                                 @enderror
+                            </div> --}}
+
+                            <div class="col-md-3">
+                                <label class="form-label">Company <span class="text-danger">*</span></label>
+                                <select name="company_id" id="company_id" class="form-select rounded-0" required>
+                                    <option value="">Choose...</option>
+                                    @foreach($customers as $customer)
+                                        <option value="{{ $customer->id }}" data-validation="{{ $customer->is_validation }}">
+                                            {{ $customer->cust_name }} ({{ $customer->cid }})
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
+
 
                             <div class="col-md-3">
                                 <label class="form-label">Vendor Site <span style="color: red;">*</span></label>

@@ -1663,6 +1663,72 @@
             });
         } 
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const companySelect = document.getElementById('company_id');
+
+        // Define which fields should always remain required
+        const alwaysRequiredFields = [
+            'company_id',
+            'vendorsite',
+            'item_code',
+            'design_num',
+            'description'
+        ];
+
+        // All other fields that are optional when validation is "No"
+        const allFormFields = document.querySelectorAll(
+            'input[required], select[required], textarea[required]'
+        );
+
+        // Red * marks
+        const redStars = document.querySelectorAll('label span[style*="color: red"], label .text-danger');
+
+        // Function to enable/disable validation dynamically
+        function toggleValidation(validationStatus) {
+            if (validationStatus === 'No') {
+                // Remove required from all fields
+                allFormFields.forEach(el => {
+                    const fieldName = el.getAttribute('name');
+                    if (!alwaysRequiredFields.includes(fieldName)) {
+                        el.removeAttribute('required');
+                    }
+                });
+
+                // Hide red stars for non-base fields
+                redStars.forEach(star => {
+                    const label = star.closest('label');
+                    if (label) {
+                        const input = label.nextElementSibling || label.parentNode.querySelector('input, select, textarea');
+                        if (input && !alwaysRequiredFields.includes(input.getAttribute('name'))) {
+                            star.style.display = 'none';
+                        }
+                    }
+                });
+
+            } else {
+                // Add required back to all fields that originally had it
+                allFormFields.forEach(el => el.setAttribute('required', true));
+
+                // Show all red stars
+                redStars.forEach(star => star.style.display = 'inline');
+            }
+        }
+
+        // On company change
+        companySelect.addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const validation = selectedOption.getAttribute('data-validation');
+            toggleValidation(validation);
+        });
+
+        // Run once on page load (for edit form or preselected company)
+        const preselected = companySelect.options[companySelect.selectedIndex];
+        if (preselected) {
+            const validation = preselected.getAttribute('data-validation');
+            toggleValidation(validation);
+        }
+    });
 </script>
 @yield('scripts')
 </body>

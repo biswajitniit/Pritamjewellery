@@ -52,7 +52,12 @@ class ProductController extends Controller
         $stones   = Stone::where('is_active', 'Yes')->orderBy('additional_charge_id')->get();
         $karigars = Karigar::where('is_active', 'Yes')->orderBy('kname')->get();
         $patterns = Pattern::where('is_active', 'Yes')->orderBy('pat_desc')->get();
-        $customers = Customer::where('is_active', 'Yes')->orderBy('cid')->get();
+        //$customers = Customer::where('is_active', 'Yes')->orderBy('cid')->get();
+        // 👇 Include is_validation from the customers table
+        $customers = Customer::where('is_active', 'Yes')
+            ->select('id', 'cust_name', 'cid', 'is_validation')
+            ->orderBy('cid')
+            ->get();
 
         return view('products.add', compact('pcodes', 'sizes', 'uoms', 'stones', 'karigars', 'patterns', 'customers'));
     }
@@ -147,6 +152,7 @@ class ProductController extends Controller
     //     return redirect()->route('products.index')->withSuccess('Products record created successfully.');
     // }
 
+    /*
     public function store(Request $request)
     {
         try {
@@ -249,7 +255,109 @@ class ProductController extends Controller
             return redirect()->back()->with('error', 'Something went wrong. Please try again.')
                 ->withInput();
         }
+    }*/
+
+
+    public function store(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Find customer
+            $customer = Customer::find($request->company_id);
+
+            // --- Base validation (always required) ---
+            $rules = [
+                'company_id'  => 'required|exists:customers,id',
+                'vendorsite'  => 'required|string|max:255',
+                'item_code'   => 'required|string|min:14|max:15',
+                'design_num'  => 'required|string|max:255',
+                'description' => 'required|string|max:1000',
+            ];
+
+            // --- Apply strict rules only if customer requires validation ---
+            if ($customer && $customer->is_validation === 'Yes') {
+                $rules = array_merge($rules, [
+                    'pcode_id'               => 'required|exists:pcodes,id',
+                    'size_id'                => 'required|exists:sizes,id',
+                    'uom_id'                 => 'required|exists:uoms,id',
+                    'kid'                    => 'required|exists:karigars,id',
+                    'item_pic'               => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                    'kt'                     => 'required|string|max:10',
+                    'lead_time_karigar'      => 'required|string|max:255',
+                    'product_lead_time'      => 'required|string|max:255',
+                    'stone_charge'           => 'nullable|string|max:255',
+                    'lab_charge'             => 'nullable|string|max:255',
+                    'additional_lab_charges' => 'nullable|string|max:255',
+                    'loss'                   => 'nullable|string|max:255',
+                    'purity'                 => 'nullable|numeric',
+                    'remarks'                => 'nullable|string|max:500',
+                ]);
+            }
+
+            // --- Validate request ---
+            $validatedData = $request->validate($rules);
+
+            // --- Handle file upload ---
+            $item_pic_imageName = null;
+            if ($request->hasFile('item_pic')) {
+                $item_pic_imageName = time() . '.' . $request->item_pic->extension();
+                $request->item_pic->storeAs('Product', $item_pic_imageName, 'public');
+            }
+
+            // --- Create Product ---
+            $product = Product::create([
+                'company_id'        => $request->company_id,
+                'vendorsite'        => $request->vendorsite,
+                'item_code'         => $request->item_code,
+                'design_num'        => $request->design_num,
+                'description'       => $request->description,
+                'pcode_id'          => $request->pcode_id ?? null,
+                'size_id'           => $request->size_id ?? null,
+                'uom_id'            => $request->uom_id ?? null,
+                'standard_wt'       => $request->standard_wt ?? 0,
+                'kid'               => $request->kid ?? null,
+                'lead_time_karigar' => $request->lead_time_karigar ?? null,
+                'product_lead_time' => $request->product_lead_time ?? null,
+                'stone_charge'      => $request->stone_charge ?? null,
+                'lab_charge'        => $request->lab_charge ?? null,
+                'additional_lab_charges' => $request->additional_lab_charges ?? null,
+                'loss'              => $request->loss ?? null,
+                'purity'            => $request->purity ?? null,
+                'item_pic'          => $item_pic_imageName,
+                'kt'                => $request->kt ?? null,
+                'pcodechar'         => strlen($request->item_code),
+                'remarks'           => $request->remarks ?? null,
+                'created_by'        => Auth::user()->name
+            ]);
+
+            // --- Save additional stone details if provided ---
+            if ($request->stone_type && is_array($request->stone_type)) {
+                foreach ($request->stone_type as $key => $val) {
+                    if (!empty($val)) {
+                        Productstonedetails::create([
+                            'product_id' => $product->id,
+                            'stone_id'   => $val,
+                            'category'   => $request->category[$key] ?? null,
+                            'pcs'        => $request->pcs[$key] ?? null,
+                            'weight'     => $request->weight[$key] ?? null,
+                            'rate'       => $request->rate[$key] ?? null,
+                            'amount'     => $request->amount[$key] ?? null,
+                            'created_by' => Auth::user()->name
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('products.index')->withSuccess('Product created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Product Store Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Something went wrong. Please try again.')->withInput();
+        }
     }
+
 
     /**
      * Display the specified resource.
