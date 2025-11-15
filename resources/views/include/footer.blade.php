@@ -5,7 +5,7 @@
 
 <!--start footer-->
 <footer class="page-footer">
-    <p class="mb-0">&copy; Copy right Pritam Jewellers Pvt. Ltd.</p>
+    <p class="mb-0">&copy; Copyright Pritam Jewellers Pvt. Ltd.</p>
 </footer>
 <!--top footer-->
 
@@ -1663,6 +1663,87 @@
             });
         } 
     }
+
+
+    $(document).ready(function() {
+        // When user changes any Net Wt input field
+        $(document).on('change', 'input[name="net[]"]', function() {
+            let netInput = $(this);
+            let netWt = parseFloat(netInput.val());
+            let row = netInput.closest('.row'); // get the current row
+            let itemCode = row.find('input[name="item_code[]"]').val(); // assuming item_code[] exists
+
+            if (!itemCode || isNaN(netWt)) {
+                return;
+            }
+
+            // Fetch min/max weight for the item via AJAX
+            $.ajax({
+                url: `/get-minmax-weight/${itemCode}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (data.min_wt && data.max_wt) {
+                        let min = parseFloat(data.min_wt);
+                        let max = parseFloat(data.max_wt);
+
+                        if (netWt < min || netWt > max) {
+                            Swal.fire({
+                                title: "⚠ Invalid Net Weight",
+                                html: `Net Wt <b>${netWt}</b> must be between <b>${min}</b> and <b>${max}</b>.`,
+                                icon: "warning",
+                                confirmButtonText: "OK",
+                                confirmButtonColor: "#d33"
+                            }).then(() => {
+                                netInput.val(""); // clear value
+                                netInput.focus();
+                            });
+                        }
+                    }
+                },
+                error: function() {
+                    console.error("Error fetching min/max weight for item:", itemCode);
+                }
+            });
+        });
+    });
+
+    $(document).ready(function() {
+        // when user types weight
+        $(document).on('input', '#weight', function() {
+            let weight = parseFloat($(this).val());
+            let location_id = $('select[name="location_id"]').val();
+            let item_id = $('select[name="item"]').val();
+            let purity_id = $('select[name="purity_id"]').val();
+
+            if (!location_id || !item_id) return; // skip if fields not selected
+            if (isNaN(weight) || weight <= 0) return;
+
+            $.ajax({
+                url: "{{ route('metalissueentries.checkStock') }}",
+                type: "GET",
+                data: { location_id, item_id, purity_id },
+                success: function(response) {
+                    let available = parseFloat(response.available_stock ?? 0);
+
+                    if (weight > available) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'OOPS! Insufficient Stock',
+                            html: `Available stock is <b>${available}</b> g only.<br>Please enter a valid weight.`,
+                            confirmButtonColor: '#d33'
+                        }).then(() => {
+                            $('#weight').val('').focus();
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error checking stock:', xhr);
+                }
+            });
+        });
+    }); 
+
 
     document.addEventListener('DOMContentLoaded', function () {
         const companySelect = document.getElementById('company_id');

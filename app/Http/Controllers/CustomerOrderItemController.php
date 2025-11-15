@@ -65,4 +65,17 @@ class CustomerOrderItemController extends Controller
 
         return response()->json(['success' => true]);
     }
+    public function getMinMaxWeight($item_code)
+    {
+        $item = Customerorderitem::where('item_code', $item_code)->first();
+
+        if ($item) {
+            return response()->json([
+                'min_wt' => $item->min_wt,
+                'max_wt' => $item->max_wt
+            ]);
+        } else {
+            return response()->json(['error' => 'Item not found'], 404);
+        }
+    }
 }

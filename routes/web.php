@@ -101,6 +101,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/customerorders/store-manual', [CustomerOrderController::class, 'storeManual'])->name('customerorders.store.manual');
 
     Route::delete('/customerorderitems/{id}', [CustomerOrderItemController::class, 'destroy']);
+    Route::get('/get-minmax-weight/{item_code}', [CustomerOrderItemController::class, 'getMinMaxWeight']);
 
     Route::resource('customerordertemps', CustomerordertempController::class);
     Route::post('customerorderstempimporttxt', [CustomerordertempController::class, 'customerorderstempimporttxt'])->name('customerorderstempimporttxt');
@@ -130,6 +131,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('getitemlistissuetokarigar', [MetalissueentryController::class, 'getitemlistissuetokarigar'])->name('getitemlistissuetokarigar');
     Route::post('getmetalpuritygroup', [MetalissueentryController::class, 'getmetalpuritygroup'])->name('getmetalpuritygroup');
     Route::post('getmetalpuritylist', [MetalissueentryController::class, 'getmetalpuritylist'])->name('getmetalpuritylist');
+    Route::get('/check-stock', [MetalissueentryController::class, 'checkStock'])->name('metalissueentries.checkStock');
 
 
     Route::resource('itemdescriptionheaders', ItemdescriptionheaderController::class);

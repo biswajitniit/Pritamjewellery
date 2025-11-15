@@ -575,4 +575,21 @@ class MetalissueentryController extends Controller
 
         echo $html;
     }
+    public function checkStock(Request $request)
+    {
+        $request->validate([
+            'location_id' => 'required|integer',
+            'item_id'     => 'required|integer',
+            'purity_id'   => 'nullable|integer',
+        ]);
+
+        $available = Metalreceiveentry::where('location_id', $request->location_id)
+            ->where('item', $request->item_id)
+            ->when($request->purity_id, fn($q) => $q->where('purity_id', $request->purity_id))
+            ->sum('balance_qty');
+
+        return response()->json([
+            'available_stock' => round($available, 3),
+        ]);
+    }
 }
