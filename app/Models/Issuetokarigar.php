@@ -21,20 +21,21 @@ class Issuetokarigar extends Model
         'updated_by',
     ];
 
+    // Each IssueToKarigar belongs to one customer
     public function customer()
     {
-        return $this->hasMany(Customer::class, "id", "customer_id");
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
 
+    // Each IssueToKarigar is linked to one Customer Order
     public function customerorder()
     {
-        return $this->hasOne(Customerorder::class, 'id', 'order_id');
+        return $this->belongsTo(Customerorder::class, 'order_id', 'id');
     }
 
-    // public function issuetokarigaritem()
-    // {
-    //     return $this->hasMany(Issuetokarigaritem::class);
-    // }
-
-
+    // Each IssueToKarigar has multiple issued items
+    public function issuetokarigaritems()
+    {
+        return $this->hasMany(Issuetokarigaritem::class, 'issue_to_karigar_id', 'id');
+    }
 }

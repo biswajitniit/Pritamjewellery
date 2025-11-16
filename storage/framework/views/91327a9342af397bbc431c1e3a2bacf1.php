@@ -5,7 +5,7 @@
 
 <!--start footer-->
 <footer class="page-footer">
-    <p class="mb-0">&copy; Copy right Pritam Jewellers Pvt. Ltd.</p>
+    <p class="mb-0">&copy; Copyright Pritam Jewellers Pvt. Ltd.</p>
 </footer>
 <!--top footer-->
 
@@ -1706,71 +1706,139 @@ unset($__errorArgs, $__bag); ?></div><div class="col-md-2"><select name="categor
         } 
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const companySelect = document.getElementById('company_id');
+    $(document).ready(function () {
 
-        // Define which fields should always remain required
-        const alwaysRequiredFields = [
-            'company_id',
-            'vendorsite',
-            'item_code',
-            'design_num',
-            'description'
-        ];
+        $('#saveFinishproductreceivedentries').on('submit', async function (e) {
+            e.preventDefault();
 
-        // All other fields that are optional when validation is "No"
-        const allFormFields = document.querySelectorAll(
-            'input[required], select[required], textarea[required]'
-        );
+            let form = this;
+            let rows = $('input[name="net[]"]');
 
-        // Red * marks
-        const redStars = document.querySelectorAll('label span[style*="color: red"], label .text-danger');
+            for (let i = 0; i < rows.length; i++) {
 
-        // Function to enable/disable validation dynamically
-        function toggleValidation(validationStatus) {
-            if (validationStatus === 'No') {
-                // Remove required from all fields
-                allFormFields.forEach(el => {
-                    const fieldName = el.getAttribute('name');
-                    if (!alwaysRequiredFields.includes(fieldName)) {
-                        el.removeAttribute('required');
+                let netInput = $(rows[i]);
+                let netWt = parseFloat(netInput.val());
+                let row = netInput.closest('.row');
+                let itemCode = row.find('input[name="item_code[]"]').val();
+
+                if (!itemCode || isNaN(netWt)) {
+                    await Swal.fire({
+                        title: "⚠ Missing Net Weight",
+                        text: "Please enter a valid Net Weight.",
+                        icon: "warning"
+                    });
+                    netInput.focus();
+                    return;
+                }
+
+                try {
+                    let data = await $.ajax({
+                        url: `/get-minmax-weight/${itemCode}`,
+                        type: 'GET',
+                        dataType: 'json'
+                    });
+
+                    let min = parseFloat(data.min_wt);
+                    let max = parseFloat(data.max_wt);
+
+                    if (netWt < min || netWt > max) {
+                        await Swal.fire({
+                            title: "⚠ Invalid Net Weight",
+                            html: `For Item <b>${itemCode}</b>, Net Wt <b>${netWt}</b> must be between <b>${min}</b> and <b>${max}</b>.`,
+                            icon: "warning"
+                        });
+                        netInput.focus();
+                        return;
                     }
-                });
 
-                // Hide red stars for non-base fields
-                redStars.forEach(star => {
-                    const label = star.closest('label');
-                    if (label) {
-                        const input = label.nextElementSibling || label.parentNode.querySelector('input, select, textarea');
-                        if (input && !alwaysRequiredFields.includes(input.getAttribute('name'))) {
-                            star.style.display = 'none';
-                        }
-                    }
-                });
-
-            } else {
-                // Add required back to all fields that originally had it
-                allFormFields.forEach(el => el.setAttribute('required', true));
-
-                // Show all red stars
-                redStars.forEach(star => star.style.display = 'inline');
+                } catch (error) {
+                    await Swal.fire("Server Error", "Could not validate item weight.", "error");
+                    return;
+                }
             }
-        }
 
-        // On company change
-        companySelect.addEventListener('change', function () {
-            const selectedOption = this.options[this.selectedIndex];
-            const validation = selectedOption.getAttribute('data-validation');
-            toggleValidation(validation);
+            // SUCCESS → SUBMIT THE FORM *ONLY ONCE*
+            HTMLFormElement.prototype.submit.call(form);
         });
 
-        // Run once on page load (for edit form or preselected company)
-        const preselected = companySelect.options[companySelect.selectedIndex];
-        if (preselected) {
-            const validation = preselected.getAttribute('data-validation');
-            toggleValidation(validation);
-        }
     });
+    
+    // Single function to validate one row by row number
+    async function validateRowWeight(rowNo) {
+
+        let row   = $(`.row_id_${rowNo}`);
+        let netWt = parseFloat($(`#net_${rowNo}`).val());
+        let itemCode = row.find('input[name="item_code[]"]').val();
+
+        if (isNaN(netWt) || !itemCode) {
+            return; 
+        }
+
+        try {
+            let data = await $.ajax({
+                url: `/get-minmax-weight/${itemCode}`,
+                type: "GET",
+                dataType: "json"
+            });
+
+            let min = parseFloat(data.min_wt);
+            let max = parseFloat(data.max_wt);
+
+            if (netWt < min || netWt > max) {
+                await Swal.fire({
+                    title: "⚠ Invalid Net Weight",
+                    html: `For Item <b>${itemCode}</b>, Net Wt <b>${netWt}</b> must be between <b>${min}</b> and <b>${max}</b>.`,
+                    icon: "warning"
+                });
+
+                $(`#gross_wt_${rowNo}`).focus();
+            }
+
+        } catch (err) {
+            console.log("Error fetching min/max weight");
+        }
+    }
+
+
+
+
+    $(document).ready(function() {
+        // when user types weight
+        $(document).on('input', '#weight', function() {
+            let weight = parseFloat($(this).val());
+            let location_id = $('select[name="location_id"]').val();
+            let item_id = $('select[name="item"]').val();
+            let purity_id = $('select[name="purity_id"]').val();
+
+            if (!location_id || !item_id) return; // skip if fields not selected
+            if (isNaN(weight) || weight <= 0) return;
+
+            $.ajax({
+                url: "<?php echo e(route('metalissueentries.checkStock')); ?>",
+                type: "GET",
+                data: { location_id, item_id, purity_id },
+                success: function(response) {
+                    let available = parseFloat(response.available_stock ?? 0);
+
+                    if (weight > available) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'OOPS! Insufficient Stock',
+                            html: `Available stock is <b>${available}</b> g only.<br>Please enter a valid weight.`,
+                            confirmButtonColor: '#d33'
+                        }).then(() => {
+                            $('#weight').val('').focus();
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error checking stock:', xhr);
+                }
+            });
+        });
+    }); 
+
+
 
     /* This is a customer order menual page */
 

@@ -981,6 +981,8 @@ class CustomerordertempController extends Controller
                     \Log::warning("Missing UOM for item_code={$item->item_code}, given_uom={$item->uom}. Defaulted to 12.");
                 }
 
+                $kid = DB::table('karigars')->where('kid', 'XX')->value('id');
+
                 // Create product
                 $product = Product::create([
                     'company_id'     => $company_id,
@@ -993,7 +995,7 @@ class CustomerordertempController extends Controller
                     'uom_id'         => $uom_id, // ✅ dynamic check
                     'standard_wt'    => $item->std_wt ?? 0,
                     'kt'             => $item->kt . 'KT',
-                    'kid'            => 44, // TODO: config/constant
+                    'kid'            => $kid,
                     'purity'         => $purity,
                     'remarks'        => $item->remarks,
                     'customer_order' => 'Yes',

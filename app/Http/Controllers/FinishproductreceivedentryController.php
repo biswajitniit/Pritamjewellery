@@ -80,7 +80,7 @@ class FinishproductreceivedentryController extends Controller
         //     'net_wt' => '+' . $data['net_wt'],
         //     'pure_wt' => '+' . $data['pure_wt'],
         // ]));
-        
+
         // Company Stock Effect
         StockEffect::create(array_merge($data, [
             'ledger_name' => 'Bhagya Laxmi Jewellers',
@@ -88,7 +88,7 @@ class FinishproductreceivedentryController extends Controller
             'ledger_type' => 'Vendor',
             'net_wt' => '+' . $data['net_wt'],
             'pure_wt' => '+' . $data['pure_wt'],
-        ]));        
+        ]));
     }
 
     /**
@@ -704,7 +704,7 @@ class FinishproductreceivedentryController extends Controller
                 </div>';
 
                 $html .= '<div class="col-md-0-8">
-                    <input type="text" name="gross_wt[]" id="gross_wt_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $item->gross_wt_items . '" onkeyup="netwtcalculation(' . $count . ')">
+                    <input type="text" name="gross_wt[]" id="gross_wt_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $item->gross_wt_items . '" onkeyup="netwtcalculation(' . $count . '); validateRowWeight(' . $count . ');">
                 </div>';
 
                 $html .= '<div class="col-md-0-8">
@@ -715,8 +715,12 @@ class FinishproductreceivedentryController extends Controller
                     <input type="text" name="k_excess[]" id="k_excess_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $defaultValue . '" onkeyup="netwtcalculation(' . $count . ')" ' . $readonlyAttr . '>
                 </div>';
 
+                // $html .= '<div class="col-md-0-8">
+                //     <input type="text" name="mina[]" id="mina_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $defaultValue . '" onkeyup="netwtcalculation(' . $count . ')" ' . $readonlyAttr . '>
+                // </div>';
+
                 $html .= '<div class="col-md-0-8">
-                    <input type="text" name="mina[]" id="mina_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $defaultValue . '" onkeyup="netwtcalculation(' . $count . ')" ' . $readonlyAttr . '>
+                    <input type="text" name="mina[]" id="mina_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $defaultValue . '" onkeyup="netwtcalculation(' . $count . ')" >
                 </div>';
 
                 $html .= '<div class="col-md-0-7">

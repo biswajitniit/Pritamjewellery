@@ -101,7 +101,7 @@ class IssuetokarigarController extends Controller
         return redirect()->route('issuetokarigars.index')->withSuccess('Issue to Karigar record created successfully.');
     }*/
 
-/*
+    /*
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -191,137 +191,138 @@ class IssuetokarigarController extends Controller
         }
     }
 */
-public function store(Request $request)
-{
-    // ✅ Validate all required fields including arrays
-    $validatedData = $request->validate([
-        'customer_id' => 'required',
-        'order_id'    => 'required',
-        'item_code'   => 'required|array|min:1',
-        'item_code.*' => 'required|string',
-        'design.*'    => 'nullable|string',
-        'description.*' => 'nullable|string',
-        'size.*'      => 'nullable|string',
-        'uom.*'       => 'nullable|string',
-        'st_weight.*' => 'nullable|numeric',
-        'min_weight.*' => 'nullable|numeric',
-        'max_weight.*' => 'nullable|numeric',
-        'qty.*'       => 'required|numeric|min:1',
-        'kid.*'       => 'nullable|string',
-        'delivery_date.*' => 'required|date',
-    ], [
-        'customer_id.required' => 'Selection of Customer is Required',
-        'order_id.required'    => 'Order No Selection is Required',
-        'item_code.required'   => 'At least one item must be selected',
-        'item_code.*.required' => 'Each item must have a valid item code',
-        'qty.*.required'       => 'Quantity is required for each item',
-        'delivery_date.*.required' => 'Delivery date is required for each item',
-    ]);
-
-    DB::beginTransaction();
-
-    try {
-        // ✅ Create main Issue to Karigar record
-        $issuetokarigar = Issuetokarigar::create([
-            'order_id'    => strip_tags($request->order_id),
-            'customer_id' => strip_tags($request->customer_id),
-            'is_active'   => strip_tags($request->is_active ?? 1),
-            'created_by'  => Auth::user()->name,
+    public function store(Request $request)
+    {
+        // ✅ Validate all required fields including arrays
+        $validatedData = $request->validate([
+            'customer_id' => 'required',
+            'order_id'    => 'required',
+            'item_code'   => 'required|array|min:1',
+            'item_code.*' => 'required|string',
+            'design.*'    => 'nullable|string',
+            'description.*' => 'nullable|string',
+            'size.*'      => 'nullable|string',
+            'uom.*'       => 'nullable|string',
+            'st_weight.*' => 'nullable|numeric',
+            'min_weight.*' => 'nullable|numeric',
+            'max_weight.*' => 'nullable|numeric',
+            'qty.*'       => 'required|numeric|min:1',
+            'kid.*'       => 'nullable|string',
+            'delivery_date.*' => 'required|date',
+        ], [
+            'customer_id.required' => 'Selection of Customer is Required',
+            'order_id.required'    => 'Order No Selection is Required',
+            'item_code.required'   => 'At least one item must be selected',
+            'item_code.*.required' => 'Each item must have a valid item code',
+            'qty.*.required'       => 'Quantity is required for each item',
+            'delivery_date.*.required' => 'Delivery date is required for each item',
         ]);
 
-        $lastInsertedId = $issuetokarigar->id;
-        $customerorder  = Customerorder::findOrFail($request->order_id);
+        DB::beginTransaction();
 
-        // ✅ Get the minimum count to avoid array size mismatch
-        $itemCount = min(
-            count($request->item_code ?? []),
-            count($request->qty ?? []),
-            count($request->delivery_date ?? [])
-        );
-
-        if ($itemCount === 0) {
-            throw new \Exception('No valid items found to process.');
-        }
-
-        // ✅ Loop through each item and save
-        for ($key = 0; $key < $itemCount; $key++) {
-            // Skip if essential data is missing
-            if (empty($request->item_code[$key]) || 
-                empty($request->qty[$key]) || 
-                empty($request->delivery_date[$key])) {
-                continue;
-            }
-
-            $financialYearId = getFinancialYearIdByDate($request->delivery_date[$key]);
-
-            if (!$financialYearId) {
-                throw new \Exception('No financial year found for date: ' . $request->delivery_date[$key]);
-            }
-
-            $issuedQty = (int) strip_tags($request->qty[$key]);
-
-            // Skip if quantity is zero or negative
-            if ($issuedQty <= 0) {
-                continue;
-            }
-
-            // ✅ Create issued item record
-            Issuetokarigaritem::create([
-                'financial_year_id'    => $financialYearId,
-                'job_no'               => $customerorder->jo_no,
-                'issue_to_karigar_id'  => $lastInsertedId,
-                'item_code'            => strip_tags($request->item_code[$key]),
-                'design'               => strip_tags($request->design[$key] ?? ''),
-                'description'          => strip_tags($request->description[$key] ?? ''),
-                'size'                 => strip_tags($request->size[$key] ?? ''),
-                'uom'                  => strip_tags($request->uom[$key] ?? ''),
-                'st_weight'            => strip_tags($request->st_weight[$key] ?? 0),
-                'min_weight'           => strip_tags($request->min_weight[$key] ?? 0),
-                'max_weight'           => strip_tags($request->max_weight[$key] ?? 0),
-                'qty'                  => $issuedQty,
-                'bal_qty'              => $issuedQty,
-                'kid'                  => strip_tags($request->kid[$key] ?? ''),
-                'delivery_date'        => $request->delivery_date[$key],
-                'finish_product_received' => 'No',
+        try {
+            // ✅ Create main Issue to Karigar record
+            $issuetokarigar = Issuetokarigar::create([
+                'order_id'    => strip_tags($request->order_id),
+                'customer_id' => strip_tags($request->customer_id),
+                'is_active'   => strip_tags($request->is_active ?? 1),
+                'created_by'  => Auth::user()->name,
             ]);
 
-            // ✅ Update the corresponding Customer Order Item
-            $orderItem = Customerorderitem::where('order_id', $request->order_id)
-                ->where('item_code', $request->item_code[$key])
-                ->first();
+            $lastInsertedId = $issuetokarigar->id;
+            $customerorder  = Customerorder::findOrFail($request->order_id);
 
-            if ($orderItem) {
-                $orderItem->ord_qty = max(0, $orderItem->ord_qty - $issuedQty);
+            // ✅ Get the minimum count to avoid array size mismatch
+            $itemCount = min(
+                count($request->item_code ?? []),
+                count($request->qty ?? []),
+                count($request->delivery_date ?? [])
+            );
 
-                if ($orderItem->ord_qty <= 0) {
-                    $orderItem->issue_to_karigar_status = 'Complete';
+            if ($itemCount === 0) {
+                throw new \Exception('No valid items found to process.');
+            }
+
+            // ✅ Loop through each item and save
+            for ($key = 0; $key < $itemCount; $key++) {
+                // Skip if essential data is missing
+                if (
+                    empty($request->item_code[$key]) ||
+                    empty($request->qty[$key]) ||
+                    empty($request->delivery_date[$key])
+                ) {
+                    continue;
                 }
 
-                $orderItem->save();
+                $financialYearId = getFinancialYearIdByDate($request->delivery_date[$key]);
+
+                if (!$financialYearId) {
+                    throw new \Exception('No financial year found for date: ' . $request->delivery_date[$key]);
+                }
+
+                $issuedQty = (int) strip_tags($request->qty[$key]);
+
+                // Skip if quantity is zero or negative
+                if ($issuedQty <= 0) {
+                    continue;
+                }
+
+                // ✅ Create issued item record
+                Issuetokarigaritem::create([
+                    'financial_year_id'    => $financialYearId,
+                    'job_no'               => $customerorder->jo_no,
+                    'issue_to_karigar_id'  => $lastInsertedId,
+                    'item_code'            => strip_tags($request->item_code[$key]),
+                    'design'               => strip_tags($request->design[$key] ?? ''),
+                    'description'          => strip_tags($request->description[$key] ?? ''),
+                    'size'                 => strip_tags($request->size[$key] ?? ''),
+                    'uom'                  => strip_tags($request->uom[$key] ?? ''),
+                    'st_weight'            => strip_tags($request->st_weight[$key] ?? 0),
+                    'min_weight'           => strip_tags($request->min_weight[$key] ?? 0),
+                    'max_weight'           => strip_tags($request->max_weight[$key] ?? 0),
+                    'qty'                  => $issuedQty,
+                    'bal_qty'              => $issuedQty,
+                    'kid'                  => strip_tags($request->kid[$key] ?? ''),
+                    'delivery_date'        => $request->delivery_date[$key],
+                    'finish_product_received' => 'No',
+                ]);
+
+                // ✅ Update the corresponding Customer Order Item
+                $orderItem = Customerorderitem::where('order_id', $request->order_id)
+                    ->where('item_code', $request->item_code[$key])
+                    ->first();
+
+                if ($orderItem) {
+                    $orderItem->ord_qty = max(0, $orderItem->ord_qty - $issuedQty);
+
+                    if ($orderItem->ord_qty <= 0) {
+                        $orderItem->issue_to_karigar_status = 'Complete';
+                    }
+
+                    $orderItem->save();
+                }
             }
+
+            // ✅ Check if all order items are completed
+            $remaining = Customerorderitem::where('order_id', $request->order_id)
+                ->where('issue_to_karigar_status', '!=', 'Complete')
+                ->count();
+
+            if ($remaining === 0) {
+                $customerorder->issue_to_karigar = 'Complete';
+                $customerorder->save();
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('issuetokarigars.index')
+                ->with('success', 'Issued to Karigar successfully and quantities updated.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
-
-        // ✅ Check if all order items are completed
-        $remaining = Customerorderitem::where('order_id', $request->order_id)
-            ->where('issue_to_karigar_status', '!=', 'Complete')
-            ->count();
-
-        if ($remaining === 0) {
-            $customerorder->issue_to_karigar = 'Complete';
-            $customerorder->save();
-        }
-
-        DB::commit();
-
-        return redirect()
-            ->route('issuetokarigars.index')
-            ->with('success', 'Issued to Karigar successfully and quantities updated.');
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return redirect()->back()->withErrors(['error' => $e->getMessage()]);
     }
-}
 
 
     /**
@@ -374,9 +375,22 @@ public function store(Request $request)
      */
     public function print($jo_no, $kid, $issue_to_karigar_id)
     {
-        $issuetokarigars = Issuetokarigar::with('customer', 'customerorder')->where('id', $issue_to_karigar_id)->first();
-        $issuetokarigaritems = Issuetokarigaritem::where('job_no', $jo_no)->where('kid', $kid)->get();
-        return view('issuetokarigars.view', compact('issuetokarigars', 'issuetokarigaritems'));
+        // Load IssueToKarigar with related data
+        $issuetokarigar = Issuetokarigar::with([
+            'customer',
+            'customerorder',
+            'issuetokarigaritems' => function ($query) use ($jo_no, $kid) {
+                $query->where('job_no', $jo_no)
+                    ->where('kid', $kid)
+                    ->orderBy('id', 'asc');
+            }
+        ])->findOrFail($issue_to_karigar_id);
+
+        // dd($issuetokarigar);
+        // Get filtered items
+        $issuetokarigaritems = $issuetokarigar->issuetokarigaritems;
+
+        return view('issuetokarigars.print', compact('issuetokarigar', 'issuetokarigaritems'));
     }
 
 

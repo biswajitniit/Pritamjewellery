@@ -1664,49 +1664,101 @@
         } 
     }
 
+    $(document).ready(function () {
 
-    $(document).ready(function() {
-        // When user changes any Net Wt input field
-        $(document).on('change', 'input[name="net[]"]', function() {
-            let netInput = $(this);
-            let netWt = parseFloat(netInput.val());
-            let row = netInput.closest('.row'); // get the current row
-            let itemCode = row.find('input[name="item_code[]"]').val(); // assuming item_code[] exists
+        $('#saveFinishproductreceivedentries').on('submit', async function (e) {
+            e.preventDefault();
 
-            if (!itemCode || isNaN(netWt)) {
-                return;
+            let form = this;
+            let rows = $('input[name="net[]"]');
+
+            for (let i = 0; i < rows.length; i++) {
+
+                let netInput = $(rows[i]);
+                let netWt = parseFloat(netInput.val());
+                let row = netInput.closest('.row');
+                let itemCode = row.find('input[name="item_code[]"]').val();
+
+                if (!itemCode || isNaN(netWt)) {
+                    await Swal.fire({
+                        title: "⚠ Missing Net Weight",
+                        text: "Please enter a valid Net Weight.",
+                        icon: "warning"
+                    });
+                    netInput.focus();
+                    return;
+                }
+
+                try {
+                    let data = await $.ajax({
+                        url: `/get-minmax-weight/${itemCode}`,
+                        type: 'GET',
+                        dataType: 'json'
+                    });
+
+                    let min = parseFloat(data.min_wt);
+                    let max = parseFloat(data.max_wt);
+
+                    if (netWt < min || netWt > max) {
+                        await Swal.fire({
+                            title: "⚠ Invalid Net Weight",
+                            html: `For Item <b>${itemCode}</b>, Net Wt <b>${netWt}</b> must be between <b>${min}</b> and <b>${max}</b>.`,
+                            icon: "warning"
+                        });
+                        netInput.focus();
+                        return;
+                    }
+
+                } catch (error) {
+                    await Swal.fire("Server Error", "Could not validate item weight.", "error");
+                    return;
+                }
             }
 
-            // Fetch min/max weight for the item via AJAX
-            $.ajax({
-                url: `/get-minmax-weight/${itemCode}`,
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) {
-                    if (data.min_wt && data.max_wt) {
-                        let min = parseFloat(data.min_wt);
-                        let max = parseFloat(data.max_wt);
-
-                        if (netWt < min || netWt > max) {
-                            Swal.fire({
-                                title: "⚠ Invalid Net Weight",
-                                html: `Net Wt <b>${netWt}</b> must be between <b>${min}</b> and <b>${max}</b>.`,
-                                icon: "warning",
-                                confirmButtonText: "OK",
-                                confirmButtonColor: "#d33"
-                            }).then(() => {
-                                netInput.val(""); // clear value
-                                netInput.focus();
-                            });
-                        }
-                    }
-                },
-                error: function() {
-                    console.error("Error fetching min/max weight for item:", itemCode);
-                }
-            });
+            // SUCCESS → SUBMIT THE FORM *ONLY ONCE*
+            HTMLFormElement.prototype.submit.call(form);
         });
+
     });
+    
+    // Single function to validate one row by row number
+    async function validateRowWeight(rowNo) {
+
+        let row   = $(`.row_id_${rowNo}`);
+        let netWt = parseFloat($(`#net_${rowNo}`).val());
+        let itemCode = row.find('input[name="item_code[]"]').val();
+
+        if (isNaN(netWt) || !itemCode) {
+            return; 
+        }
+
+        try {
+            let data = await $.ajax({
+                url: `/get-minmax-weight/${itemCode}`,
+                type: "GET",
+                dataType: "json"
+            });
+
+            let min = parseFloat(data.min_wt);
+            let max = parseFloat(data.max_wt);
+
+            if (netWt < min || netWt > max) {
+                await Swal.fire({
+                    title: "⚠ Invalid Net Weight",
+                    html: `For Item <b>${itemCode}</b>, Net Wt <b>${netWt}</b> must be between <b>${min}</b> and <b>${max}</b>.`,
+                    icon: "warning"
+                });
+
+                $(`#gross_wt_${rowNo}`).focus();
+            }
+
+        } catch (err) {
+            console.log("Error fetching min/max weight");
+        }
+    }
+
+
+
 
     $(document).ready(function() {
         // when user types weight
@@ -1745,71 +1797,6 @@
     }); 
 
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const companySelect = document.getElementById('company_id');
-
-        // Define which fields should always remain required
-        const alwaysRequiredFields = [
-            'company_id',
-            'vendorsite',
-            'item_code',
-            'design_num',
-            'description'
-        ];
-
-        // All other fields that are optional when validation is "No"
-        const allFormFields = document.querySelectorAll(
-            'input[required], select[required], textarea[required]'
-        );
-
-        // Red * marks
-        const redStars = document.querySelectorAll('label span[style*="color: red"], label .text-danger');
-
-        // Function to enable/disable validation dynamically
-        function toggleValidation(validationStatus) {
-            if (validationStatus === 'No') {
-                // Remove required from all fields
-                allFormFields.forEach(el => {
-                    const fieldName = el.getAttribute('name');
-                    if (!alwaysRequiredFields.includes(fieldName)) {
-                        el.removeAttribute('required');
-                    }
-                });
-
-                // Hide red stars for non-base fields
-                redStars.forEach(star => {
-                    const label = star.closest('label');
-                    if (label) {
-                        const input = label.nextElementSibling || label.parentNode.querySelector('input, select, textarea');
-                        if (input && !alwaysRequiredFields.includes(input.getAttribute('name'))) {
-                            star.style.display = 'none';
-                        }
-                    }
-                });
-
-            } else {
-                // Add required back to all fields that originally had it
-                allFormFields.forEach(el => el.setAttribute('required', true));
-
-                // Show all red stars
-                redStars.forEach(star => star.style.display = 'inline');
-            }
-        }
-
-        // On company change
-        companySelect.addEventListener('change', function () {
-            const selectedOption = this.options[this.selectedIndex];
-            const validation = selectedOption.getAttribute('data-validation');
-            toggleValidation(validation);
-        });
-
-        // Run once on page load (for edit form or preselected company)
-        const preselected = companySelect.options[companySelect.selectedIndex];
-        if (preselected) {
-            const validation = preselected.getAttribute('data-validation');
-            toggleValidation(validation);
-        }
-    });
 
     /* This is a customer order menual page */
 

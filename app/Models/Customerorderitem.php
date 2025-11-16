@@ -46,9 +46,15 @@ class Customerorderitem extends Model
      * Get the post that owns the comment.
 
      */
-
+    // Each Customer Order Item belongs to one Customer Order
     public function customerorder()
     {
-        return $this->belongsTo(Customerorder::class);
+        return $this->belongsTo(Customerorder::class, 'order_id', 'id');
+    }
+
+    // Each Customer Order Item may have been issued to a karigar (linked by item_code)
+    public function issuetokarigaritems()
+    {
+        return $this->hasMany(Issuetokarigaritem::class, 'item_code', 'item_code');
     }
 }

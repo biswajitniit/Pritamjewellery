@@ -1,4 +1,4 @@
-@include('include.header')
+<?php echo $__env->make('include.header', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
 <main class="main-wrapper">
     <div class="main-content">
@@ -11,7 +11,7 @@
                     </div>
                     <div class="col-12 col-lg-6 text-md-end">
                         <div class="style_back">
-                            <a href="{{ route('issuetokarigars.index') }}">
+                            <a href="<?php echo e(route('issuetokarigars.index')); ?>">
                                 <i class="fa fa-chevron-left"></i> Back
                             </a>
                         </div>
@@ -22,9 +22,7 @@
             <div class="card-body">
                 <div class="table-responsive">
 
-                    {{-- ==========================
-                        TOP CUSTOMER + JOB DETAILS
-                    =========================== --}}
+                    
                     <table class="table table-bordered table-striped-columns">
                         <thead>
                             <tr>
@@ -38,31 +36,32 @@
                         <tbody>
                             <tr>
                                 <td class="text-left">
-                                    {{ $issuetokarigars->customerorder->jo_no ?? '-' }}
+                                    <?php echo e($issuetokarigars->customerorder->jo_no ?? '-'); ?>
+
                                 </td>
 
                                 <td class="text-left">
-                                    @if($issuetokarigars->customer)
-                                        {{ $issuetokarigars->customer->cust_name }}
-                                        ({{ $issuetokarigars->customer->cid }})
-                                    @else
+                                    <?php if($issuetokarigars->customer): ?>
+                                        <?php echo e($issuetokarigars->customer->cust_name); ?>
+
+                                        (<?php echo e($issuetokarigars->customer->cid); ?>)
+                                    <?php else: ?>
                                         -
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
 
                                 <td class="border-0"></td>
 
                                 <td class="text-right">
-                                    {{ $issuetokarigars->customerorder->jo_date ?? '-' }}
+                                    <?php echo e($issuetokarigars->customerorder->jo_date ?? '-'); ?>
+
                                 </td>
                             </tr>
                         </tbody>
                     </table>
 
 
-                    {{-- ==============================
-                      ITEMS TABLE
-                    =============================== --}}
+                    
                     <table class="table table-invoice table-bordered mt-5">
                         <thead>
                             <tr>
@@ -80,26 +79,27 @@
                         </thead>
 
                         <tbody>
-                            @forelse($issuetokarigaritems as $item)
+                            <?php $__empty_1 = true; $__currentLoopData = $issuetokarigaritems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
-                                    <td>{{ $item->item_code }}</td>
-                                    <td>{{ $item->description }}</td>
-                                    <td>{{ $item->size }}</td>
-                                    <td>{{ $item->uom }}</td>
-                                    <td>{{ $item->st_weight }}</td>
-                                    <td>{{ $item->min_weight }}</td>
-                                    <td>{{ $item->max_weight }}</td>
-                                    <td>{{ $item->qty }}</td>
-                                    <td>{{ $item->kid }}</td>
+                                    <td><?php echo e($item->item_code); ?></td>
+                                    <td><?php echo e($item->description); ?></td>
+                                    <td><?php echo e($item->size); ?></td>
+                                    <td><?php echo e($item->uom); ?></td>
+                                    <td><?php echo e($item->st_weight); ?></td>
+                                    <td><?php echo e($item->min_weight); ?></td>
+                                    <td><?php echo e($item->max_weight); ?></td>
+                                    <td><?php echo e($item->qty); ?></td>
+                                    <td><?php echo e($item->kid); ?></td>
                                     <td>
-                                        {{ $item->delivery_date ? \Carbon\Carbon::parse($item->delivery_date)->format('d/m/Y') : '' }}
+                                        <?php echo e($item->delivery_date ? \Carbon\Carbon::parse($item->delivery_date)->format('d/m/Y') : ''); ?>
+
                                     </td>
                                 </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="10" class="text-center">No record found.</td>
                                 </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                     </table>
 
@@ -110,4 +110,5 @@
     </div>
 </main>
 
-@include('include.footer')
+<?php echo $__env->make('include.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php /**PATH E:\webdev\Pritamjewellery\resources\views/issuetokarigars/view.blade.php ENDPATH**/ ?>

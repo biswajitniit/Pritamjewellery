@@ -39,9 +39,16 @@ class Issuetokarigaritem extends Model
         return $this->belongsTo(Karigar::class, 'kid', 'kid');
     }
 
+    // Each item belongs to one IssueToKarigar record
     public function issuetokarigar()
     {
         return $this->belongsTo(Issuetokarigar::class, 'issue_to_karigar_id', 'id');
+    }
+
+    // Each issued item is linked to one customer order item via item_code
+    public function customerorderitem()
+    {
+        return $this->belongsTo(Customerorderitem::class, 'item_code', 'item_code');
     }
 
     public function financialYear()

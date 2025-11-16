@@ -152,52 +152,25 @@ class CustomerorderController extends Controller
         }
     }*/
 
-
     public function store(Request $request)
     {
+
         DB::beginTransaction();
 
         try {
-            // 🔹 Find the selected customer
-            $customer = Customer::find($request->customer_id);
-
-            // 🔹 Define base validation rules (always required)
-            $rules = [
-                'customer_id' => 'required|exists:customers,id',
-                'jo_date'     => 'required|date',
-            ];
-
-            // 🔹 Conditional rule for JO No
-            if ($customer && $customer->is_validation === 'Yes') {
-                $rules['jo_no'] = 'required|string|max:255|unique:customerorders,jo_no';
-            } else {
-                // Optional if validation = No, but still check uniqueness if provided
-                $rules['jo_no'] = 'nullable|string|max:255|unique:customerorders,jo_no';
-            }
-
-            // 🔹 Validate request
-            $validated = $request->validate($rules);
-
-            // 🔹 Fetch temporary orders
-            $tempOrders = Customerordertemp::with('customerordertempitems')
-                ->where('jo_no', $request->jo_no)
-                ->get();
-
-            if ($tempOrders->isEmpty()) {
-                return back()->with('error', 'No temporary orders found for this JO No.');
-            }
+            // Get all temp orders
+            $tempOrders = Customerordertemp::with('customerordertempitems')->where('jo_no', $request->jo_no)->get();
 
             foreach ($tempOrders as $tempOrder) {
-                // 🔹 Check for duplicate JO No if validation is ON
-                if ($customer && $customer->is_validation === 'Yes') {
-                    $existingOrder = Customerorder::where('jo_no', $tempOrder->jo_no)->first();
-                    if ($existingOrder) {
-                        DB::rollBack();
-                        return back()->with('error', 'JO No already exists. Duplicate upload is not allowed.');
-                    }
+
+                // Check if jo_no already exists
+                $existingOrder = Customerorder::where('jo_no', $tempOrder->jo_no)->first();
+                if ($existingOrder) {
+                    DB::rollBack(); // Ensure rollback before redirect
+                    return back()->with('error', 'JO No already exists. Duplicate upload is not allowed.');
                 }
 
-                // 🔹 Create new customer order
+                // Clone to customerorders
                 $newOrder = Customerorder::create([
                     'jo_no'       => $tempOrder->jo_no,
                     'customer_id' => $tempOrder->customer_id,
@@ -210,43 +183,47 @@ class CustomerorderController extends Controller
                     'updated_at'  => $tempOrder->updated_at,
                 ]);
 
-                // 🔹 Clone related temp items into permanent order items
+                // Clone related items
                 foreach ($tempOrder->customerordertempitems as $tempItem) {
+
                     $getkid = Product::with('karigar')
                         ->where('item_code', $tempItem->item_code)
                         ->first();
                     $kid = $getkid?->karigar?->kid ?? '';
 
+
                     Customerorderitem::create([
-                        'order_id'       => $newOrder->id,
-                        'sl_no'          => $tempItem->sl_no,
-                        'item_code'      => $tempItem->item_code,
-                        'kid'            => $kid,
-                        'design'         => $tempItem->design,
-                        'description'    => $tempItem->description,
-                        'size'           => $tempItem->size,
-                        'finding'        => $tempItem->finding,
-                        'uom'            => $tempItem->uom,
-                        'kt'             => $tempItem->kt,
-                        'std_wt'         => $tempItem->std_wt,
-                        'conv_wt'        => $tempItem->conv_wt,
-                        'ord_qty'        => $tempItem->ord_qty,
+                        'order_id'      => $newOrder->id,
+                        'sl_no'         => $tempItem->sl_no,
+                        'item_code'     => $tempItem->item_code,
+                        'kid'           => $kid,
+                        'design'        => $tempItem->design,
+                        'description'   => $tempItem->description,
+                        'size'          => $tempItem->size,
+                        'finding'       => $tempItem->finding,
+                        'uom'           => $tempItem->uom,
+                        'kt'            => $tempItem->kt,
+                        'std_wt'        => $tempItem->std_wt,
+                        'conv_wt'       => $tempItem->conv_wt,
+                        'ord_qty'       => $tempItem->ord_qty,
                         'ord_qty_actual' => $tempItem->ord_qty,
-                        'total_wt'       => $tempItem->total_wt,
-                        'lab_chg'        => $tempItem->lab_chg,
-                        'stone_chg'      => $tempItem->stone_chg,
-                        'add_l_chg'      => $tempItem->add_l_chg,
-                        'total_value'    => $tempItem->total_value,
-                        'loss_percent'   => $tempItem->loss_percent,
-                        'min_wt'         => $tempItem->min_wt,
-                        'max_wt'         => $tempItem->max_wt,
-                        'ord'            => $tempItem->ord,
-                        'delivery_date'  => $tempItem->delivery_date,
+                        'total_wt'      => $tempItem->total_wt,
+                        'lab_chg'       => $tempItem->lab_chg,
+                        'stone_chg'     => $tempItem->stone_chg,
+                        'add_l_chg'     => $tempItem->add_l_chg,
+                        'total_value'   => $tempItem->total_value,
+                        'loss_percent'  => $tempItem->loss_percent,
+                        'min_wt'        => $tempItem->min_wt,
+                        'max_wt'        => $tempItem->max_wt,
+                        'ord'           => $tempItem->ord,
+                        'delivery_date' => $tempItem->delivery_date,
                     ]);
                 }
 
-                // 🔹 Delete temp data after successful transfer
+                // Delete related temp items
                 $tempOrder->customerordertempitems()->delete();
+
+                // Delete temp order
                 $tempOrder->delete();
             }
 
@@ -255,8 +232,7 @@ class CustomerorderController extends Controller
             return redirect()->route('customerorders.index')->withSuccess('Customer orders record created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Customer Order Store Error: ' . $e->getMessage());
-            return back()->with('error', 'Something went wrong: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
