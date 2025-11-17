@@ -76,6 +76,28 @@
 			<button class="btn btn-danger" onclick="window.print()">Print Report</button>
 		</div>
 
+        <div class="no-print mb-3">
+            <form method="GET" action="{{ route('transaction.report.generate') }}" class="form-inline">
+                <input type="hidden" name="ledger_type" value="{{ $ledger_type }}">
+                <input type="hidden" name="ledger_name" value="{{ $ledger_name }}">
+                <input type="hidden" name="date_from" value="{{ $date_from }}">
+                <input type="hidden" name="date_to" value="{{ $date_to }}">
+
+                <label for="vou_no" class="mr-2"><strong>Filter by Voucher No:</strong></label>
+                <input type="text" name="vou_no" id="vou_no" value="{{ request('vou_no') }}"
+                    class="form-control mr-2" placeholder="Enter Voucher No">
+
+                <button type="submit" class="btn btn-primary">Apply</button>
+                <a href="{{ route('transaction.report.generate', [
+                    'ledger_type' => $ledger_type,
+                    'ledger_name' => $ledger_name,
+                    'date_from' => $date_from,
+                    'date_to' => $date_to
+                ]) }}" class="btn btn-secondary ml-2">Reset</a>
+            </form>
+        </div>
+
+
 		<h3>{{ $company_name }}</h3>
 		<h5>Ledger REPORT of -
 			{{ $ledger_name }}
@@ -193,7 +215,7 @@
                     @endforeach
                 </tbody>
             </table>
-        @endif<!-- OTHER ARTICLES SECTION -->
+        @endif
 		@if(count($other_summary_table) > 0)
                 <div class="section-title"> Other articles</div>
             <table>

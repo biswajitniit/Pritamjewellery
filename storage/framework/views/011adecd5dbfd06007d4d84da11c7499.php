@@ -6,29 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Pritam Jewellers</title>
     <!--favicon-->
-    <link rel="icon" href="{{ asset('assets/images/favicon-32x32.png') }}" type="image/png">
+    <link rel="icon" href="<?php echo e(asset('assets/images/favicon-32x32.png')); ?>" type="image/png">
     <!-- loader-->
-    <link href="{{ asset('assets/css/pace.min.css') }}" rel="stylesheet">
-    <script src="{{ asset('assets/js/pace.min.js') }}"></script>
+    <link href="<?php echo e(asset('assets/css/pace.min.css')); ?>" rel="stylesheet">
+    <script src="<?php echo e(asset('assets/js/pace.min.js')); ?>"></script>
 
     <!--plugins-->
-    <link href="{{ asset('assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css') }}" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/plugins/metismenu/metisMenu.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/plugins/metismenu/mm-vertical.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/plugins/simplebar/css/simplebar.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/font.awesome.css') }}">
+    <link href="<?php echo e(asset('assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css')); ?>" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="<?php echo e(asset('assets/plugins/metismenu/metisMenu.min.css')); ?>">
+    <link rel="stylesheet" type="text/css" href="<?php echo e(asset('assets/plugins/metismenu/mm-vertical.css')); ?>">
+    <link rel="stylesheet" type="text/css" href="<?php echo e(asset('assets/plugins/simplebar/css/simplebar.css')); ?>">
+    <link rel="stylesheet" type="text/css" href="<?php echo e(asset('assets/css/font.awesome.css')); ?>">
     <!--bootstrap css-->
     <!--bootstrap css-->
-    <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="<?php echo e(asset('assets/css/bootstrap.min.css')); ?>" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&amp;display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined" rel="stylesheet">
     <!--main css-->
-    <link href="{{ asset('assets/css/bootstrap-extended.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/css/horizontal-menu.css') }}" rel="stylesheet">
-    <link href="{{ asset('sass/bordered-theme.css') }}" rel="stylesheet">
-    <link href="{{ asset('sass/responsive.css') }}" rel="stylesheet">
-    <link href="{{ asset('sass/main.css') }}" rel="stylesheet">
+    <link href="<?php echo e(asset('assets/css/bootstrap-extended.css')); ?>" rel="stylesheet">
+    <link href="<?php echo e(asset('assets/css/horizontal-menu.css')); ?>" rel="stylesheet">
+    <link href="<?php echo e(asset('sass/bordered-theme.css')); ?>" rel="stylesheet">
+    <link href="<?php echo e(asset('sass/responsive.css')); ?>" rel="stylesheet">
+    <link href="<?php echo e(asset('sass/main.css')); ?>" rel="stylesheet">
     <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
@@ -43,7 +43,7 @@
         <nav class="navbar navbar-expand align-items-center justify-content-between gap-4 border-bottom">
             <div class="logo-header d-none d-xl-flex align-items-center gap-2">
                 <div class="logo-icon">
-                    <img src="{{ asset('assets/images/logo1.png') }}" class="logo-img" width="45" alt>
+                    <img src="<?php echo e(asset('assets/images/logo1.png')); ?>" class="logo-img" width="45" alt>
                 </div>
                 <div class="logo-name">
                     <h5 class="mb-0">Pritam Jewellers</h5>
@@ -126,7 +126,7 @@
                                 <a class="dropdown-item border-bottom py-2" href="javascript:;">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class>
-                                            <img src="{{ asset('assets/images/avatars/01.png') }}"
+                                            <img src="<?php echo e(asset('assets/images/avatars/01.png')); ?>"
                                                 class="rounded-circle" width="45" height="45" alt>
                                         </div>
                                         <div class>
@@ -163,7 +163,7 @@
                                 <a class="dropdown-item border-bottom py-2" href="javascript:;">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class>
-                                            <img src="{{ asset('assets/images/apps/13.png') }}" class="rounded-circle"
+                                            <img src="<?php echo e(asset('assets/images/apps/13.png')); ?>" class="rounded-circle"
                                                 width="45" height="45" alt>
                                         </div>
                                         <div class>
@@ -185,7 +185,7 @@
 
                 <li class="nav-item dropdown">
                     <a href="javascrpt:;" class="dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown">
-                        <img src="{{ asset('assets/images/avatars/01.png') }}" class="rounded-circle p-1 border"
+                        <img src="<?php echo e(asset('assets/images/avatars/01.png')); ?>" class="rounded-circle p-1 border"
                             width="45" height="45" alt>
                     </a>
                     <div class="dropdown-menu dropdown-user dropdown-menu-end shadow">
@@ -197,7 +197,7 @@
                                 class="material-icons-outlined">dashboard</i>Dashboard</a>
 
                         <hr class="dropdown-divider">
-                        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('logout') }}"><i
+                        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="<?php echo e(route('logout')); ?>"><i
                                 class="material-icons-outlined">power_settings_new</i>Logout</a>
                     </div>
                 </li>
@@ -215,7 +215,7 @@
                 <div class="offcanvas-header border-bottom h-70">
                     <div class="d-flex align-items-center gap-2">
                         <div class>
-                            <img src="{{ asset('assets/images/logo-icon.png') }}" class="logo-icon" width="45"
+                            <img src="<?php echo e(asset('assets/images/logo-icon.png')); ?>" class="logo-icon" width="45"
                                 alt="logo icon" />
                         </div>
                         <div class>
@@ -231,7 +231,7 @@
 
 
 
-                        @if (Auth::user()->id == 1)
+                        <?php if(Auth::user()->id == 1): ?>
                         <!-- For access only super admin -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
@@ -242,18 +242,18 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('rolepermissionusers.index') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('rolepermissionusers.index')); ?>">
                                         Roles & Permissions
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('users.index') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('users.index')); ?>">
                                         Admins
                                     </a>
                                 </li>
                             </ul>
                         </li>
-                        @endif
+                        <?php endif; ?>
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
@@ -264,7 +264,7 @@
                                 </div>
                             </a>
                             <ul class="dropdown-menu">
-                                @php
+                                <?php
                                 $menus = [
                                 'pcodes' => 'PCODE',
                                 'uoms' => 'UOM',
@@ -283,36 +283,28 @@
                                 'locations' => 'Location',
                                 'miscellaneouses' => 'Miscellaneous',
                                 ];
-                                @endphp
+                                ?>
 
-                                @foreach ($menus as $route => $label)
-                                @php
+                                <?php $__currentLoopData = $menus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $route => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                 $permission = getUserMenuPermission(
                                 Auth::user()->id,
                                 $route,
                                 'menu_permissions',
                                 );
-                                @endphp
+                                ?>
 
-                                @if ($permission && $permission->menu_permissions == 1)
+                                <?php if($permission && $permission->menu_permissions == 1): ?>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route($route . '.index') }}">
-                                        {{ $label }}
+                                    <a class="dropdown-item" href="<?php echo e(route($route . '.index')); ?>">
+                                        <?php echo e($label); ?>
+
                                     </a>
                                 </li>
-                                @endif
-                                @endforeach
+                                <?php endif; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                                {{-- <li>
-                                    <a class="dropdown-item" href="#">
-                                        Gold Plus
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Courier
-                                    </a>
-                                </li> --}}
+                                
                                 <li>
                                     <a class="dropdown-item" href="#">
                                         Reason
@@ -354,51 +346,41 @@
                                     </a>
                                     <ul class="dropdown-menu submenu">
 
-                                        {{-- @php
-                                            $permission_customerordertemps = getUserMenuPermission(Auth::user()->id, 'customerordertemps', 'menu_permissions');
-                                        @endphp
-
-                                         @if ($permission_customerordertemps && $permission_customerordertemps->menu_permissions == 1)
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('customerordertemps.index') }}">
-                                        Customer Order Temp
-                                        </a>
-                                </li>
-                                @endif --}}
+                                        
 
 
 
-                                @php
+                                <?php
                                 $permission_customerorders = getUserMenuPermission(
                                 Auth::user()->id,
                                 'customerorders',
                                 'menu_permissions',
                                 );
-                                @endphp
+                                ?>
 
-                                @if ($permission_customerorders && $permission_customerorders->menu_permissions == 1)
+                                <?php if($permission_customerorders && $permission_customerorders->menu_permissions == 1): ?>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('customerorders.index') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('customerorders.index')); ?>">
                                         Customer Order
                                     </a>
                                 </li>
-                                @endif
+                                <?php endif; ?>
 
-                                @php
+                                <?php
                                 $permission_issuetokarigars = getUserMenuPermission(
                                 Auth::user()->id,
                                 'issuetokarigars',
                                 'menu_permissions',
                                 );
-                                @endphp
+                                ?>
 
-                                @if ($permission_issuetokarigars && $permission_issuetokarigars->menu_permissions == 1)
+                                <?php if($permission_issuetokarigars && $permission_issuetokarigars->menu_permissions == 1): ?>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('issuetokarigars.index') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('issuetokarigars.index')); ?>">
                                         Issue To Karigar
                                     </a>
                                 </li>
-                                @endif
+                                <?php endif; ?>
 
 
                                 <!--<li>-->
@@ -406,11 +388,7 @@
                                 <!--        Regular Order-->
                                 <!--    </a>-->
                                 <!--</li>-->
-                                {{-- <li>
-                                            <a class="dropdown-item" href="#">
-                                                Regular Order Manual
-                                            </a>
-                                        </li> --}}
+                                
                                 <!--<li>-->
                                 <!--    <a class="dropdown-item" href="#">-->
                                 <!--        Modify Karigar Issue-->
@@ -443,12 +421,12 @@
                             </a>
                             <ul class="dropdown-menu submenu">
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('metalreceiveentries.index') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('metalreceiveentries.index')); ?>">
                                         Stdbar/Alloy/Finding received
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('finishproductreceivedentries.index') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('finishproductreceivedentries.index')); ?>">
                                         Finished Product Received
                                     </a>
                                 </li>
@@ -469,7 +447,7 @@
                             </a>
                             <ul class="dropdown-menu submenu">
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('metalissueentries.index') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('metalissueentries.index')); ?>">
                                         Gold Issue To Karigar </a>
                                 </li>
                                 <li>
@@ -480,7 +458,7 @@
 
 
                         <li>
-                            <a class="dropdown-item" href="{{ route('qualitychecks.index') }}">
+                            <a class="dropdown-item" href="<?php echo e(route('qualitychecks.index')); ?>">
                                 Quality check
                             </a>
                         </li>
@@ -532,12 +510,12 @@
                             </a>
                             <ul class="dropdown-menu submenu">
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('finishedproductpdis.index') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('finishedproductpdis.index')); ?>">
                                         Finished Product PDI
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('stockoutpdilists.index') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('stockoutpdilists.index')); ?>">
                                         PDI List
                                     </a>
                                 </li>
@@ -592,37 +570,37 @@
                             </ul>
                         </li>
 
-                        @php
+                        <?php
                         $permission_purchases = getUserMenuPermission(
                         Auth::user()->id,
                         'purchases',
                         'menu_permissions',
                         );
-                        @endphp
+                        ?>
 
-                        @if ($permission_purchases && $permission_purchases->menu_permissions == 1)
+                        <?php if($permission_purchases && $permission_purchases->menu_permissions == 1): ?>
                         <li>
-                            <a class="dropdown-item" href="{{ route('purchases.index') }}">Purchases</a>
+                            <a class="dropdown-item" href="<?php echo e(route('purchases.index')); ?>">Purchases</a>
                         </li>
-                        @endif
+                        <?php endif; ?>
 
 
-                        @php
+                        <?php
                         $permission_sales = getUserMenuPermission(
                         Auth::user()->id,
                         'sales',
                         'menu_permissions',
                         );
-                        @endphp
+                        ?>
 
-                        @if ($permission_sales && $permission_sales->menu_permissions == 1)
+                        <?php if($permission_sales && $permission_sales->menu_permissions == 1): ?>
                         <li>
-                            <a class="dropdown-item" href="{{ route('sales.index') }}">Sales</a>
+                            <a class="dropdown-item" href="<?php echo e(route('sales.index')); ?>">Sales</a>
                         </li>
-                        @endif
+                        <?php endif; ?>
 
                         <li>
-                            <a class="dropdown-item" href="{{ route('stock-transfers.index') }}">Stock Transfer</a>
+                            <a class="dropdown-item" href="<?php echo e(route('stock-transfers.index')); ?>">Stock Transfer</a>
                         </li>
 
 
@@ -638,139 +616,91 @@
                             </div>
                         </a>
                         <ul class="dropdown-menu">
-                            {{-- <li>
-                                    <a class="dropdown-item" href="#">
-                                        Courier Details
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Order Slip
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        OredrSlip G+
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Pending List
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Ready Ornament
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Item code Detail
-                                    </a>
-                                </li> --}}
+                            
 
                             <li>
-                                <a class="dropdown-item" href="{{ route('pendinglist.index') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('pendinglist.index')); ?>">
                                     Pending List
                                 </a>
                             </li>
 
                             <li>
-                                <a class="dropdown-item" href="{{ route('stockeffect.index') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('stockeffect.index')); ?>">
                                     Stock Ledger
                                 </a>
                             </li>
 
                             <li>
-                                <a class="dropdown-item" href="{{ route('new-report') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('new-report')); ?>">
                                     Day wise Report
                                 </a>
                             </li>
 
                             <li>
-                                <a class="dropdown-item" href="{{ route('daywisereport.index') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('daywisereport.index')); ?>">
                                     Gold Statement - Karigar
                                 </a>
                             </li>
 
                             <li>
-                                <a class="dropdown-item" href="{{ route('daywisereport.index') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('daywisereport.index')); ?>">
                                     Gold Statement
                                 </a>
                             </li>
 
                             <li>
-                                <a class="dropdown-item" href="{{ route('purchase-ledger') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('purchase-ledger')); ?>">
                                     Purchase Ledger
                                 </a>
                             </li>
 
                             <li>
-                                <a class="dropdown-item" href="{{ route('sales-register') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('sales-register')); ?>">
                                     Sales Register
                                 </a>
                             </li>
 
                             <li>
-                                    <a class="dropdown-item" href="{{ route('karigar.itemcodes') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('karigar.itemcodes')); ?>">
                                         Item Code Wise Details - Karigar
                                     </a>
                                 </li>
 
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('karigar.jobdetails') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('karigar.jobdetails')); ?>">
                                         Job Wise Delivery Details
                                     </a>
                                 </li>
 
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('karigar.qualitycheck') }}">
+                                    <a class="dropdown-item" href="<?php echo e(route('karigar.qualitycheck')); ?>">
                                         Quality Check Report
                                     </a>
                                 </li>
 
                             <li>
-                                <a class="dropdown-item" href="{{ route('itemcodedetailorder.index') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('itemcodedetailorder.index')); ?>">
                                     Item code detail order
                                 </a>
                             </li>
 
                             <li>
-                                <a class="dropdown-item" href="{{ route('purchase-ledger') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('purchase-ledger')); ?>">
                                     Purchase Ledger
                                 </a>
                             </li>
 
                             <li>
-                                <a class="dropdown-item" href="{{ route('sales-register') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('sales-register')); ?>">
                                     Sales Register
                                 </a>
                             </li>
 
-                            {{-- <li>
-                                    <a class="dropdown-item" href="#">
-                                        Status Enquiry
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Qc Report
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Repair at site
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Kar lab
-                                    </a>
-                                </li> --}}
+                            
                         </ul>
                     </li>
 
-                    @if (Auth::user()->id == 1)
+                    <?php if(Auth::user()->id == 1): ?>
                     <!-- For access only super admin -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
@@ -781,196 +711,22 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="{{ route('financial-years.index') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('financial-years.index')); ?>">
                                     Financial Year
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{{ route('vouchertypes.index') }}">
+                                <a class="dropdown-item" href="<?php echo e(route('vouchertypes.index')); ?>">
                                     Voucher Type
                                 </a>
                             </li>
 
                         </ul>
                     </li>
-                    @endif
+                    <?php endif; ?>
 
 
-                    {{-- <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;" data-bs-toggle="dropdown">
-                                <div class="menu-title d-flex align-items-center">MIS</div>
-                                <div class="ms-auto dropy-icon">
-                                    <i class="material-icons-outlined">expand_more</i>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Alignment Report
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Courier Report
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Gold Statement
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Gold Statement (Karigar)
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Jo Wise delivery Detail
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Karigar Performance Report
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Karigar Payment Report
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Karigar Receipt Detail
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Export Payment Detail
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Rejection Detail
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Search Engine
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;" data-bs-toggle="dropdown">
-                                <div class="menu-title d-flex align-items-center">Setting</div>
-                                <div class="ms-auto dropy-icon"><i class="material-icons-outlined">expand_more</i></div>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Change NPIM
-                                    </a>
-                                </li>
-
-                                <li class="nav-item dropend">
-                                    <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret" href="javascript:;">
-                                        Payment
-                                    </a>
-                                    <ul class="dropdown-menu submenu">
-                                        <li>
-                                            <a class="dropdown-item" href="#"> </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="#"> </a>
-                                        </li>
-                                    </ul>
-                                </li>
-
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Backup database
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Restore database
-                                    </a>
-                                </li>
-                                <li class="nav-item dropend">
-                                    <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret" href="javascript:;">
-                                        Group Management
-                                    </a>
-                                    <ul class="dropdown-menu submenu">
-                                        <li>
-                                            <a class="dropdown-item" href="#"> </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="#"> </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        User Management
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Export Master
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Import Master
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        Export financial data
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;" data-bs-toggle="dropdown">
-                                <div class="menu-title d-flex align-items-center">Utility</div>
-                                <div class="ms-auto dropy-icon"><i class="material-icons-outlined">expand_more</i></div>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="#"><i class="material-icons-outlined">leaderboard</i>Apex</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#"><i class="material-icons-outlined">analytics</i>Chartjs</a>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;" data-bs-toggle="dropdown">
-                                <div class="menu-title d-flex align-items-center">Log Off</div>
-                                <div class="ms-auto dropy-icon">
-                                    <i class="material-icons-outlined">expand_more</i>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="#"> <i class="material-icons-outlined">leaderboard</i>Apex </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#"> <i class="material-icons-outlined">analytics</i>Chartjs </a>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="javascript:;">
-                                <div class="menu-title d-flex align-items-center">Help</div>
-                            </a>
-                        </li> --}}
+                    
 
                     </ul>
                 </div>
@@ -979,3 +735,4 @@
         </nav>
     </div>
     <!--end navigation-->
+<?php /**PATH D:\Lara\Pritamjewellery\resources\views/include/header.blade.php ENDPATH**/ ?>

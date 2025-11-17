@@ -1,4 +1,4 @@
-@include('include.header')
+<?php echo $__env->make('include.header', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
   <!--start main wrapper-->
   <main class="main-wrapper">
     <div class="main-content">
@@ -14,13 +14,14 @@
                             <div class="card-body">
                                 <div class="table-responsive-xxl">
 
-                                    @if(Session::has('success'))
+                                    <?php if(Session::has('success')): ?>
                                         <div class="alert alert-success">
-                                        {{ Session::get('success')}}
-                                        </div>
-                                    @endif
+                                        <?php echo e(Session::get('success')); ?>
 
-                                    <form method="GET" action="{{ route('karigar.itemcodes.report') }}" id="dateForm">
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <form method="GET" action="<?php echo e(route('karigar.itemcodes.report')); ?>" id="dateForm">
                                         <div class="row g-3">
                                             <!-- Date From -->
                                             <div class="col-md-3">
@@ -44,8 +45,9 @@
     </div>
   </main>
   <!--end main wrapper-->
-  @php $modalTitle = 'Purchase Items' @endphp
-  @include('transaction-reports.items-modal')
+  <?php $modalTitle = 'Purchase Items' ?>
+  <?php echo $__env->make('transaction-reports.items-modal', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
 
-@include('include.footer')
+<?php echo $__env->make('include.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php /**PATH D:\Lara\Pritamjewellery\resources\views/transaction-reports/item-code-wise-karigar-detail.blade.php ENDPATH**/ ?>

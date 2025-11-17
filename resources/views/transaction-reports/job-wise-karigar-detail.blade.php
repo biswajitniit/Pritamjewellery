@@ -25,7 +25,7 @@
                                             <!-- Date From -->
                                             <div class="col-md-3">
                                                 <label for="date" class="form-label">Date</label>
-                                                <input type="date" name="date" id="date_from" class="form-control">
+                                                <input type="text" name="date" id="date" class="form-control" placeholder="dd/mm/yyyy" required maxlength="10">
                                             </div>
 
                                             <div class="col-6 mt-5">
@@ -46,40 +46,5 @@
   <!--end main wrapper-->
   @php $modalTitle = 'Purchase Items' @endphp
   @include('transaction-reports.items-modal')
-
-<script>
-    // Input mask for dd/mm/yyyy format
-    document.getElementById('date').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/[^0-9]/g, '');
-
-        if (value.length >= 2) {
-            value = value.substring(0, 2) + '/' + value.substring(2);
-        }
-        if (value.length >= 5) {
-            value = value.substring(0, 5) + '/' + value.substring(5, 9);
-        }
-
-        e.target.value = value;
-    });
-
-    // Form submission - convert dd/mm/yyyy to yyyy-mm-dd format
-    document.getElementById('dateForm').addEventListener('submit', function(e) {
-        const dateInput = document.getElementById('date');
-        const dateValue = dateInput.value;
-
-        if (dateValue) {
-            const parts = dateValue.split('/');
-            if (parts.length === 3) {
-                const day = parts[0];
-                const month = parts[1];
-                const year = parts[2];
-
-                // Format as yyyy-mm-dd for backend
-                const formattedDate = year + '-' + month + '-' + day;
-                dateInput.value = formattedDate;
-            }
-        }
-    });
-</script>
 
 @include('include.footer')

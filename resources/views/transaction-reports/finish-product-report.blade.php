@@ -106,7 +106,6 @@
 </style>
 
 <div class="report-container">
-
     <div class="action-buttons">
         <button class="btn-success" onclick="exportToExcel()">
             <i class="fa fa-file-excel"></i> Export to Excel
@@ -123,6 +122,28 @@
     <div class="header-section">
         <h2>Item Code Wise Details - Karigar</h2>
         <p>Date: {{ \Carbon\Carbon::parse($date)->format('d-m-Y') }}</p>
+    </div>
+
+    <div class="action-buttons">
+        <form method="GET" action="">
+            <input type="date" name="date" value="{{ $date }}" hidden required>
+
+            <select name="karigar_name"
+                style="padding:6px; border:1px solid #ccc; border-radius:4px;">
+                <option value="">-- Select Karigar --</option>
+
+                @foreach($karigarList as $name)
+                    <option value="{{ $name }}"
+                        {{ ($karigar_name == $name) ? 'selected' : '' }}>
+                        {{ $name }}
+                    </option>
+                @endforeach
+            </select>
+
+            <button type="submit" class="btn-success">
+                <i class="fa fa-search"></i> Search
+            </button>
+        </form>
     </div>
 
     @if($data->count() > 0)
@@ -163,6 +184,7 @@
     @endif
 
     <div class="action-buttons" style="margin-top: 30px;">
+        <a href="{{ route('karigar.itemcodes') }}" class="btn btn-secondary">Back</a>
         <form method="POST" action="{{ route('karigar.itemcodes.export') }}" style="display: inline;">
             @csrf
             <input type="hidden" name="date" value="{{ $date }}">

@@ -21,14 +21,32 @@ class KarigarDetailController extends Controller
     public function generateReport(Request $request)
     {
         $validated = $request->validate([
-            'date' => 'required|date'
+            'date' => 'required|date',
+            'karigar_name' => 'nullable|string|max:255'
         ]);
 
         try {
-            $data = DB::table('finishproductreceivedentries AS FPE')
+
+            // ⭐ DISTINCT KARIGAR DROPDOWN
+            $karigarList = DB::table('finishproductreceivedentries')
+                ->whereDate('voucher_date', $validated['date'])
+                ->select('karigar_name')
+                ->whereNotNull('karigar_name')
+                ->distinct()
+                ->orderBy('karigar_name')
+                ->pluck('karigar_name');
+
+            // ⭐ MAIN QUERY
+            $query = DB::table('finishproductreceivedentries AS FPE')
                 ->leftJoin('finishproductreceivedentryitems AS FPI', 'FPI.fprentries_id', '=', 'FPE.id')
-                ->whereRaw('FPE.voucher_date = ?', $validated['date'])
-                ->select(
+                ->whereDate('FPE.voucher_date', $validated['date']);
+
+            // ⭐ FILTER: KARIGAR NAME
+            if (!empty($validated['karigar_name'])) {
+                $query->where('FPE.karigar_name', 'LIKE', '%' . $validated['karigar_name'] . '%');
+            }
+
+            $data = $query->select(
                     'FPI.job_no',
                     'FPI.item_code',
                     'FPE.karigar_name',
@@ -42,13 +60,14 @@ class KarigarDetailController extends Controller
                 ->get();
 
             return view('transaction-reports.finish-product-report', [
-                'data' => $data,
-                'date' => $validated['date']
+                'data'          => $data,
+                'date'          => $validated['date'],
+                'karigar_name'  => $validated['karigar_name'] ?? '',
+                'karigarList'   => $karigarList
             ]);
 
         } catch (Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Error generating report: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error generating report: ' . $e->getMessage());
         }
     }
 
@@ -104,14 +123,48 @@ class KarigarDetailController extends Controller
     public function generateJobReport(Request $request)
     {
         $validated = $request->validate([
-            'date' => 'required|date'
+            'date' => 'required|date',
+            'karigar_name' => 'nullable|string|max:255',
+            'job_no' => 'nullable|string|max:255'
         ]);
 
         try {
-            $data = DB::table('finishproductreceivedentries AS FPE')
+
+            // ⭐ DISTINCT KARIGAR LIST (for dropdown)
+            $karigarList = DB::table('finishproductreceivedentries')
+                ->whereDate('voucher_date', $validated['date'])
+                ->whereNotNull('karigar_name')
+                ->select('karigar_name')
+                ->distinct()
+                ->orderBy('karigar_name')
+                ->pluck('karigar_name');
+
+            // ⭐ DISTINCT JOB_NO LIST (for dropdown)
+            $jobList = DB::table('finishproductreceivedentryitems AS FPI')
+                ->leftJoin('finishproductreceivedentries AS FPE', 'FPI.fprentries_id', '=', 'FPE.id')
+                ->whereDate('FPE.voucher_date', $validated['date'])
+                ->whereNotNull('FPI.job_no')
+                ->select('FPI.job_no')
+                ->distinct()
+                ->orderBy('FPI.job_no')
+                ->pluck('job_no');
+
+            // ⭐ MAIN QUERY
+            $query = DB::table('finishproductreceivedentries AS FPE')
                 ->leftJoin('finishproductreceivedentryitems AS FPI', 'FPI.fprentries_id', '=', 'FPE.id')
-                ->whereRaw('FPE.voucher_date = ?', $validated['date'])
-                ->select(
+                ->whereDate('FPE.voucher_date', $validated['date']);
+
+            // ⭐ Filter: Karigar Name
+            if (!empty($validated['karigar_name'])) {
+                $query->where('FPE.karigar_name', $validated['karigar_name']);
+            }
+
+            // ⭐ Filter: Job No
+            if (!empty($validated['job_no'])) {
+                $query->where('FPI.job_no', $validated['job_no']);
+            }
+
+            $data = $query->select(
                     'FPE.karigar_name',
                     'FPE.voucher_date',
                     'FPI.job_no',
@@ -125,12 +178,15 @@ class KarigarDetailController extends Controller
 
             return view('transaction-reports.job-wise-report', [
                 'data' => $data,
-                'date' => $validated['date']
+                'date' => $validated['date'],
+                'karigar_name' => $validated['karigar_name'] ?? '',
+                'job_no' => $validated['job_no'] ?? '',
+                'karigarList' => $karigarList,
+                'jobList' => $jobList
             ]);
 
         } catch (Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Error generating report: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error generating report: ' . $e->getMessage());
         }
     }
 
@@ -185,15 +241,50 @@ class KarigarDetailController extends Controller
     public function generateQualityCheckReport(Request $request)
     {
         $validated = $request->validate([
-            'date' => 'required|date'
+            'date' => 'required|date',
+            'karigar_name' => 'nullable|string|max:255',
+            'job_no' => 'nullable|string|max:255'
         ]);
 
         try {
-            $data = DB::table('qualitychecks AS QC')
+
+            // ⭐ Get distinct Karigar Names
+            $karigarList = DB::table('qualitychecks')
+                ->whereDate('qualitycheck_date', $validated['date'])
+                ->whereNotNull('karigar_name')
+                ->select('karigar_name')
+                ->distinct()
+                ->orderBy('karigar_name')
+                ->pluck('karigar_name');
+
+            // ⭐ Get distinct Job Nos
+            $jobList = DB::table('qualitycheckitems AS QCI')
+                ->leftJoin('qualitychecks AS QC', 'QCI.qualitychecks_id', '=', 'QC.id')
+                ->whereDate('QC.qualitycheck_date', $validated['date'])
+                ->where('QCI.remark_items', 'Accept')
+                ->whereNotNull('QCI.job_no')
+                ->select('QCI.job_no')
+                ->distinct()
+                ->orderBy('QCI.job_no')
+                ->pluck('job_no');
+
+            // ⭐ Main Query
+            $query = DB::table('qualitychecks AS QC')
                 ->leftJoin('qualitycheckitems AS QCI', 'QCI.qualitychecks_id', '=', 'QC.id')
-                ->whereRaw('QC.qualitycheck_date = ?', $validated['date'])
-                ->where('remark_items', 'Accept')
-                ->select(
+                ->whereDate('QC.qualitycheck_date', $validated['date'])
+                ->where('remark_items', 'Accept');
+
+            // ⭐ Filter: Karigar Name
+            if (!empty($validated['karigar_name'])) {
+                $query->where('QC.karigar_name', $validated['karigar_name']);
+            }
+
+            // ⭐ Filter: Job No
+            if (!empty($validated['job_no'])) {
+                $query->where('QCI.job_no', $validated['job_no']);
+            }
+
+            $data = $query->select(
                     'QC.qc_voucher',
                     'QC.qualitycheck_date',
                     'QC.karigar_name',
@@ -211,8 +302,12 @@ class KarigarDetailController extends Controller
                 ->get();
 
             return view('transaction-reports.quality-check-report', [
-                'data' => $data,
-                'date' => $validated['date']
+                'data'          => $data,
+                'date'          => $validated['date'],
+                'karigar_name'  => $validated['karigar_name'] ?? '',
+                'job_no'        => $validated['job_no'] ?? '',
+                'karigarList'   => $karigarList,
+                'jobList'       => $jobList,
             ]);
 
         } catch (Exception $e) {

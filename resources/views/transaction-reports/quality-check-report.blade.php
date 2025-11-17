@@ -146,6 +146,41 @@
         <p>Accepted Items for {{ \Carbon\Carbon::parse($date)->format('d-m-Y') }}</p>
     </div>
 
+    <div class="action-buttons no-print" style="margin-bottom: 20px;">
+    <form method="GET" action=""
+          style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+
+        <input type="date" name="date" value="{{ $date }}" hidden required>
+
+        <!-- ⭐ Karigar Dropdown -->
+        <select name="karigar_name"
+                style="padding:6px; border:1px solid #ccc; border-radius:4px; width:180px;">
+            <option value="">-- Select Karigar --</option>
+            @foreach($karigarList as $name)
+                <option value="{{ $name }}" {{ $karigar_name == $name ? 'selected' : '' }}>
+                    {{ $name }}
+                </option>
+            @endforeach
+        </select>
+
+        <!-- ⭐ Job No Dropdown -->
+        <select name="job_no"
+                style="padding:6px; border:1px solid #ccc; border-radius:4px; width:180px;">
+            <option value="">-- Select Job No --</option>
+            @foreach($jobList as $job)
+                <option value="{{ $job }}" {{ $job_no == $job ? 'selected' : '' }}>
+                    {{ $job }}
+                </option>
+            @endforeach
+        </select>
+
+        <button type="submit" class="btn-success">
+            <i class="fa fa-search"></i> Search
+        </button>
+
+    </form>
+</div>
+
     @if($data->count() > 0)
         <table>
             <thead>
@@ -192,6 +227,8 @@
     @endif
 
     <div class="action-buttons no-print" style="margin-top: 30px;">
+        <a href="{{ route('karigar.qualitycheck') }}" class="btn btn-secondary">Back</a>
+
         <form method="POST" action="{{ route('karigar.qualitycheck.export') }}" style="display: inline;">
             @csrf
             <input type="hidden" name="date" value="{{ $date }}">
@@ -202,6 +239,7 @@
         <button class="btn-danger" onclick="window.print()">
             <i class="fa fa-print"></i> Print Report
         </button>
+
     </div>
 
 </div>
