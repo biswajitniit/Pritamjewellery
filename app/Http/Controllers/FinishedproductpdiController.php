@@ -182,7 +182,7 @@ class FinishedproductpdiController extends Controller
             if (!empty($items)) {
                 // Get first row purity
                 $firstItemParts = explode(',', $items[0]);
-                $firstPurity = $firstItemParts[2] ?? null; // third value (91.6)
+                $firstPurity = $firstItemParts[3] ?? null; // fourth value (91.6)
             } else {
                 $firstPurity = null;
             }
