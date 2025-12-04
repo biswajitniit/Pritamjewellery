@@ -127,16 +127,16 @@
                     <table class="w-100" >
                       <tbody>
                         <tr>
-                          <td class="text-left"><strong>Name : </strong> {{ $karigars->kname }}</td>
+                          <td class="text-left"><strong>Name : </strong> {{ $customers->cust_name }}</td>
                         </tr>
                         <tr>
-                          <td class="text-left"><strong>Address : </strong> {{ @$karigars->address }}Z</td>
+                          <td class="text-left"><strong>Address : </strong> {{ @$customers->address }}Z</td>
                         </tr>
                         <tr>
-                          <td class="text-left"><strong>State Code : </strong> {{ @$karigars->statecode }}</td>
+                          <td class="text-left"><strong>State Code : </strong> {{ substr(@$customers->gstin, 0, 2) }}</td>
                         </tr>
                         <tr>
-                          <td class="text-left"><strong>GSTIN : </strong> {{ @$karigars->gstin }}</td>
+                          <td class="text-left"><strong>GSTIN : </strong> {{ @$customers->gstin }}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -146,17 +146,17 @@
                     <tbody>
 
                       <tr>
-                        <td class="text-left"><strong>Voucher No. : </strong> {{ @$metalissueentries->voucher_no }}</td>
+                        <td class="text-left"><strong>Voucher No. : </strong> {{ @$metalreceiveentries->vou_no }}</td>
                       </tr>
                       <tr>
-                        <td class="text-left"><strong>Voucher Date : </strong> {{ date('d/m/Y',strtotime(@$metalissueentries->metal_issue_entries_date)) }}</td>
+                        <td class="text-left"><strong>Voucher Date : </strong> {{ date('d/m/Y',strtotime(@$metalreceiveentries->created_at)) }}</td>
                       </tr>
                       <tr>
                         <td class="text-left"><strong>GSTIN : </strong> 19AHVPS9192D1ZE</td>
                       </tr>
-                      <tr>
-                        <td class="text-left"><strong>State Code : </strong> 19</td>
-                      </tr>
+                       <tr>
+                          <td class="text-left"><strong>State Code : </strong> 19 </td>
+                        </tr>
                     </tbody>
                   </table></td>
                  </tr>
@@ -166,9 +166,7 @@
                 <thead>
                    <tr>
                       <th class="text-left">Description</th>
-                      <th class="text-left">HSN</th>
                       <th class="text-left">Purity</th>
-                      <th class="text-left">Add Alloy</th>
                       <th class="text-left">Gross Weight <br>(in Grams)</th>
                       <th class="text-left">Net Weight <br>(in Grams)</th>
                    </tr>
@@ -176,14 +174,13 @@
                 <tbody>
                   <tr>
                     <td class="text-right">
-                      <strong><u>{{ $metalissueentries->metal_category }}</u></strong> <br><br>
-
+                      <strong><u>{{ @$metals->metal_name }}</u></strong> <br><br><br><br><br><br><br><br>
+                      Received GOLD for Job Work<br>
+                      Against DV No : {{ @$metalreceiveentries->dv_no }}   Dated: {{ date('d/m/Y',strtotime(@$metalreceiveentries->dv_date)) }} <br>
                     </td>
-                    <td class="text-end">{{ @$metals->metal_hsn }}</td>
                     <td class="text-end">{{ @$metalpurities->purity }}</td>
-                    <td class="text-end">{{ @$metalissueentries->alloy_gm }}</td>
-                    <td class="text-end">{{ @$metalissueentries->weight }}</td>
-                    <td class="text-end">{{ @$metalissueentries->netweight_gm }}</td>
+                    <td class="text-end">{{ @$metalreceiveentries->weight }}</td>
+                    <td class="text-end">{{ @$metalreceiveentries->weight }}</td>
                    </tr>
                 </tbody>
                 <tbody class="w-100">
@@ -198,7 +195,7 @@
                 </tbody>
              </table>
 
-             <h5>ISSUED FOR JOBWORK SAC:{{ @$metals->metal_sac }},HSN FOR ALLOY-7407/7106</h5>
+             {{-- <h5>ISSUED FOR JOBWORK SAC:{{ @$metals->metal_sac }},HSN FOR ALLOY-7407/7106</h5> --}}
 
              <table class="w-100 text-center mt-5 mb-5">
               <tbody>

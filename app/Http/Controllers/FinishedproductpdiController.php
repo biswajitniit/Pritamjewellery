@@ -35,11 +35,11 @@ class FinishedproductpdiController extends Controller
         //     ->where('pdi_list', 'No')
         //     ->where('remark_items', 'Accept')
         //     ->paginate(100);
-        
+
         $qualitycheckitems = Qualitycheckitem::with('karigar')
             ->leftJoin('finishproductreceivedentryitems as fpri', function ($join) {
                 $join->on('fpri.item_code', '=', 'qualitycheckitems.item_code')
-                     ->on('fpri.job_no', '=', 'qualitycheckitems.job_no');
+                    ->on('fpri.job_no', '=', 'qualitycheckitems.job_no');
             })
             ->select('qualitycheckitems.*', 'fpri.gross_wt')
             ->when($purity, function ($query, $purity) {
@@ -50,9 +50,9 @@ class FinishedproductpdiController extends Controller
             })
             ->where('qualitycheckitems.pdi_list', 'No')
             ->where('qualitycheckitems.remark_items', 'Accept')
-            ->paginate(100);        
-        
-        
+            ->paginate(100);
+
+
 
         // Active karigars with pending (pdi_list = No)
         $karigars = Karigar::where('is_active', 'Yes')
@@ -155,7 +155,7 @@ class FinishedproductpdiController extends Controller
                     'qty'                  => strip_tags($qualitycheckitems->order_qty),
                     'size'                 => strip_tags($qualitycheckitems->size),
                     'uom'                  => strip_tags($qualitycheckitems->uom),
-                    'net_wt'               => $qualitycheckitems->qualitycheckitems,
+                    'net_wt'               => $qualitycheckitems->net_wt,
                     'purity'               => $qualitycheckitems->purity,
                     'rate'                 => @$getRate->lab_charge,
                     'a_lab'                => @$getalabs, // sum of amount product stone details
@@ -227,7 +227,6 @@ class FinishedproductpdiController extends Controller
 
             return redirect()->route('stockoutpdilists.index')
                 ->withSuccess('Finished Product PDI saved successfully.');
-                
         } catch (\Throwable $e) {
             DB::rollBack();
             report($e);

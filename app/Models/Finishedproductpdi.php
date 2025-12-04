@@ -29,6 +29,7 @@ class Finishedproductpdi extends Model
         'loss',
         'kid',
         'delivered_stock_out',
+        'rejection_from_customer'
     ];
 
 

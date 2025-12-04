@@ -516,4 +516,17 @@ class MetalreceiveentriesController extends Controller
 
         return response($html);
     }
+    /**
+     * Display the specified resource.
+     */
+    public function print(string $id)
+    {
+
+        $metalreceiveentries = Metalreceiveentry::findOrFail($id);
+        $customer = Customer::where('id', $metalreceiveentries->customer_id)->first();
+        $metalpurities   = Metalpurity::findOrFail($metalreceiveentries->purity_id);
+        $company = Customer::where('party_type', 'Company')->first();
+        $metal = Metal::where('metal_name', 'GOLD')->where('metal_category', 'Gold')->first();
+        return view('metalreceiveentries.print', compact('metalreceiveentries', 'customer', 'metalpurities', 'company', 'metal'));
+    }
 }

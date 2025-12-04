@@ -11,28 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('finishedproductpdis', function (Blueprint $table) {
+        Schema::create('rejection_recd_from_customers', function (Blueprint $table) {
             $table->id();
-
             $table->unsignedBigInteger('location_id');
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
             $table->string('vou_no')->nullable();
-            $table->date('date')->nullable();
-
+            $table->date('vou_date')->nullable();
             $table->string('job_no')->nullable();
             $table->string('item_code')->nullable();
-            $table->string('qty')->nullable();
-            $table->string('uom')->nullable();
-            $table->string('size')->nullable();
-            $table->string('net_wt')->nullable();
-            $table->string('purity')->nullable();
-            $table->string('rate')->nullable();
-            $table->string('a_lab')->nullable();
-            $table->string('stone_chg')->nullable();
-            $table->string('loss')->nullable();
             $table->string('kid')->nullable();
-            $table->enum('delivered_stock_out', ['Yes', 'No'])->default('No');
-            $table->enum('rejection_from_customer', ['Pending', 'Processing', 'Complete'])->default('Pending');
+            $table->string('qty')->nullable();
+            $table->string('gross_wt')->nullable();
+            $table->string('net_wt')->nullable();
+            $table->string('reason')->nullable();
+            $table->string('rej_lab_chg')->nullable();
+            $table->string('rej_st_chg')->nullable();
+            $table->string('rej_add_lab')->nullable();
+            $table->string('created_by')->nullable();
+            $table->string('updated_by')->nullable();
             $table->timestamps();
         });
     }
@@ -42,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('finishedproductpdis');
+        Schema::dropIfExists('rejection_recd_from_customers');
     }
 };

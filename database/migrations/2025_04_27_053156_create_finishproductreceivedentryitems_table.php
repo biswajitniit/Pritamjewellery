@@ -19,6 +19,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('financial_years')
                 ->restrictOnDelete();
+            $table->string('sl_no')->nullable();
             $table->string('barcode')->nullable();
             $table->string('job_no')->nullable();
             $table->string('item_code')->nullable();

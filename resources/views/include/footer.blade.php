@@ -1134,7 +1134,7 @@
     // FOR Metal Issue Entry Page End metalissueentries/create, metalissueentries/update
 
     // FOR Quality Check Page Start qualitychecks/create, qualitychecks/update
-    $("document").ready(function(){
+    /*$("document").ready(function(){
         $('#receive_qty').keyup(function() {
             $order_qty   = $("#order_qty").val();
             $receive_qty = $("#receive_qty").val();
@@ -1158,7 +1158,136 @@
                 });
             }
         })
+    });*/
+
+    $(document).ready(function(){
+
+        $('#receive_qty').keyup(function() {
+
+            let order_qty   = $("#order_qty").val();
+            let receive_qty = $("#receive_qty").val();
+
+            if(receive_qty <= order_qty){
+
+                $("#bal_qty").val(order_qty - receive_qty);
+
+                let karigar_id = $("select[name='karigar_id']").val();
+                let job_no     = $("#job_no").val();
+
+                if(!karigar_id || !job_no){
+                    $("#qualitycheckitems").html("<b style='color:red'>Missing KID or Job No</b>");
+                    return;
+                }
+
+                // 🔹 GET NEXT SL NUMBER FROM DATABASE
+                $.ajax({
+                    url: "{{ route('getNextSlno') }}",
+                    type: "POST",
+                    data: {
+                        karigar_id: karigar_id,
+                        job_no: job_no,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(result){
+
+                        let startSl = parseInt(result.next_sl_no);  
+                        let html = "";
+
+                        //for (let i = 0; i < receive_qty; i++) {
+                        for (let i = 0; i < receive_qty; i++) {
+
+                            //let sl_no = startSl + i;  // auto increment
+                            let sl_no =  1+i;  // auto increment
+                            html += `
+                            <div class="row mb-1">
+
+                                <div class="col-md-1">
+                                    <input type="text" name="sl_no[]" class="form-control" value="${sl_no}" readonly>
+                                </div>
+
+                                <div class="col-md-1">
+                                    <input type="text" name="gross_wt_items[]" class="form-control">
+                                </div>
+
+                                <div class="col-md-1">
+                                    <input type="text" name="net_wt_items[]" class="form-control">
+                                </div>
+
+                                <div class="col-md-1">
+                                    <select name="design_items[]" class="form-select">
+                                        <option value="Match" selected>Match</option>
+                                        <option value="Mismatch">Mismatch</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1">
+                                    <select name="solder_items[]" class="form-select">
+                                        <option value="Satisfy" selected>Satisfy</option>
+                                        <option value="Solder cut">Solder cut</option>
+                                        <option value="Link cut">Link cut</option>
+                                        <option value="Weak Solder">Weak Solder</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <select name="polish_items[]" class="form-select">
+                                        <option value="Satisfy" selected>Satisfy</option>
+                                        <option value="Polishing not ok">Polishing not ok</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <select name="finish_items[]" class="form-select">
+                                        <option value="Satisfy" selected>Satisfy</option>
+                                        <option value="Finishing not ok">Finishing not ok</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1">
+                                    <select name="mina_items[]" class="form-select">
+                                        <option value="Satisfy" selected>Satisfy</option>
+                                        <option value="Enamel crack">Enamel crack</option>
+                                        <option value="Chief off">Chief off</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1">
+                                    <select name="other_items[]" class="form-select">
+                                        <option value="Satisfy" selected>Satisfy</option>
+                                        <option value="Finishing not ok">Finishing not ok</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1">
+                                    <select name="remark_items[]" class="form-select">
+                                        <option value="Accept" selected>Accept</option>
+                                        <option value="Reject">Reject</option>
+                                    </select>
+                                </div>
+
+                            </div>`;
+                        }
+
+                        $("#qualitycheckitems").html(html);
+                    }
+                });
+
+            }else{
+
+                $("#bal_qty").val('');
+                $("#qualitycheckitems").html('');
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Receive Qty Not Greater Than Order Qty!"
+                });
+            }
+        });
+
     });
+
+
     // FOR Quality Check Page End qualitychecks/create, qualitychecks/update
 
     function GetLocationWiseVoucherNo(location_id,voucher_type){
@@ -1827,6 +1956,99 @@
             toggleJOValidation(validation);
         }
     });
+
+
+    function GetKIDjobnowise(job_no) {
+        if (job_no !== '') {
+            $.ajax({
+                url: "{{ route('getkidjobnowise') }}",
+                type: "POST",
+                data: {
+                    job_no: job_no, 
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (result) {
+                    $("#jobno_kid").html(result);
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", error);
+                }
+            });
+        }
+    }  
+
+    function GetItemCodeKIDJobNoWise(kid) {
+        var job_no = $("#job_no").val();
+        if (kid !== '' && job_no !== '') {
+            $.ajax({
+                url: "{{ route('getitemcodekidjobnowise') }}",
+                type: "POST",
+                data: {
+                    kid: kid,
+                    job_no: job_no, 
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (result) {
+                    $("#item_code").html(result);
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", error);
+                }
+            });
+        }
+    } 
+
+    function GetItemCodeKIDJobNoWise(kid) {
+        var job_no = $("#job_no").val();
+        if (kid !== '' && job_no !== '') {
+            $.ajax({
+                url: "{{ route('getitemcodekidjobnowise') }}",
+                type: "POST",
+                data: {
+                    kid: kid,
+                    job_no: job_no, 
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (result) {
+                    $("#item_code").html(result);
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", error);
+                }
+            });
+        }
+    }
+    function GetItemCodeKIDJobNoWiseQtyGrosswtNetwt(item_code) {
+
+        var job_no = $("#job_no").val();
+        var kid = $("#jobno_kid").val();
+
+        if (item_code !== '' && job_no !== '' && kid !== '') {
+
+            $.ajax({
+                url: "{{ route('getitemcodekidjobnowiseqtygrosswtnetwt') }}",
+                type: "POST",
+                data: {
+                    item_code: item_code,
+                    job_no: job_no,
+                    kid: kid,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (result) {
+                    console.log(result);
+
+                    // FILL INPUT FIELDS
+                    $("#qty").val(result.qty);
+                    $("#gross_wt").val(result.gross_wt);
+                    $("#net_wt").val(result.net_wt);
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", error);
+                }
+            });
+        }
+    } 
+
 </script>
 @yield('scripts')
 </body>

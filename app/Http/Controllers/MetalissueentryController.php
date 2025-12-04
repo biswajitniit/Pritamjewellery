@@ -592,4 +592,25 @@ class MetalissueentryController extends Controller
             'available_stock' => round($available, 3),
         ]);
     }
+
+    /**
+     * Display the specified resource.
+     */
+    public function print(string $id)
+    {
+
+        $metalissueentries = Metalissueentry::findOrFail($id);
+        $karigars = Karigar::findOrFail($metalissueentries->karigar_id);
+        $metalpurities   = Metalpurity::findOrFail($metalissueentries->purity_id);
+        $company = Customer::where('party_type', 'Company')->first();
+        $metal = Metal::where('metal_name', 'GOLD')->where('metal_category', 'Gold')->first();
+        $metalSILVER = Metal::where('metal_name', 'SILVER')->where('metal_category', 'Alloy')->first();
+        $metalCOPPER = Metal::where('metal_name', 'COPPER')->where('metal_category', 'Alloy')->first();
+        //dd($metalpurities);
+        // $pdf = Pdf::loadView('metalissueentries.view', compact('metalissueentries', 'karigars', 'metals', 'metalpurities'));
+        // $pdf->setPaper('A5', 'landscape');
+        // return $pdf->stream('metal-issue-voucher.pdf'); // opens in browser
+
+        return view('metalissueentries.print', compact('metalissueentries', 'karigars', 'metalpurities', 'company', 'metal', 'metalSILVER', 'metalCOPPER'));
+    }
 }

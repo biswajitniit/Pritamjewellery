@@ -565,7 +565,7 @@
                             </a>
                             <ul class="dropdown-menu submenu">
                                 <li>
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" href="{{ route('rejection-recd-from-customers.index') }}">
                                         Rejection Recd. From Customer
                                     </a>
                                 </li>

@@ -27,6 +27,7 @@ use App\Http\Controllers\PendinglistController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\QualitycheckController;
+use App\Http\Controllers\RejectionRecdFromCustomerController;
 use App\Http\Controllers\RolepermissionController;
 use App\Http\Controllers\RolepermissionuserController;
 use App\Http\Controllers\SaleController;
@@ -120,6 +121,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('getcustomerdetails', [MetalreceiveentriesController::class, 'getcustomerdetails'])->name('getcustomerdetails');
     Route::post('getmetalpurity', [MetalreceiveentriesController::class, 'getmetalpurity'])->name('getmetalpurity');
     Route::post('getitemlist', [MetalreceiveentriesController::class, 'getitemlist'])->name('getitemlist');
+    Route::get('/metalreceiveentries/print/{id}', [MetalreceiveentriesController::class, 'print'])->name('metalreceiveentries.print');
 
     Route::resource('metalissueentries', MetalissueentryController::class);
     Route::post('getmetalname', [MetalissueentryController::class, 'getmetalname'])->name('getmetalname');
@@ -132,6 +134,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('getmetalpuritygroup', [MetalissueentryController::class, 'getmetalpuritygroup'])->name('getmetalpuritygroup');
     Route::post('getmetalpuritylist', [MetalissueentryController::class, 'getmetalpuritylist'])->name('getmetalpuritylist');
     Route::get('/check-stock', [MetalissueentryController::class, 'checkStock'])->name('metalissueentries.checkStock');
+    Route::get('/metalissueentries/print/{id}', [MetalissueentryController::class, 'print'])->name('metalissueentries.print');
 
 
     Route::resource('itemdescriptionheaders', ItemdescriptionheaderController::class);
@@ -149,6 +152,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('getissuetokarigaritemdetails', [QualitycheckController::class, 'getissuetokarigaritemdetails'])->name('getissuetokarigaritemdetails');
     Route::post('getissuetokarigaritemcodedetails', [QualitycheckController::class, 'getissuetokarigaritemcodedetails'])->name('getissuetokarigaritemcodedetails');
     Route::post('getordertype', [QualitycheckController::class, 'getordertype'])->name('getordertype');
+    Route::post('/get-next-slno', [QualitycheckController::class, 'getNextSlno'])->name('getNextSlno');
     // For Qualitycheck END
 
     // For Finished product pdi Start
@@ -205,4 +209,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/quality-check', [KarigarDetailController::class, 'qualityCheck'])->name('karigar.qualitycheck');
     Route::get('/quality-check-report', [KarigarDetailController::class, 'generateQualityCheckReport'])->name('karigar.qualitycheck.report');
     Route::post('/quality-check-excel', [KarigarDetailController::class, 'exportQualityCheckToExcel'])->name('karigar.qualitycheck.export');
+
+    Route::resource('rejection-recd-from-customers', RejectionRecdFromCustomerController::class);
+    Route::post('getkidjobnowise', [RejectionRecdFromCustomerController::class, 'getkidjobnowise'])->name('getkidjobnowise');
+    Route::post('getitemcodekidjobnowise', [RejectionRecdFromCustomerController::class, 'getitemcodekidjobnowise'])->name('getitemcodekidjobnowise');
+    Route::post('getitemcodekidjobnowiseqtygrosswtnetwt', [RejectionRecdFromCustomerController::class, 'getitemcodekidjobnowiseqtygrosswtnetwt'])->name('getitemcodekidjobnowiseqtygrosswtnetwt');
 });

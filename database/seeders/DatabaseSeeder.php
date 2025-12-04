@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
             LocationsTableSeeder::class,
             FinancialYearsTableSeeder::class,
             VoucherTypesTableSeeder::class,
+            RejectionReasonSeeder::class,
         ]);
     }
 }

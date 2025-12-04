@@ -704,7 +704,7 @@ class FinishproductreceivedentryController extends Controller
                 </div>';
 
                 $html .= '<div class="col-md-0-8">
-                    <input type="text" name="gross_wt[]" id="gross_wt_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $item->gross_wt_items . '" onkeyup="netwtcalculation(' . $count . '); validateRowWeight(' . $count . ');">
+                    <input type="text" name="gross_wt[]" id="gross_wt_' . $count . '" class="form-control form-control-sm rounded-0 text-end" value="' . $item->gross_wt_items . '" onchange="netwtcalculation(' . $count . '); validateRowWeight(' . $count . ');">
                 </div>';
 
                 $html .= '<div class="col-md-0-8">

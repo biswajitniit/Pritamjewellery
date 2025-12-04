@@ -15,6 +15,7 @@ class Finishproductreceivedentryitem extends Model
     protected $fillable = [
         'fprentries_id',
         'financial_year_id',
+        'sl_no',
         'barcode',
         'job_no',
         'item_code',

@@ -6,12 +6,12 @@
           <div class="col-12 col-xl-12">
             <div class="card border-top border-3 border-danger rounded-0">
               <div class="card-header py-3 px-4">
-                <h5 class="mb-0 text-danger">Metal Receive Entry
+                <h5 class="mb-0 text-danger">Rejection Recd Customers
                 </h5>
                 <div id="fixed-social">
 
                   <div>
-                      <a href="{{ route('metalreceiveentries.create') }}">ADD</a>
+                      <a href="{{ route('rejection-recd-from-customers.create') }}">ADD</a>
                   </div>
                   <!-- <div>
                       <a href="#">DEL</a>
@@ -39,48 +39,44 @@
 
 
                                         <table class="table mb-0 table-striped">
-                                          <thead>
-                                              <tr>
-                                                <th><i class="fa fa-cog style_cog"></i></th>
-                                                  <th scope="col">#</th>
-                                                  
-                                                  <th scope="col">Vou.No</th>
-                                                  <th scope="col">Date</th>
-                                                  <th scope="col">Company Name</th>
-                                                  <th scope="col">Item Type</th>
-                                                  <th scope="col">Metal</th>
-                                                  <th scope="col">Purity</th>
-                                                  <th scope="col">Weight</th>
-                                                  <th scope="col">DV No.</th>
-                                                  <th scope="col">DV Date</th>
-                                              </tr>
-                                          </thead>
+                                            <thead>
+                                                <tr>
+                                                    <th><i class="fa fa-cog style_cog"></i></th>
+                                                    <th>#</th>
+                                                    <th>Location</th>
+                                                    <th>Vou No</th>
+                                                    <th>Job No</th>
+                                                    <th>Item Code</th>
+                                                    <th>KID</th>
+                                                    <th>Qty</th>
+                                                    <th>Gross Wt</th>
+                                                    <th>Net Wt</th>
+                                                    <th>Reason</th>
+                                                </tr>
+                                            </thead>
+
                                             <tbody>
                                                 @php $count = 1; @endphp
-                                                @forelse($metalreceiveentries as $entry)
+
+                                                @forelse($rejectionrecdfromcustomers as $entry)
                                                     <tr>
                                                         <td>
                                                             <div class="dropdown dd__">
                                                                 <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown">
                                                                     <i class="fa fa-ellipsis-v"></i>
                                                                 </button>
+
                                                                 <ul class="dropdown-menu">
                                                                     <li>
-                                                                        <a class="dropdown-item" href="{{ route('metalreceiveentries.edit', $entry->metal_receive_entries_id) }}">
+                                                                        <a class="dropdown-item" href="{{ route('rejection_recd_from_customers.edit', $entry->id) }}">
                                                                             <i class="fa fa-pencil"></i> Edit
                                                                         </a>
                                                                     </li>
-                                                                    @if($entry->item_name == 'GOLD')
+
                                                                     <li><hr class="dropdown-divider"></li>
+
                                                                     <li>
-                                                                        <a class="dropdown-item" href="{{ route('metalreceiveentries.print',[$entry->metal_receive_entries_id]) }}">
-                                                                        <i class="fa fa-print"></i> Print
-                                                                        </a>
-                                                                    </li>
-                                                                    @endif
-                                                                    <li><hr class="dropdown-divider"></li>
-                                                                    <li>
-                                                                        <form action="{{ route('metalreceiveentries.destroy', $entry->metal_receive_entries_id) }}" method="POST">
+                                                                        <form action="{{ route('rejection_recd_from_customers.destroy', $entry->id) }}" method="POST">
                                                                             @csrf
                                                                             @method("DELETE")
                                                                             <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure?')">
@@ -91,29 +87,30 @@
                                                                 </ul>
                                                             </div>
                                                         </td>
-                                                        <td>{{ $count }}</td>
-                                                       
-                                                        <td>{{ $entry->vou_no }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($entry->metal_receive_entries_date)->format('d-m-Y') }}</td>
-                                                        <td>{{ $entry->customer?->cust_name }} ({{ $entry->customer?->cid }})</td>
-                                                        <td>{{ $entry->item_type }}</td>
-                                                        <td>{{ $entry->item_name ?? '-' }}</td>
-                                                        <td>{{ $entry->metalpurity?->purity }}</td>
-                                                        <td>{{ $entry->weight }}</td>
-                                                        <td>{{ $entry->dv_no }}</td>
-                                                        <td>{{ $entry->dv_date ? \Carbon\Carbon::parse($entry->dv_date)->format('d-m-Y') : '' }}</td>
+
+                                                        <td>{{ $count++ }}</td>
+
+                                                        {{-- Show Location Name via relationship --}}
+                                                        <td>{{ $entry->location?->location_name ?? '-' }}</td>
+
+                                                        <td>{{ $entry->vou_no ?? '-' }}</td>
+                                                        <td>{{ $entry->job_no ?? '-' }}</td>
+                                                        <td>{{ $entry->item_code ?? '-' }}</td>
+                                                        <td>{{ $entry->kid ?? '-' }}</td>
+                                                        <td>{{ $entry->qty ?? '-' }}</td>
+                                                        <td>{{ $entry->gross_wt ?? '-' }}</td>
+                                                        <td>{{ $entry->net_wt ?? '-' }}</td>
+                                                        <td>{{ $entry->reason ?? '-' }}</td>
+
                                                     </tr>
-                                                    @php $count++; @endphp
                                                 @empty
                                                     <tr>
-                                                        <td colspan="11" class="text-center text-muted">No record found.</td>
+                                                        <td colspan="12" class="text-center text-muted">No record found.</td>
                                                     </tr>
                                                 @endforelse
                                             </tbody>
 
-
-
-                                      </table>
+                                        </table>
                                        </div>
                                     </div>
 
@@ -125,7 +122,7 @@
                                       <li class="page-item"><a class="page-link" href="#">Next</a></li>
                                     </ul> --}}
                                     <ul class="pagination pagination-sm mx-3">
-                                    {{ $metalreceiveentries->links() }}
+                                     {{ $rejectionrecdfromcustomers->links() }}
                                     </ul>
 
                 </div>
