@@ -146,6 +146,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('finishproductreceivedentries', FinishproductreceivedentryController::class);
     Route::post('getissuetokarigaritems', [FinishproductreceivedentryController::class, 'getissuetokarigaritems'])->name('getissuetokarigaritems');
     Route::post('getkarigardetailsissuetokarigaritems', [FinishproductreceivedentryController::class, 'getkarigardetailsissuetokarigaritems'])->name('getkarigardetailsissuetokarigaritems');
+    Route::get(
+        '/finishproductreceivedentries/{id}/barcode',
+        [FinishproductreceivedentryController::class, 'barcode']
+    )->name('finishproductreceivedentries.barcode');
 
     // For Qualitycheck
     Route::resource('qualitychecks', QualitycheckController::class);
@@ -153,10 +157,17 @@ Route::middleware(['auth'])->group(function () {
     Route::post('getissuetokarigaritemcodedetails', [QualitycheckController::class, 'getissuetokarigaritemcodedetails'])->name('getissuetokarigaritemcodedetails');
     Route::post('getordertype', [QualitycheckController::class, 'getordertype'])->name('getordertype');
     Route::post('/get-next-slno', [QualitycheckController::class, 'getNextSlno'])->name('getNextSlno');
+    Route::post('/qc/get-karigar-details', [QualityCheckController::class, 'getKarigarDetails'])->name('qc.getKarigarDetails');
+    Route::post('/qc/get-job-details', [QualityCheckController::class, 'getJobDetails'])->name('qc.getJobDetails');
+    Route::post('/qc/get-itemcodes', [QualityCheckController::class, 'getItemCodes'])->name('qc.getItemCodes');
+    Route::get('/qualitychecks/{id}/barcode', [QualitycheckController::class, 'downloadBarcode'])->name('qualitychecks.barcode');
+
     // For Qualitycheck END
 
     // For Finished product pdi Start
     Route::resource('finishedproductpdis', FinishedproductpdiController::class);
+    Route::get('/get-barcode-data', [FinishedproductpdiController::class, 'getBarcodeData'])
+        ->name('get.barcode.data');
     // For Finished product pdi END
 
     // For Finished product pdi Start

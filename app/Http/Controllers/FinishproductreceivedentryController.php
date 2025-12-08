@@ -167,6 +167,7 @@ class FinishproductreceivedentryController extends Controller
             Finishproductreceivedentryitem::create([
                 'financial_year_id' => $financialYearId,
                 'fprentries_id' => $lastInsertedId,
+                'sl_no'   => $request->sl_no[$key],
                 'barcode' => $barcodegenerator,
                 'job_no' => strip_tags($request->job_no[$key]),
                 'item_code' => strip_tags($request->item_code[$key]),
@@ -677,7 +678,14 @@ class FinishproductreceivedentryController extends Controller
 
                 $html .= '<input type="hidden" name="job_no[]" value="' . $item->job_no . '">';
 
-                $html .= '<div class="col-md-1-5">
+
+                // sl_no shown before Item Code
+                $html .= '<div class="col-md-0-7 text-center">
+                    <input type="text" name="sl_no[]" id="sl_no_' . $count . '" class="form-control form-control-sm rounded-0 text-center"
+                           value="' . $item->sl_no . '" readonly>
+                  </div>';
+
+                $html .= '<div class="col-md-0-7">
                     <input type="text" name="item_code[]" id="item_code_' . $count . '" class="form-control form-control-sm rounded-0" value="' . $item->item_code . '" readonly>
                 </div>';
 
@@ -746,6 +754,7 @@ class FinishproductreceivedentryController extends Controller
             }
         }
 
+
         return response()->json([
             'ohtml' => $html,
             'obal'  => $bal,
@@ -759,6 +768,62 @@ class FinishproductreceivedentryController extends Controller
 
         return response()->json([
             'kname' => $karigar->kname,
+        ]);
+    }
+
+    public function barcode($id)
+    {
+        // Fetch voucher row
+        $voucher = Finishproductreceivedentry::where('id', $id)->firstOrFail();
+
+        // Correct JOIN with actual table name: finishproductreceivedentries
+        $items = DB::table('finishproductreceivedentryitems as f')
+            ->join('finishproductreceivedentries as fp', 'fp.id', '=', 'f.fprentries_id')
+            ->leftJoin('customerorderitems as c', 'c.item_code', '=', 'f.item_code')
+            ->select(
+                'f.sl_no',
+                'c.kt',
+                'c.design',
+                'c.description',
+                'c.item_code',
+                'c.kid',
+                'f.qty',
+                'f.barcode',
+                'f.gross_wt',
+                'f.net',
+                'f.size'
+            )
+            ->where('fp.voucher_no', $voucher->voucher_no)
+            ->orderBy('f.sl_no')
+            ->get();
+
+        if ($items->isEmpty()) {
+            return response("No items found for voucher number: {$voucher->voucher_no}", 404);
+        }
+
+        // Build barcode text
+        $barcodeText = '';
+        foreach ($items as $item) {
+            $barcodeText .=
+                ($item->sl_no ?? '') . '|' .
+                ($item->kt ?? '') . '|' .
+                '-' . ($item->design ?? '') . ' -' . ($item->description ?? '') . '|' .
+                ($item->item_code ?? '') . '|' .
+                ($item->kid ?? '') . '|' .
+                ($item->qty ?? '') . '|' .
+                ($item->barcode ?? '') . '|' .
+                ($item->gross_wt ?? '') . '|' .
+                ($item->net ?? '') . '|' .
+                ($item->size ?? '') . "\n";
+        }
+
+        // Safe filename
+        $safeVoucher = preg_replace('/[^A-Za-z0-9_\-]/', '_', $voucher->voucher_no);
+        $filename = "barcode_{$safeVoucher}.txt";
+
+        return response($barcodeText, 200, [
+            'Content-Type' => 'text/plain; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
     }
 }

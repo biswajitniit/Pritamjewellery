@@ -15,6 +15,7 @@ class Qualitycheckitem extends Model
     protected $fillable = [
         'qualitychecks_id',
         'karigar_id',
+        'qc_voucher',
         'sl_no',
         'job_no',
         'item_code',

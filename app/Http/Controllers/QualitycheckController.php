@@ -38,25 +38,46 @@ class QualitycheckController extends Controller
      */
     public function create()
     {
+        // $karigars = IssueToKarigarItem::join('karigars', 'issuetokarigaritems.kid', '=', 'karigars.kid')
+        //     ->select(
+        //         'issuetokarigaritems.job_no',
+        //         'karigars.id',
+        //         'karigars.kid',
+        //         'karigars.kname'
+        //     )
+        //     ->where('quality_check', 'No')
+        //     ->groupBy(
+        //         'issuetokarigaritems.job_no',
+        //         'karigars.id',
+        //         'karigars.kid',
+        //         'karigars.kname'
+        //     )
+        //     ->get();
+
+        // $locations = Location::get();
+
+        // return view('qualitycheck.add', compact('karigars', 'locations'));
+
+
+
         $karigars = IssueToKarigarItem::join('karigars', 'issuetokarigaritems.kid', '=', 'karigars.kid')
-            ->select(
-                'issuetokarigaritems.job_no',
-                'karigars.id',
-                'karigars.kid',
-                'karigars.kname'
-            )
+            ->select('issuetokarigaritems.job_no', 'karigars.id', 'karigars.kid', 'karigars.kname')
             ->where('quality_check', 'No')
-            ->groupBy(
-                'issuetokarigaritems.job_no',
-                'karigars.id',
-                'karigars.kid',
-                'karigars.kname'
-            )
+            ->groupBy('issuetokarigaritems.job_no', 'karigars.id', 'karigars.kid', 'karigars.kname')
             ->get();
 
         $locations = Location::get();
 
-        return view('qualitycheck.add', compact('karigars', 'locations'));
+        return view('qualitycheck.add', [
+            'karigars'        => $karigars,
+            'locations'       => $locations,
+            'lastVoucher'     => session('last_qc_voucher'),
+            'old_location_id' => session('old_location_id'),
+            'old_karigar_id'  => session('old_karigar_id'),
+            'old_karigar_name' => session('old_karigar_name'),
+            'old_type'        => session('old_type'),
+            'old_item_code'   => session('old_item_code'),
+        ]);
     }
 
     /**
@@ -67,19 +88,43 @@ class QualitycheckController extends Controller
         DB::beginTransaction();
 
         try {
-            // 🔹 Lock voucher type row to prevent duplicate voucher numbers
+            // 🔹 Lock voucher type row to avoid duplicate voucher creation
             $voucherType = Vouchertype::where('voucher_type', 'quality_check')
                 ->where('location_id', $request->location_id)
-                ->lockForUpdate() // prevents race conditions
+                ->lockForUpdate()
                 ->first();
 
             if (!$voucherType) {
                 return back()->withErrors(['Voucher type not found for this location.']);
             }
 
-            // 🔹 Generate next voucher number (padded)
-            $nextNo = (int) $voucherType->lastno + 1;
-            $voucherNo = str_pad($nextNo, 3, '0', STR_PAD_LEFT);
+            // ------------------------------------------------------------------
+            // 🔥 RULE:
+            // If QC Voucher already exists → KEEP SAME VOUCHER
+            // Otherwise generate a NEW voucher based on lastno
+            // ------------------------------------------------------------------
+
+            $voucherNo = null;
+            $exists = false;
+            $nextNo = (int)$voucherType->lastno + 1;  // raw number, not padded
+
+            if (!empty($request->qc_voucher)) {
+
+                // Check if this voucher already exists in DB
+                $exists = Qualitycheck::where('qc_voucher', $request->qc_voucher)->exists();
+
+                if ($exists) {
+                    // ✔ Reuse existing voucher
+                    $voucherNo = $request->qc_voucher;
+                } else {
+                    // ❌ Voucher not found → generate new
+                    $voucherNo = str_pad($nextNo, 3, '0', STR_PAD_LEFT);
+                }
+            } else {
+                // First time page opens → generate new voucher number
+                $voucherNo = str_pad($nextNo, 3, '0', STR_PAD_LEFT);
+            }
+
 
             // 🔹 Validation
             $validatedData = $request->validate(
@@ -101,6 +146,8 @@ class QualitycheckController extends Controller
                     'bal_qty'           => 'required|numeric',
 
                     // Arrays
+                    'sl_no'              => 'required|array',
+                    'sl_no.*'             => 'nullable|string',
                     'gross_wt_items'      => 'required|array',
                     'gross_wt_items.*'    => 'nullable|string',
                     'design_items'      => 'required|array',
@@ -180,6 +227,8 @@ class QualitycheckController extends Controller
                 $totalStoneAmount = Productstonedetails::where('product_id', $products->id)->sum('amount');
 
                 Qualitycheckitem::create([
+                    'qc_voucher'       => $request->qc_voucher,
+                    'sl_no'            => $validatedData['sl_no'][$key] ?? '',
                     'qualitychecks_id' => $lastInsertedId,
                     'karigar_id'       => $validatedData['karigar_id'],
                     'karigar_name'     => $validatedData['karigar_name'],
@@ -210,9 +259,13 @@ class QualitycheckController extends Controller
                 ]);
             }
 
-            // 🔹 Update the voucher type's lastno with padded value
-            $voucherType->lastno = $voucherNo; // ✅ stores 001, 002, etc.
-            $voucherType->save();
+            // ------------------------------------------------------------------
+            // 🔹 Update voucherType->lastno ONLY when new voucher created
+            // ------------------------------------------------------------------
+            if (!$exists) {
+                $voucherType->lastno = $voucherNo;   // store raw numeric value
+                $voucherType->save();
+            }
 
             $balQty = $validatedData['bal_qty'] ?? 0;
 
@@ -237,8 +290,15 @@ class QualitycheckController extends Controller
             // return redirect()->route('qualitychecks.index')
             //     ->withSuccess('Qualitychecks record created successfully.');
 
-            return redirect()->route('qualitychecks.create')
-                ->withSuccess('Qualitychecks record created successfully.');
+            return redirect()
+                ->route('qualitychecks.create')
+                ->withSuccess('Qualitychecks record created successfully.')
+                ->with('last_qc_voucher', $request->qc_voucher)
+                ->with('old_location_id', $request->location_id)
+                ->with('old_karigar_id', $request->karigar_id)
+                ->with('old_karigar_name', $request->karigar_name)
+                ->with('old_type', $request->type)
+                ->with('old_item_code', $request->item_code);
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -339,5 +399,113 @@ class QualitycheckController extends Controller
         return response()->json([
             "type"        => $customerorders->type,
         ]);
+    }
+
+    // public function getNextSlno(Request $request)
+    // {
+    //     $maxSl = Qualitycheckitem::where('karigar_id', $request->karigar_id)
+    //         ->where('job_no', $request->job_no)
+    //         ->max('sl_no');
+
+    //     $nextSl = $maxSl ? $maxSl + 1 : 1;
+
+    //     return response()->json(['next_sl_no' => $nextSl]);
+    // }
+
+    // public function getNextSlno(Request $request)
+    // {
+    //     $maxSl = Qualitycheckitem::where('karigar_id', $request->karigar_id)
+    //         ->where('job_no', $request->job_no)
+    //         ->where('qc_voucher', $request->qc_voucher) // 🔥 add this
+    //         ->max('sl_no');
+
+    //     $nextSl = $maxSl ? $maxSl + 1 : 1;
+
+    //     return response()->json(['next_sl_no' => $nextSl]);
+    // }
+
+    public function getNextSlno(Request $request)
+    {
+        $maxSl = Qualitycheckitem::where('qc_voucher', $request->qc_voucher)
+            ->max('sl_no');
+
+        $nextSl = $maxSl ? $maxSl + 1 : 1;
+
+        return response()->json(['next_sl_no' => $nextSl]);
+    }
+
+    public function getKarigarDetails(Request $request)
+    {
+        $karigar = Karigar::where('id', $request->karigar_id)->first();
+
+        return response()->json([
+            'kname' => $karigar->kname,
+            'type' => $karigar->type ?? 'Regular'
+        ]);
+    }
+
+
+    public function getJobDetails(Request $request)
+    {
+        $kid = Karigar::where('id', $request->karigar_id)->value('kid');
+
+        $item = Issuetokarigaritem::where('kid', $kid)
+            ->select('job_no')
+            ->first();
+
+        return response()->json(['job_no' => $item->job_no]);
+    }
+
+    public function getItemCodes(Request $request)
+    {
+        // get the KID from karigars table
+        $kid = Karigar::where('id', $request->karigar_id)->value('kid');
+
+        // get item codes that are pending QC
+        $items = Issuetokarigaritem::where('kid', $kid)
+            ->where('quality_check', 'No')
+            ->select('item_code')
+            ->groupBy('item_code')
+            ->get();
+
+        return response()->json($items);
+    }
+
+    public function downloadBarcode($id)
+    {
+        // Load QC parent
+        $qc = Qualitycheck::findOrFail($id);
+
+        // Load QC items
+        $items = Qualitycheckitem::where('qualitychecks_id', $id)->get();
+
+        // File content holder
+        $output = "";
+
+        foreach ($items as $item) {
+
+            // FORMAT:
+            // slno-kt-design-description | item_code | kid | receive_qty | gross_wt | net_wt | size
+
+            $line =
+                $item->sl_no . "-" .
+                $item->purity . "KT -" .
+                $item->design . " -" .
+                $item->description . " |" .
+                $item->item_code . "|" .
+                $item->karigar_id . "|" .
+                $item->receive_qty . "|" .
+                $item->gross_wt_items . "|" .
+                $item->net_wt . "|" .
+                $item->size;
+
+            $output .= $line . "\r\n"; // new line
+        }
+
+        $filename = "barcode_" . $qc->qc_voucher . ".txt";
+
+        return response($output)
+            ->header('Content-Type', 'text/plain')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }

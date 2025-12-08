@@ -1,4 +1,4 @@
-@include('include.header')
+<?php echo $__env->make('include.header', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 <!--start main wrapper-->
 <main class="main-wrapper">
     <div class="main-content">
@@ -14,7 +14,7 @@
                         </div>
                     </div>
                     <div class="card-body p-4">
-                        <form class="row g-3" action="{{ route('finishedproductpdis.index') }}" id="FinishedproductpdisForm" name="FinishedproductpdisForm" enctype="multipart/form-data">
+                        <form class="row g-3" action="<?php echo e(route('finishedproductpdis.index')); ?>" id="FinishedproductpdisForm" name="FinishedproductpdisForm" enctype="multipart/form-data">
                             <div class="row g-3 align-items-center">
                                 <div class="col-auto">
                                     <label class="col-form-label">Purity</label>
@@ -22,11 +22,12 @@
                                 <div class="col-md-2">
                                     <select name="purity" class="form-select">
                                         <option value="">All</option>
-                                        @foreach($purities as $p)
-                                            <option value="{{ $p }}" {{ $purity == $p ? 'selected' : '' }}>
-                                                {{ $p }}
+                                        <?php $__currentLoopData = $purities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($p); ?>" <?php echo e($purity == $p ? 'selected' : ''); ?>>
+                                                <?php echo e($p); ?>
+
                                             </option>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
                                 </div>
 
@@ -36,10 +37,10 @@
                                 <div class="col-md-1">
                                     <select name="kid" class="form-select">
                                         <option value="all">All</option>
-                                        @forelse($karigars as $karigar)
-                                            <option value="{{ $karigar->id }}">{{ $karigar->kid }} - {{ $karigar->kname }}</option>
-                                        @empty
-                                        @endforelse
+                                        <?php $__empty_1 = true; $__currentLoopData = $karigars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $karigar): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                            <option value="<?php echo e($karigar->id); ?>"><?php echo e($karigar->kid); ?> - <?php echo e($karigar->kname); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                        <?php endif; ?>
                                     </select>
                                 </div>
 
@@ -49,28 +50,29 @@
                             </div>
                         </form>
                         <hr style="height: 3px; border: none; background: linear-gradient(to right, #dc3545, #ffc107); margin: 30px 0;">
-                        <form class="row g-3" action="{{ route('finishedproductpdis.store') }}" method="POST" id="FinishedproductpdisForm" name="finishedproductpdis" enctype="multipart/form-data">
-                            @csrf
+                        <form class="row g-3" action="<?php echo e(route('finishedproductpdis.store')); ?>" method="POST" id="FinishedproductpdisForm" name="finishedproductpdis" enctype="multipart/form-data">
+                            <?php echo csrf_field(); ?>
                             <div class="card">
                                 <div class="card-body">
 
 
                                     <div class="table-responsive-xxl">
-                                        @if(Session::has('success'))
+                                        <?php if(Session::has('success')): ?>
                                             <div class="alert alert-success">
-                                                {{ Session::get('success') }}
+                                                <?php echo e(Session::get('success')); ?>
+
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                         
-                                        @if ($errors->any())
+                                        <?php if($errors->any()): ?>
                                         <div class="alert alert-danger">
                                             <ul class="mb-0">
-                                                @foreach ($errors->all() as $error)
-                                                <li>{{ $error }}</li>
-                                                @endforeach
+                                                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <li><?php echo e($error); ?></li>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </ul>
                                         </div>
-                                        @endif
+                                        <?php endif; ?>
 
                                         <div class="row g-3 align-items-center">
                                             <div class="col-auto">
@@ -79,10 +81,10 @@
                                             <div class="col-md-2">
                                                 <select name="location_id" class="form-select rounded-0 " onchange="GetLocationWiseVoucherNo(this.value,'finished_product_pdi_list')">
                                                     <option value="">Choose...</option>
-                                                    @forelse($locations as $location)
-                                                    <option value="{{ $location->id }}">{{ $location->location_name }}</option>
-                                                    @empty
-                                                    @endforelse
+                                                    <?php $__empty_1 = true; $__currentLoopData = $locations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $location): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                                    <option value="<?php echo e($location->id); ?>"><?php echo e($location->location_name); ?></option>
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                                    <?php endif; ?>
                                                 </select>
                                             </div>
 
@@ -97,14 +99,28 @@
                                                 <label class="col-form-label">Date <span style="color: red">*</span></label>
                                             </div>
                                             <div class="col-md-2">
-                                                <input type="date" name="date" id="date" value="{{ old('date', date('Y-m-d')) }}" class="form-control rounded-0 @error('date') is-invalid @enderror">
+                                                <input type="date" name="date" id="date" value="<?php echo e(old('date', date('Y-m-d'))); ?>" class="form-control rounded-0 <?php $__errorArgs = ['date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                             </div>
 
                                             <div class="col-auto">
                                                 <label class="col-form-label">Barcode <span style="color: red">*</span></label>
                                             </div>
                                             <div class="col-md-2">
-                                                <input type="text" name="barcode" id="barcode" value="" class="form-control rounded-0 @error('barcode') is-invalid @enderror">
+                                                <input type="text" name="barcode" id="barcode" value="" class="form-control rounded-0 <?php $__errorArgs = ['barcode'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                             </div>
 
 
@@ -171,4 +187,5 @@
 
 
 
-@include('include.footer')
+<?php echo $__env->make('include.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php /**PATH E:\webdev\Pritamjewellery\resources\views/finishedproductpdis/list.blade.php ENDPATH**/ ?>

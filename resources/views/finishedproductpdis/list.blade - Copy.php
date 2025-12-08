@@ -134,6 +134,69 @@
                                             <tbody>
                                                
                                                 
+                                                @php $count = 1; @endphp
+                                                @forelse($qualitycheckitems as $qualitycheckitem)
+                                                    <tr>
+                                                        <td scope="row">{{ $count }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->job_no }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->item_code }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->receive_qty }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->uom }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->size }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->gross_wt  }}</td>
+                                                        <td scope="row">{{ $qualitycheckitem->purity }}</td>
+                                                        <td scope="row">
+                                                            @php
+                                                                $getRate = GetItemcodeRate($qualitycheckitem->item_code);
+                                                            @endphp
+                                                            {{ @$getRate->lab_charge }}
+                                                        </td>
+                                                        <td scope="row">
+                                                            @php
+                                                                $getALab = GetItemcodeAlabStoneChg($qualitycheckitem->item_code);
+                                                            @endphp
+                                                            @if($getALab && $getALab->category != 'Stone')
+                                                                {{ $getALab->pcs * $getALab->amount  }}
+                                                            @else
+                                                                0.00
+                                                            @endif
+                                                        </td>
+                                                        <td scope="row">
+                                                            @php
+                                                                $getAStone = GetItemcodeAlabStoneChg($qualitycheckitem->item_code);
+                                                            @endphp
+                                                            @if($getAStone && $getAStone->category == 'Stone')
+                                                                {{ $getAStone->pcs * $getAStone->amount  }}
+                                                            @else
+                                                                0.00
+                                                            @endif
+                                                        </td>
+                                                        <td scope="row">
+                                                            @php
+                                                                $getLoss = GetItemcodeLoss($qualitycheckitem->item_code);
+                                                            @endphp
+                                                            {{ @$getLoss->loss }}
+                                                        </td>
+                                                        <td scope="row">
+                                                            <input
+                                                                type="checkbox"
+                                                                name="selectstockout[]"
+                                                                class="stockoutpdilist"
+                                                                value="{{ $qualitycheckitem->id }},{{ $qualitycheckitem->receive_qty }},{{ $qualitycheckitem->gross_wt }},{{ $qualitycheckitem->purity }}"
+                                                            >
+                                                        </td>
+                                                        <td>
+                                                            {{ optional($qualitycheckitem->karigar)->kid }}
+                                                        </td>
+                                                    </tr>
+                                                    @php $count++; @endphp
+                                                @empty
+                                                    <tr class="no-records">
+                                                        <td colspan="14">No record found.</td>
+                                                    </tr>
+                                                @endforelse
+
+
 
                                             </tbody>
                                         </table>

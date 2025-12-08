@@ -18,7 +18,8 @@ return new class extends Migration
 
             $table->unsignedBigInteger('karigar_id');
             $table->foreign('karigar_id')->references('id')->on('karigars')->onDelete('cascade');
-            
+            $table->string('qc_voucher')->nullable();
+
             $table->unsignedBigInteger('sl_no')->nullable();
             $table->string('job_no')->nullable();
             $table->string('item_code')->nullable();

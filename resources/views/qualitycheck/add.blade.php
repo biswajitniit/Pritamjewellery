@@ -47,7 +47,7 @@
                                         onchange="GetLocationWiseVoucherNo(this.value,'quality_check')">
                                     <option value="">Choose...</option>
                                     @foreach($locations as $location)
-                                        <option value="{{ $location->id }}" {{ old('location_id') == $location->id ? 'selected' : '' }}>
+                                        <option value="{{ $location->id }}"  {{ $old_location_id == $location->id ? 'selected' : '' }}>
                                             {{ $location->location_name }}
                                         </option>
                                     @endforeach
@@ -77,19 +77,29 @@
 
                             <div class="col-md-2">
                                 <label class="form-label">KID <span style="color: red;">*</span></label>
-                                <select name="karigar_id"
-                                    onchange="GetKarigarDetails(this.value);
-                                            GetIssueToKarigarItemDetails(this.value);
-                                            Getjoborderno(this);
-                                            recalcAllRowsForKid();"
+
+                                <select name="karigar_id" id="karigar_id"
+                                    onchange="
+                                        GetKarigarDetails(this.value);
+                                        GetIssueToKarigarItemDetails(this.value);
+                                        Getjoborderno(this);
+                                        loadItemCodeByKid(this.value); /* 🔥 Added */
+                                        recalcAllRowsForKid();
+                                        loadNewVoucherForKid(this.value);
+                                    "
                                     class="form-select rounded-0 @error('karigar_id') is-invalid @enderror">
+
                                     <option value="">Choose...</option>
+
                                     @foreach($karigars as $karigar)
-                                        <option value="{{ $karigar->id }}" data-job-no="{{ $karigar->job_no }}" {{ old('karigar_id') == $karigar->id ? 'selected' : '' }}>
+                                        <option value="{{ $karigar->id }}"
+                                            data-job-no="{{ $karigar->job_no }}"
+                                            {{ $old_karigar_id == $karigar->id ? 'selected' : '' }}>
                                             {{ $karigar->kid }} - ({{ $karigar->kname }}) - {{ $karigar->job_no }}
                                         </option>
                                     @endforeach
                                 </select>
+
                                 @error('karigar_id')
                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                 @enderror
@@ -97,7 +107,7 @@
 
                             <div class="col-md-2">
                                 <label class="form-label">Name <span style="color: red;">*</span></label>
-                                <input type="text" name="karigar_name" id="karigar_name" value="{{ old('karigar_name') }}"
+                                <input type="text" name="karigar_name" id="karigar_name" value="{{ $old_karigar_name ?? '' }}"
                                     class="form-control rounded-0 @error('karigar_name') is-invalid @enderror" />
                                 @error('karigar_name')
                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
@@ -106,7 +116,7 @@
 
                             <div class="col-md-1">
                                 <label class="form-label">Type <span style="color: red;">*</span></label>
-                                <input type="text" name="type" id="type" value="{{ old('type') }}"
+                                <input type="text" name="type" id="type" value="{{ $old_type ?? '' }}"
                                     class="form-control rounded-0 @error('type') is-invalid @enderror" />
                                 @error('type')
                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
@@ -115,7 +125,7 @@
 
                             <div class="col-md-2">
                                 <label class="form-label">QC Voucher <span style="color: red;">*</span></label>
-                                <input type="text" name="qc_voucher" id="voucher_no" value="{{ old('qc_voucher') }}"
+                                <input type="text" name="qc_voucher" id="voucher_no" value="{{ $lastVoucher ?? old('qc_voucher') }}"
                                     class="form-control rounded-0 text-end @error('qc_voucher') is-invalid @enderror" />
                                 @error('qc_voucher')
                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
@@ -238,13 +248,14 @@
                             <hr />
 
                             <div class="row mb-1">
+                                <div class="col-md-1"><label class="form-label">SL No</label></div>
                                 <div class="col-md-1"><label class="form-label">Gross WT</label></div>
                                 <div class="col-md-1"><label class="form-label">Net WT</label></div>
                                 <div class="col-md-1"><label class="form-label">Design</label></div>
                                 <div class="col-md-1"><label class="form-label">Solder</label></div>
                                 <div class="col-md-2"><label class="form-label">Polish</label></div>
                                 <div class="col-md-2"><label class="form-label">Finish</label></div>
-                                <div class="col-md-2"><label class="form-label">Mina</label></div>
+                                <div class="col-md-1"><label class="form-label">Mina</label></div>
                                 <div class="col-md-1"><label class="form-label">Other</label></div>
                                 <div class="col-md-1"><label class="form-label">Remark</label></div>
                             </div>

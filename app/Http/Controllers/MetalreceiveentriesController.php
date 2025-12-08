@@ -55,7 +55,7 @@ class MetalreceiveentriesController extends Controller
      */
     public function create()
     {
-        $customers = Customer::where('id', 1)->where('is_active', 'Yes')->orderBy('cust_name')->get();
+        $customers = Customer::where('party_type', 'Customer')->where('is_active', 'Yes')->orderBy('cust_name')->get();
         $locations = Location::get();
         $financialyears = FinancialYear::where('status', 'Active')
             ->orderBy('id', 'desc')

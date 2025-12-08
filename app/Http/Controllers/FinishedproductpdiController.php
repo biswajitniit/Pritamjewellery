@@ -265,4 +265,49 @@ class FinishedproductpdiController extends Controller
     {
         //
     }
+
+    public function getBarcodeData(Request $request)
+    {
+        $barcode = $request->barcode;
+
+        $item = DB::table('finishproductreceivedentryitems')
+            ->where('barcode', $barcode)
+            ->first();
+
+        if (!$item) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Barcode not found'
+            ]);
+        }
+
+        // Fetch Rate (lab_charge)
+        $rate = GetItemcodeRate($item->item_code)->lab_charge ?? 0;
+
+        // Fetch Loss
+        $loss = GetItemcodeLoss($item->item_code)->loss ?? 0;
+
+        // Fetch A.LAB or Stone Charge
+        $labStone = GetItemcodeAlabStoneChg($item->item_code);
+
+        $a_lab = 0;
+        $stone_chg = 0;
+
+        if ($labStone) {
+            if ($labStone->category !== 'Stone') {
+                $a_lab = $labStone->pcs * $labStone->amount;
+            } else {
+                $stone_chg = $labStone->pcs * $labStone->amount;
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $item,
+            'rate' => $rate,
+            'a_lab' => $a_lab,
+            'stone_chg' => $stone_chg,
+            'loss' => $loss
+        ]);
+    }
 }

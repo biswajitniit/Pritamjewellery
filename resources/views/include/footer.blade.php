@@ -1079,18 +1079,39 @@
         })
     }
 
-    function GetAlloyandNetWeight(){
-        $Weight = parseFloat($("#weight").val()) || 0;
-        $SourcePurity = parseFloat($('#purity_id option:selected').text()) || 0;
-        //$converted_purity = parseFloat($("#converted_purity").val()) || 0;
-        $converted_purity = parseFloat($('#converted_purity option:selected').text()) || 0;
+    // function GetAlloyandNetWeight(){
+    //     $Weight = parseFloat($("#weight").val()) || 0;
+    //     $SourcePurity = parseFloat($('#purity_id option:selected').text()) || 0;
+    //     //$converted_purity = parseFloat($("#converted_purity").val()) || 0;
+    //     $converted_purity = parseFloat($('#converted_purity option:selected').text()) || 0;
 
-        $NetWeightCalculation = parseFloat((($Weight * $SourcePurity) / $converted_purity)).toFixed(3);
-        $AlloyGm = parseFloat($NetWeightCalculation - $Weight).toFixed(3);
+    //     $NetWeightCalculation = parseFloat((($Weight * $SourcePurity) / $converted_purity)).toFixed(3);
+    //     $AlloyGm = parseFloat($NetWeightCalculation - $Weight).toFixed(3);
 
-        $("#netweight_gm").val($NetWeightCalculation);
-        $("#alloy_gm").val($AlloyGm);
-    }
+    //     $("#netweight_gm").val($NetWeightCalculation);
+    //     $("#alloy_gm").val($AlloyGm);
+    // }
+
+    function GetAlloyandNetWeight() {
+
+        let NetWeight = parseFloat($("#netweight_gm").val()) || 0;
+        let SourcePurity = parseFloat($('#purity_id option:selected').text()) || 0;
+        let ConvertedPurity = parseFloat($('#converted_purity option:selected').text()) || 0;
+
+        if (NetWeight === 0 || SourcePurity === 0 || ConvertedPurity === 0) {
+            $("#weight").val("");
+            $("#alloy_gm").val("");
+            return;
+        }
+
+        // Reverse calculation
+        let Weight = parseFloat((NetWeight * ConvertedPurity) / SourcePurity).toFixed(3);
+        let AlloyGm = parseFloat(NetWeight - Weight).toFixed(3);
+
+        // Set values in fields
+        $("#weight").val(Weight);
+        $("#alloy_gm").val(AlloyGm);
+    }   
 
     /*
     function GetTotalMetalReceiveWeight(){
@@ -1160,119 +1181,15 @@
         })
     });*/
 
-    $(document).ready(function(){
+    $(document).ready(function() {
 
-        $('#receive_qty').keyup(function() {
+        $('#receive_qty').on('input', function() {
 
-            let order_qty   = $("#order_qty").val();
-            let receive_qty = $("#receive_qty").val();
+            let order_qty   = parseFloat($("#order_qty").val()) || 0;
+            let receive_qty = parseFloat($("#receive_qty").val()) || 0;
 
-            if(receive_qty <= order_qty){
-
-                $("#bal_qty").val(order_qty - receive_qty);
-
-                let karigar_id = $("select[name='karigar_id']").val();
-                let job_no     = $("#job_no").val();
-
-                if(!karigar_id || !job_no){
-                    $("#qualitycheckitems").html("<b style='color:red'>Missing KID or Job No</b>");
-                    return;
-                }
-
-                // 🔹 GET NEXT SL NUMBER FROM DATABASE
-                $.ajax({
-                    url: "{{ route('getNextSlno') }}",
-                    type: "POST",
-                    data: {
-                        karigar_id: karigar_id,
-                        job_no: job_no,
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function(result){
-
-                        let startSl = parseInt(result.next_sl_no);  
-                        let html = "";
-
-                        //for (let i = 0; i < receive_qty; i++) {
-                        for (let i = 0; i < receive_qty; i++) {
-
-                            //let sl_no = startSl + i;  // auto increment
-                            let sl_no =  1+i;  // auto increment
-                            html += `
-                            <div class="row mb-1">
-
-                                <div class="col-md-1">
-                                    <input type="text" name="sl_no[]" class="form-control" value="${sl_no}" readonly>
-                                </div>
-
-                                <div class="col-md-1">
-                                    <input type="text" name="gross_wt_items[]" class="form-control">
-                                </div>
-
-                                <div class="col-md-1">
-                                    <input type="text" name="net_wt_items[]" class="form-control">
-                                </div>
-
-                                <div class="col-md-1">
-                                    <select name="design_items[]" class="form-select">
-                                        <option value="Match" selected>Match</option>
-                                        <option value="Mismatch">Mismatch</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-1">
-                                    <select name="solder_items[]" class="form-select">
-                                        <option value="Satisfy" selected>Satisfy</option>
-                                        <option value="Solder cut">Solder cut</option>
-                                        <option value="Link cut">Link cut</option>
-                                        <option value="Weak Solder">Weak Solder</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-2">
-                                    <select name="polish_items[]" class="form-select">
-                                        <option value="Satisfy" selected>Satisfy</option>
-                                        <option value="Polishing not ok">Polishing not ok</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-2">
-                                    <select name="finish_items[]" class="form-select">
-                                        <option value="Satisfy" selected>Satisfy</option>
-                                        <option value="Finishing not ok">Finishing not ok</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-1">
-                                    <select name="mina_items[]" class="form-select">
-                                        <option value="Satisfy" selected>Satisfy</option>
-                                        <option value="Enamel crack">Enamel crack</option>
-                                        <option value="Chief off">Chief off</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-1">
-                                    <select name="other_items[]" class="form-select">
-                                        <option value="Satisfy" selected>Satisfy</option>
-                                        <option value="Finishing not ok">Finishing not ok</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-1">
-                                    <select name="remark_items[]" class="form-select">
-                                        <option value="Accept" selected>Accept</option>
-                                        <option value="Reject">Reject</option>
-                                    </select>
-                                </div>
-
-                            </div>`;
-                        }
-
-                        $("#qualitycheckitems").html(html);
-                    }
-                });
-
-            }else{
+            // ❌ If receive qty > order qty → show error
+            if (receive_qty > order_qty) {
 
                 $("#bal_qty").val('');
                 $("#qualitycheckitems").html('');
@@ -1282,10 +1199,116 @@
                     title: "Oops...",
                     text: "Receive Qty Not Greater Than Order Qty!"
                 });
+
+                return;
             }
+
+            // ✔ Calculate Bal Qty
+            $("#bal_qty").val(order_qty - receive_qty);
+
+            let karigar_id = $("select[name='karigar_id']").val();
+            let job_no     = $("#job_no").val();
+
+            if (!karigar_id || !job_no) {
+                $("#qualitycheckitems").html("<b style='color:red'>Missing KID or Job No</b>");
+                return;
+            }
+
+            // 🔥 FETCH NEXT SL NO (Voucher Based)
+            $.ajax({
+                url: "{{ route('getNextSlno') }}",
+                type: "POST",
+                data: {
+                    qc_voucher: $("#voucher_no").val(),  // 🔥 SL Per Voucher
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(result) {
+
+                    let startSl = parseInt(result.next_sl_no) || 1;
+                    let html = "";
+
+                    for (let i = 0; i < receive_qty; i++) {
+
+                        let sl_no = startSl + i;
+
+                        html += `
+                        <div class="row mb-1">
+
+                            <div class="col-md-1">
+                                <input type="text" name="sl_no[]" class="form-control" value="${sl_no}" readonly>
+                            </div>
+
+                            <div class="col-md-1">
+                                <input type="text" name="gross_wt_items[]" class="form-control">
+                            </div>
+
+                            <div class="col-md-1">
+                                <input type="text" name="net_wt_items[]" class="form-control">
+                            </div>
+
+                            <div class="col-md-1">
+                                <select name="design_items[]" class="form-select">
+                                    <option value="Match" selected>Match</option>
+                                    <option value="Mismatch">Mismatch</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-1">
+                                <select name="solder_items[]" class="form-select">
+                                    <option value="Satisfy" selected>Satisfy</option>
+                                    <option value="Solder cut">Solder cut</option>
+                                    <option value="Link cut">Link cut</option>
+                                    <option value="Weak Solder">Weak Solder</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <select name="polish_items[]" class="form-select">
+                                    <option value="Satisfy" selected>Satisfy</option>
+                                    <option value="Polishing not ok">Polishing not ok</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <select name="finish_items[]" class="form-select">
+                                    <option value="Satisfy" selected>Satisfy</option>
+                                    <option value="Finishing not ok">Finishing not ok</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-1">
+                                <select name="mina_items[]" class="form-select">
+                                    <option value="Satisfy" selected>Satisfy</option>
+                                    <option value="Enamel crack">Enamel crack</option>
+                                    <option value="Chief off">Chief off</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-1">
+                                <select name="other_items[]" class="form-select">
+                                    <option value="Satisfy" selected>Satisfy</option>
+                                    <option value="Finishing not ok">Finishing not ok</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-1">
+                                <select name="remark_items[]" class="form-select">
+                                    <option value="Accept" selected>Accept</option>
+                                    <option value="Reject">Reject</option>
+                                </select>
+                            </div>
+
+                        </div>`;
+                    }
+
+                    $("#qualitycheckitems").html(html);
+                }
+            });
+
         });
 
     });
+
 
 
     // FOR Quality Check Page End qualitychecks/create, qualitychecks/update
@@ -1614,19 +1637,19 @@
                     <label class="form-label">Weight <span class="text-danger">*</span></label>
                     <input type="text" name="weight" id="weight"
                         class="form-control rounded-0 text-end"
-                        onkeyup="GetAlloyandNetWeight();" required/>
+                         required readonly/>
                 </div>
 
                 <div class="col-md-2">
                     <label class="form-label">Alloy (gm) <span class="text-danger">*</span></label>
                     <input type="text" name="alloy_gm" id="alloy_gm"
-                        class="form-control rounded-0 text-end" required/>
+                        class="form-control rounded-0 text-end" required readonly/>
                 </div>
 
                 <div class="col-md-2">
                     <label class="form-label">Net Weight <span class="text-danger">*</span></label>
                     <input type="text" name="netweight_gm" id="netweight_gm"
-                        class="form-control rounded-0 text-end" readonly required/>
+                        class="form-control rounded-0 text-end" onkeyup="GetAlloyandNetWeight();"  required/>
                 </div>
             `;
 
@@ -1957,6 +1980,22 @@
         }
     });
 
+    $(document).ready(function () {
+
+    let oldKid = "{{ $old_karigar_id ?? '' }}";
+    let oldItemCode = "{{ $old_item_code ?? '' }}";
+
+    if (oldKid) {
+        // Auto-load name, type, job no and item codes
+        GetKarigarDetails(oldKid);
+        GetIssueToKarigarItemDetails(oldKid);
+        Getjoborderno({ value: oldKid });
+
+        // Load item codes and auto-select old item code
+        loadItemCodeByKidAfterLoad(oldKid, oldItemCode);
+    }
+});
+
 
     function GetKIDjobnowise(job_no) {
         if (job_no !== '') {
@@ -2048,6 +2087,141 @@
             });
         }
     } 
+
+    function loadItemCodeByKid(karigar_id) {
+
+        if (!karigar_id) {
+            $("#item_code").html("<option value=''>Choose...</option>");
+            return;
+        }
+
+        $.ajax({
+            url: "{{ route('qc.getItemCodes') }}",
+            type: "POST",
+            data: {
+                karigar_id: karigar_id,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(res) {
+
+                let html = "<option value=''>Choose...</option>";
+
+                res.forEach(item => {
+                    html += `<option value="${item.item_code}">${item.item_code}</option>`;
+                });
+
+                $("#item_code").html(html);
+            }
+        });
+    }
+
+    
+
+    function loadItemCodeByKidAfterLoad(karigar_id, oldItemCode) {
+
+        $.ajax({
+            url: "{{ route('qc.getItemCodes') }}",
+            type: "POST",
+            data: {
+                karigar_id: karigar_id,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(res) {
+
+                let html = "<option value=''>Choose...</option>";
+
+                res.forEach(item => {
+                    let selected = (oldItemCode == item.item_code) ? "selected" : "";
+                    html += `<option value="${item.item_code}" ${selected}>${item.item_code}</option>`;
+                });
+
+                $("#item_code").html(html);
+
+                // 🚀 Automatically load item details
+                if (oldItemCode) {
+                    GetItemCodeDeatils(oldItemCode);
+                }
+            }
+        });
+    }
+
+    function loadNewVoucherForKid(karigarId) {
+
+        // Clear old voucher first
+        document.getElementById('voucher_no').value = '';
+
+        // Get current selected Location ID
+        let locationId = document.querySelector('select[name=location_id]').value;
+
+        if (!karigarId || !locationId) {
+            return; // stop if missing inputs
+        }
+
+        // Call the ALREADY WORKING function that generates voucher
+        GetLocationWiseVoucherNo(locationId, 'quality_check');
+    }
+
+
+
+    $(document).ready(function () {
+
+        // When user presses Enter in Barcode box
+        $("#barcode").on('keyup', function (e) {
+            if (e.key === 'Enter') {
+                let barcode = $(this).val();
+
+                if (barcode !== "") {
+                    fetchBarcodeData(barcode);
+                }
+            }
+        });
+
+    });
+
+    function fetchBarcodeData(barcode) {
+
+        $.ajax({
+            url: "{{ route('get.barcode.data') }}",
+            type: "GET",
+            data: { barcode: barcode },
+            success: function (response) {
+
+                if (response.status === "success") {
+
+                    let item = response.data;
+
+                    let newRow = `
+                        <tr>
+                            <td>1</td>
+                            <td>${item.job_no}</td>
+                            <td>${item.item_code}</td>
+                            <td>${item.receive_qty_from_karigar}</td>
+                            <td>${item.uom}</td>
+                            <td>${item.size}</td>
+                            <td>${item.gross_wt}</td>
+                            <td>${item.purity}</td>
+
+                            <td>${response.rate}</td>
+                            <td>${response.a_lab}</td>
+                            <td>${response.stone_chg}</td>
+                            <td>${response.loss}</td>
+
+                            <td>
+                                <input type="checkbox" 
+                                    name="selectstockout[]" 
+                                    value="${item.id},${item.receive_qty_from_karigar},${item.gross_wt},${item.purity}">
+                            </td>
+
+                            <td>${item.kid}</td>
+                        </tr>
+                    `;
+
+                    $("table tbody").append(newRow);
+                    $("#barcode").val("").focus();
+                }
+            }
+        });
+    }
 
 </script>
 @yield('scripts')

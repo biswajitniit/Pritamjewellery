@@ -62,6 +62,12 @@
                                                     <li><hr class="dropdown-divider"></hr></li>
                                                     <li><a class="dropdown-item" href="{{ route('finishproductreceivedentries.show',[$finishproductreceivedentry->id]) }}"><i class="fa fa-eye"></i> View</a></li>
                                                     <li><hr class="dropdown-divider"></hr></li>
+                                                    <li>
+                                                        <a class="dropdown-item" 
+                                                          href="{{ route('finishproductreceivedentries.barcode', $finishproductreceivedentry->id) }}">
+                                                            <i class="fa fa-barcode"></i> Barcode
+                                                        </a>
+                                                    </li>
                                                   </ul>
                                                 </div>
                                                 </td>

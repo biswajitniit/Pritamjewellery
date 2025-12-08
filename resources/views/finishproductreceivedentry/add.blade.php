@@ -82,7 +82,8 @@
                                 </div>
                             </div>
                             <div class="row g-2 mb-1">
-                                <div class="col-md-1-5"><label class="form-label">Item Code</label></div>
+                                <div class="col-md-0-7"><label class="form-label">SL No</label></div>
+                                <div class="col-md-0-7"><label class="form-label">Item Code</label></div>
                                 <div class="col-md-1-5"><label class="form-label">Design</label></div>
                                 <div class="col-md-0-7"><label class="form-label">Size</label></div>
                                 <div class="col-md-0-7"><label class="form-label">UOM</label></div>
